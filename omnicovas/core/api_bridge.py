@@ -34,6 +34,7 @@ from typing import Any
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from omnicovas.api import combat as combat_router
@@ -203,6 +204,11 @@ class ApiBridge:
             title="OmniCOVAS Core API",
             description="Internal bridge between Python core and Tauri UI",
             version="0.1.0",
+        )
+
+        app.add_middleware(
+            TrustedHostMiddleware,
+            allowed_hosts=["127.0.0.1", "localhost", "[::1]", "testserver"],
         )
 
         app.add_middleware(
