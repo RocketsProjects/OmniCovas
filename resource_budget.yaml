@@ -1,0 +1,25 @@
+# OmniCOVAS Resource Budget Framework
+# Principle 10 (Resource Efficiency) — every resource bounded and measurable.
+#
+# Constrained-system detection at startup adjusts these defaults downward
+# automatically for machines with <8GB RAM or <100GB free disk.
+
+disk:
+  max_galaxy_dump_size_gb: 5
+  max_log_retention_days: 30
+  log_rotation_size_mb: 100
+
+memory:
+  max_cache_size_mb: 512
+  max_ai_context_tokens: 4000
+  eviction_policy: LRU
+
+cpu:
+  max_background_task_cpu_percent: 10
+  journal_parse_priority: high
+  ui_render_priority: high
+  api_polling_priority: low
+
+bandwidth:
+  max_eddn_submission_per_hour: 100
+  max_api_calls_per_minute_total: 50

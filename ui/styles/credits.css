@@ -1,0 +1,47 @@
+/* ui/styles/credits.css - About / Credits styling (PB05-10) */
+
+#view-credits {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.registry-plaque {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-panel);
+  margin-bottom: var(--space-5);
+  backdrop-filter: blur(8px);
+}
+
+.registry-header {
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.registry-title {
+  font-size: var(--font-size-xl);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.trademark-disclaimer {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.project-details .field-row {
+  margin-bottom: var(--space-2);
+}
+
+.project-details .field-label {
+  color: var(--color-telemetry-label);
+  font-weight: var(--font-weight-bold);
+  width: 100px;
+}

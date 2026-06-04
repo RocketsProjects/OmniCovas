@@ -1,0 +1,39 @@
+/* Protanopia palette override — replaces red signals with yellow/blue */
+:root {
+  --color-ok:            #4499ff;
+  --color-warn:          #ffcc00;
+  --color-critical:      #ffaa00;
+  --color-hull-full:     #4499ff;
+  --color-hull-warn:     #ffcc00;
+  --color-hull-critical: #ffaa00;
+  --color-accent:        #ffcc00;
+  --color-accent-hover:  #ffe044;
+  --color-border:        rgba(255, 204, 0, 0.25);
+  --color-border-active: rgba(255, 204, 0, 0.6);
+
+  /* === UI v3 cockpit tokens === */
+  --uiv3-bg:                   #07080f;
+  --uiv3-bg-elev-1:            #0b0d18;
+  --uiv3-bg-elev-2:            #0d1020;
+  --uiv3-panel:                rgba(20, 24, 36, 0.55);
+  --uiv3-panel-soft:           rgba(20, 24, 36, 0.36);
+  --uiv3-panel-strong:         rgba(20, 24, 36, 0.85);
+  --uiv3-border:               rgba(140, 160, 180, 0.18);
+  --uiv3-border-strong:        rgba(140, 160, 180, 0.28);
+  --uiv3-border-active:        rgba(255, 204, 0, 0.50);
+  --uiv3-border-cyan:          rgba(68, 153, 255, 0.30);
+  --uiv3-text-primary:         #e6e8ef;
+  --uiv3-text-muted:           #8a92a8;
+  --uiv3-text-dim:             #5a6478;
+  --uiv3-text-unknown:         #4b5366;
+  --uiv3-accent-cyan:          #4499ff;
+  --uiv3-accent-blue:          #2f6fbf;
+  --uiv3-accent-orange:        #ffcc00;
+  --uiv3-accent-gold:          #ffcc00;
+  --uiv3-status-ok:            #4499ff;
+  --uiv3-status-warn:          #ffcc00;
+  --uiv3-status-alert:         #ffaa00;
+  --uiv3-status-info:          #4499ff;
+  --uiv3-focus:                #66b8ff;
+  --uiv3-area-card-active-bg:  rgba(255, 204, 0, 0.08);
+}

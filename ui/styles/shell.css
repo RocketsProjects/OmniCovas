@@ -1,0 +1,297 @@
+/* OmniCOVAS Shell Layout
+   Defines the top-bar and Command Center content area.
+   System selection now stages inside Dashboard instead of a sidebar. */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--color-fg);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+/* ── Top connection bar ── */
+#topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-height);
+  background: rgba(5, 5, 15, 0.97);
+  border-bottom: 1px solid var(--color-nav-border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+  gap: var(--space-3);
+  z-index: 100;
+  font-size: var(--font-size-sm);
+}
+
+#topbar .app-name {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  font-size: var(--font-size-md);
+  flex-shrink: 0;
+}
+
+#topbar .topbar-sep {
+  color: var(--color-nav-border);
+  flex-shrink: 0;
+}
+
+#connection-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-fg-muted);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-critical);
+  flex-shrink: 0;
+  transition: background var(--transition-normal);
+}
+
+.status-dot.connected {
+  background: var(--color-ok);
+  box-shadow: 0 0 6px var(--color-ok);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 4px var(--color-ok); }
+  50%       { box-shadow: 0 0 10px var(--color-ok); }
+}
+
+#topbar .topbar-spacer { flex: 1; }
+
+#topbar .port-label {
+  color: var(--color-telemetry-label);
+  font-size: var(--font-size-xs);
+}
+
+/* ── Retired sidebar nav (not rendered by the Command Center shell) ── */
+#sidebar {
+  display: none;
+  position: fixed;
+  top: var(--topbar-height);
+  left: 0;
+  bottom: 0;
+  width: var(--nav-width);
+  background: var(--color-nav-bg);
+  border-right: 1px solid var(--color-nav-border);
+  flex-direction: column;
+  padding: var(--space-4) 0;
+  z-index: 90;
+  overflow-y: auto;
+}
+
+#sidebar nav ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+}
+
+#sidebar nav ul li a,
+#sidebar nav ul li a:link,
+#sidebar nav ul li a:visited {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-nav-text) !important;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.04em;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  border-left: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+#sidebar nav ul li a:hover {
+  color: var(--color-nav-text-hover) !important;
+  background: var(--color-surface-hover);
+}
+
+#sidebar nav ul li a:focus-visible {
+  outline: 2px solid var(--color-accent);
+}
+
+#sidebar nav ul li a.active,
+#sidebar nav ul li a[aria-current="page"] {
+  color: var(--color-nav-active-text) !important;
+  background: var(--color-nav-active);
+  border-left-color: var(--color-nav-active-border);
+  box-shadow: inset 4px 0 8px -4px var(--color-accent-dim);
+}
+
+#sidebar nav ul li a .nav-icon {
+  flex-shrink: 0;
+}
+
+#sidebar .sidebar-footer {
+  margin-top: auto;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--color-nav-text-disabled) !important;
+  border-top: 1px solid var(--color-nav-border);
+}
+
+/* ── Main content area ── */
+#content-area {
+  position: fixed;
+  top: var(--topbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+  scroll-behavior: smooth;
+}
+
+/* ── View containers (each view is a <section>) ── */
+.view {
+  display: none;
+  animation: fadeIn 180ms ease;
+}
+
+.view.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.view-title {
+  font-size: var(--font-size-xl);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ── Future Systems navigation group ── */
+.future-systems-group {
+  margin: var(--space-3) var(--space-3) 0;
+  border-top: 1px solid var(--color-nav-border);
+  padding-top: var(--space-3);
+}
+
+.future-systems-summary,
+.future-systems-summary:visited {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-nav-text-muted) !important;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  outline-offset: 2px;
+}
+
+.future-systems-summary::-webkit-details-marker { display: none; }
+
+.future-systems-summary:hover {
+  color: var(--color-nav-text-hover) !important;
+  background: var(--color-surface-hover);
+}
+
+.future-systems-summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+}
+
+.future-systems-expand {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-nav-text-muted) !important;
+  transition: transform var(--transition-fast);
+}
+
+.future-systems-group[open] .future-systems-expand {
+  transform: rotate(90deg);
+}
+
+.future-systems-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3) 0;
+}
+
+.nav-item-future {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-nav-text-disabled) !important;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.04em;
+  cursor: default;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.nav-item-future .nav-icon {
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+/* PB05 failsafe: prevent browser default link styling in sidebar */
+#sidebar a,
+#sidebar a:link,
+#sidebar a:visited,
+#sidebar a:any-link {
+  color: var(--color-nav-text, #aab4c2) !important;
+  text-decoration: none !important;
+}
+
+#sidebar a:hover,
+#sidebar a:focus-visible {
+  color: var(--color-nav-text-hover, var(--color-fg, #f4f7fb)) !important;
+}
+
+#sidebar a[aria-current="page"] {
+  color: var(--color-nav-active-text, var(--color-accent, #ff8800)) !important;
+  text-decoration: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view, .status-dot.connected {
+    animation: none;
+    transition: none;
+  }
+  #sidebar nav ul li a,
+  .future-systems-expand {
+    transition: none;
+  }
+}
+
+#sidebar .future-systems-summary,
+#sidebar .future-systems-summary *,
+#sidebar .future-system-item,
+#sidebar .future-system-item *,
+#sidebar .nav-item-future,
+#sidebar .nav-item-future *,
+#sidebar .nav-disabled,
+#sidebar .nav-disabled * {
+  color: var(--color-nav-text-disabled, #505a68) !important;
+  text-decoration: none !important;
+}

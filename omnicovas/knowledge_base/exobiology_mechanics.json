@@ -1,0 +1,16 @@
+{
+  "category": "exobiology_mechanics",
+  "description": "Exobiology: genus, species, biome predictions, sample values",
+  "entries": [
+    {
+      "id": "sample_collection_process",
+      "topic": "Sample Collection Process",
+      "content": "Exobiology samples are collected using the Genetic Sampler tool. Three samples from distinct colonies of the same species are required to complete analysis. Samples must be collected from colonies separated by a minimum distance (the Colonial Range), which is species-specific. The journal records each sample via the ScanOrganic event with ScanType values of Log, Sample, and Analyse.",
+      "patch_verified": "4.0",
+      "source": "in-game journal observation (ScanOrganic event)",
+      "last_updated": "2026-04-18",
+      "confidence": "high",
+      "needs_review": false
+    }
+  ]
+}

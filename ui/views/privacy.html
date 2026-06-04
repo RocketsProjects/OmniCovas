@@ -1,0 +1,451 @@
+<!-- Phase 3 Week 13 — Privacy Page -->
+<main id="privacy-container" role="main" aria-label="Privacy and data sharing settings">
+  <div class="page-header">
+    <h1>🔒 Your Data, Your Choice</h1>
+    <p>
+      OmniCOVAS is local-only by default. Stored preferences do not activate outbound
+      traffic, and reserved integrations remain unavailable in this build.
+    </p>
+  </div>
+
+  <!-- Privacy Toggles Section -->
+  <section id="privacy-toggles-section" aria-labelledby="toggles-heading">
+    <h2 id="toggles-heading">Data Sharing Preferences</h2>
+
+    <div id="privacy-toggles-list" class="toggles-grid">
+      <!-- Toggles populated by JavaScript -->
+    </div>
+  </section>
+
+  <!-- Data Flow Transparency Section -->
+  <section id="data-flows-section" aria-labelledby="flows-heading">
+    <h2 id="flows-heading">📊 Configured Outbound Posture</h2>
+    <p>
+      Review declared disabled or reserved external-feature posture. This is not a live network monitor.
+    </p>
+    <button
+      class="secondary-button"
+      id="view-data-flows-btn"
+      aria-label="View detailed data flow transparency map"
+    >
+      View Outbound Posture
+    </button>
+  </section>
+
+  <!-- Data Export Section -->
+  <section id="data-export-section" aria-labelledby="export-heading">
+    <h2 id="export-heading">💾 Export Configuration Snapshot</h2>
+    <p>
+      Download vault-backed settings and configuration values as JSON. Secrets, Activity Log
+      entries, and local database records are not included.
+    </p>
+    <button
+      class="secondary-button"
+      id="export-data-btn"
+      aria-label="Export OmniCOVAS configuration snapshot as JSON"
+    >
+      Export Configuration Snapshot
+    </button>
+  </section>
+
+  <!-- Data Delete Section -->
+  <section id="data-delete-section" aria-labelledby="delete-heading">
+    <h2 id="delete-heading">🗑️ Reset Configuration Vault</h2>
+    <p>
+      Clear vault-backed settings and configuration values. Activity Log entries, local database
+      records, and runtime log files are not deleted by this control.
+    </p>
+    <button
+      class="danger-button"
+      id="delete-data-btn"
+      aria-label="Reset OmniCOVAS configuration vault"
+    >
+      Reset Configuration Vault
+    </button>
+  </section>
+
+  <!-- Data Flows Modal (hidden by default) -->
+  <div id="data-flows-modal" class="modal" style="display: none;" role="dialog" aria-labelledby="flows-modal-title">
+    <div class="modal-content">
+      <h2 id="flows-modal-title">Configured Outbound Posture</h2>
+
+      <div id="data-flows-list" class="flows-grid">
+        <!-- Flows populated by JavaScript -->
+      </div>
+
+      <div class="modal-no-flows-banner" id="no-flows-banner" style="display: none;">
+        ℹ️ <strong>No outbound data flows are currently active.</strong> OmniCOVAS is operating
+        in local-only mode.
+      </div>
+
+      <button
+        class="primary-button"
+        id="close-flows-modal-btn"
+        aria-label="Close data flows modal"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal (hidden by default) -->
+  <div id="delete-confirm-modal" class="modal" style="display: none;" role="dialog" aria-labelledby="delete-modal-title">
+    <div class="modal-content modal-danger">
+      <h2 id="delete-modal-title">Reset Configuration Vault?</h2>
+      <p>
+        This will clear:
+      </p>
+      <ul>
+        <li>Vault-backed OmniCOVAS settings and configuration values</li>
+        <li>Stored privacy preferences</li>
+      </ul>
+      <p><strong>Activity Log entries and local database records are not deleted by this control.</strong></p>
+
+      <p>
+        To confirm, please click the Reset button below twice.
+      </p>
+
+      <div id="delete-confirm-buttons" class="modal-buttons">
+        <button
+          class="danger-button"
+          id="delete-confirm-1st-btn"
+          aria-label="First confirmation: reset configuration vault"
+        >
+          I understand, reset configuration
+        </button>
+        <button
+          class="secondary-button"
+          id="delete-confirm-cancel-btn"
+          aria-label="Cancel deletion"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <div id="delete-confirm-2nd-buttons" style="display: none;" class="modal-buttons">
+        <p style="font-weight: bold; color: var(--color-warn);">
+          Click again to clear vault-backed configuration.
+        </p>
+        <button
+          class="danger-button"
+          id="delete-confirm-2nd-btn"
+          aria-label="Final confirmation: reset configuration vault"
+        >
+          Reset Configuration Vault
+        </button>
+        <button
+          class="secondary-button"
+          id="delete-confirm-cancel-2nd-btn"
+          aria-label="Cancel deletion"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<style>
+  #privacy-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    color: var(--color-text-primary);
+  }
+
+  .page-header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 1.05rem;
+  }
+
+  section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+  }
+
+  section h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.3rem;
+    color: var(--color-text-primary);
+  }
+
+  section p {
+    margin: 0 0 1rem 0;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Toggle Grid */
+  .toggles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .toggle-card {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .toggle-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .toggle-label {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    flex: 1;
+  }
+
+  .toggle-switch {
+    width: 50px;
+    height: 28px;
+    background: var(--color-border);
+    border-radius: 14px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .toggle-switch input {
+    display: none;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: var(--color-accent);
+    left: 26px;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+
+  .toggle-description {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+  }
+
+  /* Data Flows Grid */
+  .flows-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .flow-card {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 1rem;
+  }
+
+  .flow-destination {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .flow-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .flow-status.active {
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+  }
+
+  .flow-status.disabled {
+    background: var(--color-border);
+    color: var(--color-text-secondary);
+  }
+
+  .flow-status.not-shipped {
+    background: var(--color-info-bg);
+    color: var(--color-info);
+  }
+
+  .flow-frequency {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+  }
+
+  .flow-purpose {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.5rem;
+  }
+
+  .modal-no-flows-banner {
+    background: var(--color-info-bg);
+    border: 1px solid var(--color-info);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary);
+  }
+
+  /* Buttons */
+  .secondary-button,
+  .primary-button,
+  .danger-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .secondary-button {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+  }
+
+  .secondary-button:hover {
+    background: var(--color-bg-hover);
+  }
+
+  .secondary-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .primary-button {
+    background: var(--color-accent);
+    color: white;
+  }
+
+  .primary-button:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .primary-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .danger-button {
+    background: var(--color-critical);
+    color: white;
+  }
+
+  .danger-button:hover {
+    background: var(--color-critical-dark);
+  }
+
+  .danger-button:focus-visible {
+    outline: 2px solid var(--color-critical);
+    outline-offset: 2px;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: var(--color-bg-secondary);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-content h2 {
+    margin: 0 0 1rem 0;
+    color: var(--color-text-primary);
+  }
+
+  .modal-content p {
+    margin: 0 0 1rem 0;
+    color: var(--color-text-secondary);
+  }
+
+  .modal-content ul {
+    margin: 0 0 1rem 1.5rem;
+    color: var(--color-text-secondary);
+  }
+
+  .modal-content ul li {
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-danger {
+    border: 2px solid var(--color-critical);
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .modal-buttons button {
+    flex: 1;
+  }
+
+  @media (max-width: 600px) {
+    #privacy-container {
+      padding: 1rem;
+    }
+
+    .toggles-grid,
+    .flows-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<script src="/views/privacy.js"></script>

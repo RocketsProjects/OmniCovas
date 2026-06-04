@@ -1,0 +1,156 @@
+/* OmniCOVAS Design Tokens
+   Single source of truth for color, spacing, and typography.
+   All components reference tokens — never hard-coded values.
+   Color-blind palette overrides swap these tokens at the :root level. */
+
+:root {
+  /* --- Background / Surface ---
+     Correction #17: deep charcoal base with muted blue-gray panels.
+     Borders default to a neutral steel tone; the orange/gold accent
+     only takes over on active/focused state — calmer station-menu feel. */
+  --color-bg:            #07080f;
+  --color-bg-gradient:   linear-gradient(135deg, #07080f 0%, #0d1020 100%);
+  --color-bg-panel:      rgba(20, 24, 36, 0.85);
+  --color-surface:       rgba(20, 24, 36, 0.85);
+  --color-surface-hover: rgba(255, 136, 0, 0.06);
+  --color-border:        rgba(140, 160, 180, 0.18);
+  --color-border-active: rgba(255, 136, 0, 0.6);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-backdrop:      rgba(0, 0, 0, 0.65);
+
+  /* --- Foreground / Text --- */
+  --color-fg:            #e0e0e8;
+  --color-fg-muted:      #8888aa;
+  --color-fg-unknown:    #555577;
+
+  /* --- Accent --- */
+  --color-accent:        #ff8800;
+  --color-accent-hover:  #ff9922;
+  --color-accent-dim:    rgba(255, 136, 0, 0.15);
+  --color-command:       var(--color-accent);
+  --color-command-hover: var(--color-accent-hover);
+  --color-command-dim:   var(--color-accent-dim);
+  --color-action:        var(--color-command);
+  --color-action-hover:  var(--color-command-hover);
+  --color-action-dim:    var(--color-command-dim);
+
+  /* --- Semantic Status --- */
+  --color-ok:            #00ffaa;
+  --color-warn:          #ffcc00;
+  --color-critical:      #ff3333;
+  --color-info:          #4499ff;
+
+  /* --- Semantic aliases (confirmation-gate, onboarding, settings, privacy, activity-log) --- */
+  --color-bg-secondary:   rgba(15, 16, 32, 0.95);
+  --color-text-primary:   var(--color-fg);
+  --color-text-secondary: var(--color-fg-muted);
+  --color-info-bg:        rgba(68, 153, 255, 0.10);
+  --color-bg-hover:       rgba(255, 255, 255, 0.06);
+
+  /* --- Telemetry (cyan/blue family — applied selectively in PB05-05) --- */
+  --color-telemetry-label:  #5599cc;
+  --color-telemetry-value:  var(--color-fg);
+  --color-telemetry-muted:  var(--color-fg-muted);
+  --color-telemetry-border: rgba(68, 153, 255, 0.18);
+
+  /* --- Nav --- */
+  --color-nav-bg:            rgba(8, 8, 20, 0.95);
+  --color-nav-border:        rgba(255, 136, 0, 0.18);
+  --color-nav-active:        rgba(255, 136, 0, 0.12);
+  --color-nav-active-border: #ff8800;
+  --color-nav-text:          #aab4c2;
+  --color-nav-text-hover:    var(--color-fg);
+  --color-nav-text-muted:    #6f7a8a;
+  --color-nav-text-disabled: #505a68;
+  --color-nav-active-text:   var(--color-accent);
+
+  /* --- Hull / Shield Bar Colors --- */
+  --color-hull-full:     #00ffaa;
+  --color-hull-warn:     #ffcc00;
+  --color-hull-critical: #ff3333;
+  --color-shield-up:     #4499ff;
+  --color-shield-down:   #555577;
+
+  /* --- Spacing Scale --- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+
+  /* --- Typography --- */
+  --font-family-ui:   system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-family-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
+  --font-family:      var(--font-family-ui);
+  --font-size-xs:     11px;
+  --font-size-sm:     12px;
+  --font-size-base:   14px;
+  --font-size-md:     15px;
+  --font-size-lg:     18px;
+  --font-size-xl:     22px;
+  --font-size-2xl:    28px;
+  --font-weight-normal: 400;
+  --font-weight-bold:   700;
+  --line-height:        1.5;
+
+  /* --- Radius --- */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+
+  /* --- Shadows --- */
+  --shadow-panel: 0 2px 12px rgba(0, 0, 0, 0.40);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.65);
+
+  /* --- Z-index scale --- */
+  --z-sidebar:    90;
+  --z-topbar:     100;
+  --z-overlay:    200;
+  --z-onboarding: 300;
+  --z-modal:      400;
+
+  /* --- Transitions --- */
+  --transition-fast:   120ms ease;
+  --transition-normal: 220ms ease;
+
+  /* --- Layout dimensions --- */
+  --nav-width:      200px;
+  --topbar-height:  36px;
+
+  /* === UI v3 cockpit tokens === */
+  --uiv3-bg:                   #07080f;
+  --uiv3-bg-elev-1:            #0b0d18;
+  --uiv3-bg-elev-2:            #0d1020;
+  --uiv3-panel:                rgba(20, 24, 36, 0.55);
+  --uiv3-panel-soft:           rgba(20, 24, 36, 0.36);
+  --uiv3-panel-strong:         rgba(20, 24, 36, 0.85);
+  --uiv3-border:               rgba(140, 160, 180, 0.14);
+  --uiv3-border-strong:        rgba(140, 160, 180, 0.24);
+  --uiv3-border-active:        rgba(255, 136, 0, 0.45);
+  --uiv3-border-cyan:          rgba(68, 153, 255, 0.26);
+  --uiv3-text-primary:         #e6e8ef;
+  --uiv3-text-muted:           #8a92a8;
+  --uiv3-text-dim:             #5a6478;
+  --uiv3-text-unknown:         #4b5366;
+  --uiv3-accent-cyan:          #4499ff;
+  --uiv3-accent-blue:          #2f6fbf;
+  --uiv3-accent-orange:        #ff8800;
+  --uiv3-accent-gold:          #ffcc00;
+  --uiv3-status-ok:            #00d090;
+  --uiv3-status-warn:          #ffcc00;
+  --uiv3-status-alert:         #ff4d4d;
+  --uiv3-status-info:          #4499ff;
+  --uiv3-focus:                #66b8ff;
+  --uiv3-area-card-active-bg:  rgba(255, 136, 0, 0.08);
+  --uiv3-font-ui:              'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --uiv3-font-mono:            'JetBrains Mono', 'IBM Plex Mono', 'Cascadia Mono', Consolas, ui-monospace, monospace;
+  --uiv3-topbar-height:        40px;
+  --uiv3-identity-height:      68px;
+  --uiv3-watch-height:         32px;
+  --uiv3-tabs-height:          44px;
+  --uiv3-bottom-spine-height:  44px;
+  --uiv3-left-rail-width:      320px;
+}

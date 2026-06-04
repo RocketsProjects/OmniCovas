@@ -1,0 +1,665 @@
+<!-- Phase 3 Week 13 — First-Run Onboarding (Three-Path Model) -->
+<div id="onboarding-container" role="main" aria-label="First-run onboarding wizard">
+  <!-- Path Selection Screen -->
+  <div id="onboarding-path-selection" style="display: none;">
+    <div class="onboarding-panel">
+      <h1>Welcome to OmniCOVAS</h1>
+      <p class="subtitle">
+        Choose how you'd like to set up OmniCOVAS. You can change all settings later.
+      </p>
+
+      <div class="path-buttons">
+        <!-- Path A: Easy Mode -->
+        <button
+          class="path-button"
+          id="path-easy-btn"
+          aria-label="Easy Mode: 60-second preset setup"
+        >
+          <div class="path-icon">⚡</div>
+          <h2>Easy Mode</h2>
+          <p>Fastest setup (60 seconds). Casual Pilot preset, all defaults.</p>
+        </button>
+
+        <!-- Path B: Custom Setup -->
+        <button
+          class="path-button"
+          id="path-custom-btn"
+          aria-label="Custom Setup: guided 5-15 minute wizard"
+        >
+          <div class="path-icon">⚙️</div>
+          <h2>Custom Setup</h2>
+          <p>Choose your options. Presets, AI provider, privacy, overlay.</p>
+        </button>
+
+        <!-- Path C: Power User -->
+        <button
+          class="path-button"
+          id="path-power-user-btn"
+          aria-label="Power User: open Settings and Privacy pages directly"
+        >
+          <div class="path-icon">🔧</div>
+          <h2>Power User</h2>
+          <p>Full control. Visit every setting before applying.</p>
+        </button>
+      </div>
+
+      <button
+        class="secondary-button"
+        id="onboarding-skip-btn"
+        aria-label="Skip onboarding and use defaults"
+      >
+        Skip (use defaults)
+      </button>
+    </div>
+  </div>
+
+  <!-- Path A: Easy Mode (Single-Screen Preset Selection) -->
+  <div id="onboarding-easy-mode" style="display: none;">
+    <div class="onboarding-panel">
+      <h1>Quick Setup</h1>
+      <p>Select your playstyle. This preset will set recommended defaults.</p>
+
+      <div class="preset-selector">
+        <label for="onboarding-easy-preset-casual-view">
+          <input type="radio" id="onboarding-easy-preset-casual-view" name="easy-preset" value="casual" checked />
+          <span class="preset-name">Casual Pilot</span>
+          <span class="preset-desc">Balanced for relaxed play</span>
+        </label>
+        <label for="onboarding-easy-preset-combat-view">
+          <input type="radio" id="onboarding-easy-preset-combat-view" name="easy-preset" value="combat" />
+          <span class="preset-name">Combat Pilot</span>
+          <span class="preset-desc">Optimized for combat readiness</span>
+        </label>
+        <label for="onboarding-easy-preset-explorer-view">
+          <input type="radio" id="onboarding-easy-preset-explorer-view" name="easy-preset" value="explorer" />
+          <span class="preset-name">Explorer</span>
+          <span class="preset-desc">Exploration-focused settings</span>
+        </label>
+        <label for="onboarding-easy-preset-trader-view">
+          <input type="radio" id="onboarding-easy-preset-trader-view" name="easy-preset" value="trader" />
+          <span class="preset-name">Trader</span>
+          <span class="preset-desc">Trading and commodity tracking</span>
+        </label>
+        <label for="onboarding-easy-preset-miner-view">
+          <input type="radio" id="onboarding-easy-preset-miner-view" name="easy-preset" value="miner" />
+          <span class="preset-name">Miner</span>
+          <span class="preset-desc">Mining-focused settings</span>
+        </label>
+      </div>
+
+      <div class="onboarding-buttons">
+        <button
+          class="primary-button"
+          id="onboarding-easy-complete-btn"
+          aria-label="Complete onboarding with selected preset"
+        >
+          Continue
+        </button>
+        <button
+          class="secondary-button"
+          id="onboarding-easy-back-btn"
+          aria-label="Go back to path selection"
+        >
+          Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Path B: Custom Setup (Multi-Step Wizard) -->
+  <div id="onboarding-custom-mode" style="display: none;">
+    <!-- Step 1: Preset Selection -->
+    <div id="onboarding-custom-preset" class="onboarding-panel" style="display: none;">
+      <h1>Step 1 of 5: Playstyle Preset</h1>
+      <p>Choose a starting point. You can fine-tune everything in the next steps.</p>
+
+      <div class="preset-selector">
+        <label for="onboarding-custom-preset-casual-view">
+          <input type="radio" id="onboarding-custom-preset-casual-view" name="custom-preset" value="casual" checked />
+          <span class="preset-name">Casual Pilot</span>
+        </label>
+        <label for="onboarding-custom-preset-combat-view">
+          <input type="radio" id="onboarding-custom-preset-combat-view" name="custom-preset" value="combat" />
+          <span class="preset-name">Combat Pilot</span>
+        </label>
+        <label for="onboarding-custom-preset-explorer-view">
+          <input type="radio" id="onboarding-custom-preset-explorer-view" name="custom-preset" value="explorer" />
+          <span class="preset-name">Explorer</span>
+        </label>
+        <label for="onboarding-custom-preset-trader-view">
+          <input type="radio" id="onboarding-custom-preset-trader-view" name="custom-preset" value="trader" />
+          <span class="preset-name">Trader</span>
+        </label>
+        <label for="onboarding-custom-preset-miner-view">
+          <input type="radio" id="onboarding-custom-preset-miner-view" name="custom-preset" value="miner" />
+          <span class="preset-name">Miner</span>
+        </label>
+      </div>
+
+      <div class="onboarding-buttons">
+        <button
+          class="primary-button"
+          id="onboarding-custom-preset-next-btn"
+          aria-label="Continue to next step"
+        >
+          Next
+        </button>
+        <button
+          class="secondary-button"
+          id="onboarding-custom-preset-skip-btn"
+          aria-label="Skip this step"
+        >
+          Skip
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: AI Provider -->
+    <div id="onboarding-custom-ai" class="onboarding-panel" style="display: none;">
+      <h1>Step 2 of 5: AI Provider (Optional)</h1>
+      <p>NullProvider is active in this build. Future provider choices remain reserved.</p>
+
+      <div class="ai-provider-selector">
+        <label for="onboarding-custom-ai-null-view">
+          <input type="radio" id="onboarding-custom-ai-null-view" name="custom-ai" value="null" checked />
+          <span class="provider-name">NullProvider (Rule-Based)</span>
+          <span class="provider-desc">
+            Recommendations based on game rules only. No external API calls.
+          </span>
+        </label>
+        <label for="onboarding-custom-ai-gemini-view">
+          <input type="radio" id="onboarding-custom-ai-gemini-view" name="custom-ai" value="gemini" disabled />
+          <span class="provider-name">Gemini (Google) — reserved / unavailable</span>
+          <span class="provider-desc">
+            Provider activation is not wired in this build.
+          </span>
+        </label>
+        <label for="onboarding-custom-ai-local-view">
+          <input type="radio" id="onboarding-custom-ai-local-view" name="custom-ai" value="local_llm" disabled />
+          <span class="provider-name">Local LLM (Ollama) — reserved / unavailable</span>
+          <span class="provider-desc">
+            Local model activation is not wired in this build.
+          </span>
+        </label>
+      </div>
+
+      <div class="onboarding-buttons">
+        <button
+          class="primary-button"
+          id="onboarding-custom-ai-next-btn"
+          aria-label="Continue to next step"
+        >
+          Next
+        </button>
+        <button
+          class="secondary-button"
+          id="onboarding-custom-ai-back-btn"
+          aria-label="Go back to previous step"
+        >
+          Back
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Privacy Toggles -->
+    <div id="onboarding-custom-privacy" class="onboarding-panel" style="display: none;">
+      <h1>Step 3 of 5: Privacy & Data Sharing</h1>
+      <p>All toggles default OFF. Enable only what you're comfortable with.</p>
+
+      <div class="privacy-toggles">
+        <label class="toggle-item" for="onboarding-privacy-eddn-view">
+          <input type="checkbox" class="privacy-toggle" id="onboarding-privacy-eddn-view" name="onboarding-privacy-eddn-view" data-toggle="eddn_submission" disabled />
+          <span class="toggle-label">EDDN Market Data — reserved</span>
+          <span class="toggle-desc">
+            Locked disabled. Requires an approved provider-specific playbook.
+          </span>
+        </label>
+        <label class="toggle-item" for="onboarding-privacy-edsm-view">
+          <input type="checkbox" class="privacy-toggle" id="onboarding-privacy-edsm-view" name="onboarding-privacy-edsm-view" data-toggle="edsm_tracking" disabled />
+          <span class="toggle-label">EDSM Tracking — reserved</span>
+          <span class="toggle-desc">
+            Locked disabled. Requires an approved provider-specific playbook.
+          </span>
+        </label>
+        <label class="toggle-item" for="onboarding-privacy-squadron-view">
+          <input type="checkbox" class="privacy-toggle" id="onboarding-privacy-squadron-view" name="onboarding-privacy-squadron-view" data-toggle="squadron_telemetry" />
+          <span class="toggle-label">Squadron Telemetry (Local Only)</span>
+          <span class="toggle-desc">
+            Stored local preference only. Local-only — sync not yet shipped.
+          </span>
+        </label>
+        <label class="toggle-item" for="onboarding-privacy-ai-view">
+          <input type="checkbox" class="privacy-toggle" id="onboarding-privacy-ai-view" name="onboarding-privacy-ai-view" data-toggle="ai_provider_calls" disabled />
+          <span class="toggle-label">AI API Calls — reserved</span>
+          <span class="toggle-desc">
+            Provider activation is not wired in this build.
+          </span>
+        </label>
+      </div>
+
+      <div class="onboarding-buttons">
+        <button
+          class="primary-button"
+          id="onboarding-custom-privacy-next-btn"
+          aria-label="Continue to next step"
+        >
+          Next
+        </button>
+        <button
+          class="secondary-button"
+          id="onboarding-custom-privacy-back-btn"
+          aria-label="Go back to previous step"
+        >
+          Back
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 4: Output Mode -->
+    <div id="onboarding-custom-output" class="onboarding-panel" style="display: none;">
+      <h1>Step 4 of 5: Output Mode</h1>
+      <p>How would you like alerts and recommendations delivered?</p>
+
+      <div class="output-mode-selector">
+        <label for="onboarding-custom-output-overlay-view">
+          <input type="radio" id="onboarding-custom-output-overlay-view" name="custom-output" value="overlay" checked />
+          <span class="mode-name">Overlay Only</span>
+          <span class="mode-desc">
+            Show alerts in a floating overlay above your game.
+          </span>
+        </label>
+        <label for="onboarding-custom-output-voice-view">
+          <input type="radio" id="onboarding-custom-output-voice-view" name="custom-output" value="voice" disabled />
+          <span class="mode-name">Voice &mdash; reserved</span>
+          <span class="mode-desc">
+            Native-first voice delivery is reserved for a future approved slice. VoiceAttack remains an optional adapter only.
+          </span>
+        </label>
+        <label for="onboarding-custom-output-both-view">
+          <input type="radio" id="onboarding-custom-output-both-view" name="custom-output" value="both" disabled />
+          <span class="mode-name">HUD Projection + Voice &mdash; reserved</span>
+          <span class="mode-desc">
+            Combined delivery remains reserved until native-first voice is approved.
+          </span>
+        </label>
+      </div>
+
+      <div class="onboarding-buttons">
+        <button
+          class="primary-button"
+          id="onboarding-custom-output-next-btn"
+          aria-label="Continue to final step"
+        >
+          Next
+        </button>
+        <button
+          class="secondary-button"
+          id="onboarding-custom-output-back-btn"
+          aria-label="Go back to previous step"
+        >
+          Back
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 5: Overlay Position -->
+    <div id="onboarding-custom-overlay" class="onboarding-panel" style="display: none;">
+      <h1>Step 5 of 5: Overlay Position</h1>
+      <p>Where should critical alerts appear on screen?</p>
+
+      <div class="overlay-position-selector">
+        <label for="onboarding-custom-overlay-tl-view">
+          <input type="radio" id="onboarding-custom-overlay-tl-view" name="custom-overlay" value="tl" />
+          <span class="position-name">Top-Left</span>
+        </label>
+        <label for="onboarding-custom-overlay-tr-view">
+          <input type="radio" id="onboarding-custom-overlay-tr-view" name="custom-overlay" value="tr" />
+          <span class="position-name">Top-Right</span>
+        </label>
+        <label for="onboarding-custom-overlay-bl-view">
+          <input type="radio" id="onboarding-custom-overlay-bl-view" name="custom-overlay" value="bl" />
+          <span class="position-name">Bottom-Left</span>
+        </label>
+        <label for="onboarding-custom-overlay-br-view">
+          <input type="radio" id="onboarding-custom-overlay-br-view" name="custom-overlay" value="br" />
+          <span class="position-name">Bottom-Right</span>
+        </label>
+        <label for="onboarding-custom-overlay-center-view">
+          <input type="radio" id="onboarding-custom-overlay-center-view" name="custom-overlay" value="center" checked />
+          <span class="position-name">Center</span>
+        </label>
+      </div>
+
+      <div class="onboarding-buttons">
+        <button
+          class="primary-button"
+          id="onboarding-custom-complete-btn"
+          aria-label="Complete custom onboarding"
+        >
+          Complete
+        </button>
+        <button
+          class="secondary-button"
+          id="onboarding-custom-overlay-back-btn"
+          aria-label="Go back to previous step"
+        >
+          Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Path C: Power User (Direct Link to Settings) -->
+  <div id="onboarding-power-user" style="display: none;">
+    <div class="onboarding-panel">
+      <h1>Power User Setup</h1>
+      <p>
+        Visit the full Settings and Privacy pages to configure every option before
+        anything is applied.
+      </p>
+
+      <div class="power-user-buttons">
+        <button
+          class="primary-button"
+          id="onboarding-power-user-settings-btn"
+          aria-label="Open Settings page"
+        >
+          📋 Open Settings
+        </button>
+        <button
+          class="primary-button"
+          id="onboarding-power-user-privacy-btn"
+          aria-label="Open Privacy page"
+        >
+          🔒 Open Privacy
+        </button>
+      </div>
+
+      <p class="power-user-note">
+        You must open both pages at least once to complete onboarding.
+      </p>
+
+      <div id="power-user-progress" aria-live="polite" aria-atomic="true">
+        <span id="power-user-settings-check">
+          ☐ Settings opened
+        </span>
+        <br />
+        <span id="power-user-privacy-check">
+          ☐ Privacy opened
+        </span>
+      </div>
+
+      <button
+        class="primary-button"
+        id="onboarding-power-user-complete-btn"
+        disabled
+        aria-label="Complete onboarding (both pages must be opened first)"
+      >
+        Complete
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  #onboarding-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg));
+    padding: 2rem;
+  }
+
+  .onboarding-panel {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 3rem;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .onboarding-panel h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    color: var(--color-text-primary);
+  }
+
+  .onboarding-panel .subtitle {
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  /* Path Selection Buttons */
+  .path-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .path-button {
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .path-button:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-accent);
+  }
+
+  .path-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .path-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .path-button h2 {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--color-text-primary);
+  }
+
+  .path-button p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* Preset Selector */
+  .preset-selector,
+  .ai-provider-selector,
+  .output-mode-selector,
+  .overlay-position-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .preset-selector label,
+  .ai-provider-selector label,
+  .output-mode-selector label,
+  .overlay-position-selector label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .preset-selector label:hover,
+  .ai-provider-selector label:hover,
+  .output-mode-selector label:hover,
+  .overlay-position-selector label:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-accent);
+  }
+
+  .preset-selector input,
+  .ai-provider-selector input,
+  .output-mode-selector input,
+  .overlay-position-selector input {
+    cursor: pointer;
+  }
+
+  .preset-name,
+  .provider-name,
+  .mode-name,
+  .position-name {
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .preset-desc,
+  .provider-desc,
+  .mode-desc {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-left: 1.5rem;
+  }
+
+  /* Privacy Toggles */
+  .privacy-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .toggle-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .toggle-item input[type="checkbox"] {
+    margin-right: 0.5rem;
+  }
+
+  .toggle-label {
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .toggle-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-left: 1.5rem;
+  }
+
+  /* Buttons */
+  .onboarding-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .onboarding-buttons .primary-button {
+    flex: 1;
+  }
+
+  .onboarding-buttons .secondary-button {
+    flex: 1;
+  }
+
+  .primary-button,
+  .secondary-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .primary-button {
+    background: var(--color-accent);
+    color: white;
+  }
+
+  .primary-button:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+  }
+
+  .primary-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .primary-button:disabled {
+    background: var(--color-border);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .secondary-button {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+  }
+
+  .secondary-button:hover {
+    background: var(--color-bg-hover);
+  }
+
+  .secondary-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Power User */
+  .power-user-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .power-user-note {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin: 1rem 0;
+  }
+
+  #power-user-progress {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-primary);
+  }
+
+  @media (max-width: 600px) {
+    .onboarding-panel {
+      padding: 2rem 1.5rem;
+    }
+
+    .path-buttons {
+      gap: 0.75rem;
+    }
+  }
+</style>
+
+<script src="/views/onboarding.js"></script>

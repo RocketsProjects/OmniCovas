@@ -1,0 +1,537 @@
+/* ── Squadrons route styles — PB07-04 ── */
+
+.squadrons-route {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+  width: 100%;
+}
+
+.squadrons-route .route-hero {
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.squadrons-local-intro {
+  max-width: 58rem;
+  margin: 0;
+  color: var(--color-fg-muted, var(--color-text-muted, #6b7280));
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.squadrons-command-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-4, 1rem);
+  border: 1px solid var(--color-border-subtle, var(--color-border, #e5e7eb));
+  border-radius: var(--radius-md, 0.375rem);
+  background:
+    linear-gradient(180deg, rgba(68, 153, 255, 0.035), transparent 38%),
+    var(--color-surface, transparent);
+}
+
+.squadrons-command-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 0.25rem);
+}
+
+.squadrons-command-section-title {
+  margin: 0;
+  color: var(--color-fg, var(--color-text, inherit));
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: var(--font-weight-bold, 700);
+}
+
+.squadrons-command-section-copy {
+  margin: 0;
+  color: var(--color-fg-muted, var(--color-text-muted, #6b7280));
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.squadrons-command-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-3, 0.75rem);
+}
+
+.squadrons-command-grid--available .command-card {
+  border-color: var(--color-border, #e5e7eb);
+}
+
+.squadrons-command-grid--status {
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.squadrons-detail-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+}
+
+.squadrons-local-tools .squadrons-section {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.squadrons-future-roadmap {
+  background: transparent;
+  border-style: dashed;
+  opacity: 0.92;
+}
+
+.squadrons-future-summary {
+  cursor: pointer;
+  color: var(--color-fg-muted, var(--color-text-muted, #6b7280));
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-bold, 700);
+  letter-spacing: 0.08em;
+  list-style: none;
+  text-transform: uppercase;
+}
+
+.squadrons-future-summary::-webkit-details-marker {
+  display: none;
+}
+
+.squadrons-future-summary::before {
+  content: "+";
+  display: inline-block;
+  width: 1rem;
+  color: var(--color-accent, currentColor);
+}
+
+.squadrons-future-roadmap[open] .squadrons-future-summary::before {
+  content: "-";
+}
+
+.squadrons-future-summary:focus-visible {
+  outline: 2px solid var(--color-accent, currentColor);
+  outline-offset: 2px;
+}
+
+.squadrons-reserved-row-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+.squadrons-reserved-row-shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+.squadrons-reserved-row-shell .reserved-feature-row {
+  border-left-color: var(--color-border-subtle, var(--color-border, #e5e7eb));
+  min-height: 2rem;
+}
+
+.squadrons-reserved-detail-host[data-open="true"] {
+  margin-left: var(--space-3, 0.75rem);
+}
+
+.squadrons-reserved-detail,
+.sq-reserved-proof-detail {
+  border: 1px solid var(--color-border-subtle, var(--color-border, #e5e7eb));
+  border-radius: var(--radius-sm, 0.25rem);
+  padding: var(--space-3, 0.75rem);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+.sq-reserved-proof {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+.squadrons-header {
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.squadrons-heading {
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: 600;
+  margin: 0 0 var(--space-1, 0.25rem);
+  color: var(--color-text, inherit);
+}
+
+.squadrons-subheading {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-muted, #6b7280);
+  margin: 0;
+}
+
+/* ── Section panels ── */
+.squadrons-section {
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 0.375rem);
+  padding: var(--space-4, 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+}
+
+.squadrons-section-title {
+  font-size: var(--font-size-md, 1rem);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text, inherit);
+}
+
+/* ── Fact rows ── */
+.squadrons-fact-row {
+  display: flex;
+  gap: var(--space-2, 0.5rem);
+  align-items: baseline;
+}
+
+.squadrons-fact-label {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  min-width: 8rem;
+  flex-shrink: 0;
+}
+
+.squadrons-fact-value {
+  font-size: var(--font-size-sm, 0.875rem);
+  word-break: break-word;
+  color: var(--color-text, inherit);
+}
+
+.squadrons-fact-value--fallback {
+  color: var(--color-text-muted, #6b7280);
+  font-style: italic;
+}
+
+/* ── Text helpers ── */
+.squadrons-fallback {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-muted, #6b7280);
+  font-style: italic;
+  margin: 0;
+}
+
+.squadrons-caveat {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+  margin: 0;
+}
+
+.squadrons-waiting,
+.squadrons-unavailable-message,
+.squadrons-unavailable-fallback {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-muted, #6b7280);
+  font-style: italic;
+  margin: 0;
+}
+
+.squadrons-reserved-card {
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-left: 3px solid var(--color-warning, #d97706);
+  border-radius: var(--radius-sm, 0.25rem);
+  padding: var(--space-3, 0.75rem);
+  background: var(--color-surface, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+.squadrons-reserved-title {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text, inherit);
+}
+
+.squadrons-reserved-wording,
+.sq-reserved-intent-status {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-muted, #6b7280);
+  margin: 0;
+}
+
+.squadrons-reserved-status-list {
+  margin: 0;
+  padding-left: var(--space-4, 1rem);
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+.squadrons-reserved-requirements,
+.squadrons-reserved-authorities,
+.squadrons-fallback-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1, 0.25rem);
+  align-items: center;
+}
+
+.squadrons-reserved-label,
+.squadrons-fallback-words-label {
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  margin-right: var(--space-1, 0.25rem);
+}
+
+.squadrons-reserved-chip,
+.squadrons-fallback-word {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 0.25rem);
+  padding: 1px var(--space-2, 0.5rem);
+  background: var(--color-surface, transparent);
+}
+
+.squadrons-reserved-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+  align-items: center;
+  margin-top: var(--space-1, 0.25rem);
+}
+
+.sq-reserved-intent-btn {
+  font-size: var(--font-size-xs, 0.75rem);
+  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 0.25rem);
+  background: var(--color-surface, transparent);
+  color: var(--color-text, inherit);
+  cursor: pointer;
+}
+
+.sq-reserved-intent-btn:hover {
+  background: var(--color-surface-hover, #f9fafb);
+}
+
+/* ── Lists ── */
+.squadrons-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+.squadrons-list-item {
+  display: flex;
+  gap: var(--space-2, 0.5rem);
+  align-items: baseline;
+  font-size: var(--font-size-sm, 0.875rem);
+  padding: var(--space-1, 0.25rem) 0;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.squadrons-list-item:last-child {
+  border-bottom: none;
+}
+
+/* ── Peer-specific spans ── */
+.squadrons-peer-name {
+  font-weight: 600;
+  color: var(--color-text, inherit);
+}
+
+.squadrons-peer-role {
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+/* ── Invite-specific spans ── */
+.squadrons-invite-code {
+  font-family: var(--font-mono, monospace);
+  color: var(--color-text, inherit);
+}
+
+.squadrons-invite-expiry {
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+/* ── Role-specific spans ── */
+.squadrons-role-name {
+  font-weight: 600;
+  color: var(--color-text, inherit);
+}
+
+.squadrons-role-permissions {
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+/* ── Operation / navigation link spans ── */
+.squadrons-op-label,
+.squadrons-nav-system {
+  font-weight: 600;
+  color: var(--color-text, inherit);
+}
+
+.squadrons-nav-objective {
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+/* ── Log entry spans ── */
+.squadrons-log-timestamp {
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-xs, 0.75rem);
+  min-width: 10rem;
+  flex-shrink: 0;
+}
+
+.squadrons-log-type {
+  font-weight: 600;
+  color: var(--color-text, inherit);
+}
+
+.squadrons-log-summary {
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+/* ── Integration spans ── */
+.squadrons-integration-provider {
+  font-weight: 600;
+  color: var(--color-text, inherit);
+}
+
+.squadrons-integration-status {
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+/* ── Write controls (PB07-07) ── */
+.sq-write-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  margin-top: var(--space-2, 0.5rem);
+}
+
+.sq-add-btn {
+  font-size: var(--font-size-sm, 0.875rem);
+  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 0.25rem);
+  background: var(--color-surface, transparent);
+  color: var(--color-text, inherit);
+  cursor: pointer;
+}
+
+.sq-add-btn:hover {
+  background: var(--color-surface-hover, #f9fafb);
+}
+
+.sq-revoke-btn {
+  font-size: var(--font-size-xs, 0.75rem);
+  padding: 2px var(--space-2, 0.5rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 0.25rem);
+  background: var(--color-surface, transparent);
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.sq-revoke-btn:hover {
+  color: var(--color-text, inherit);
+}
+
+.sq-local-note {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+}
+
+.squadrons-section-subtitle {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  margin: var(--space-2, 0.5rem) 0 0;
+  color: var(--color-text, inherit);
+}
+
+.squadrons-emergency-note-text {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text, inherit);
+  word-break: break-word;
+}
+
+/* ── Gate modal (PB07-07) ── */
+.sq-gate-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.sq-gate-modal {
+  background: var(--color-surface-raised, #fff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 0.375rem);
+  padding: var(--space-5, 1.25rem);
+  max-width: 24rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+  outline: none;
+}
+
+.sq-gate-title {
+  font-size: var(--font-size-md, 1rem);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text, inherit);
+}
+
+.sq-gate-suggestion {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text, inherit);
+  margin: 0;
+  word-break: break-word;
+}
+
+.sq-gate-local-note {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+  margin: 0;
+}
+
+.sq-gate-buttons {
+  display: flex;
+  gap: var(--space-2, 0.5rem);
+  justify-content: flex-end;
+}
+
+.sq-gate-btn {
+  font-size: var(--font-size-sm, 0.875rem);
+  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 0.25rem);
+  cursor: pointer;
+}
+
+.sq-gate-btn--confirm {
+  background: var(--color-primary, #2563eb);
+  color: #fff;
+  border-color: var(--color-primary, #2563eb);
+}
+
+.sq-gate-btn--confirm:hover {
+  opacity: 0.9;
+}
+
+.sq-gate-btn--cancel {
+  background: var(--color-surface, transparent);
+  color: var(--color-text, inherit);
+}

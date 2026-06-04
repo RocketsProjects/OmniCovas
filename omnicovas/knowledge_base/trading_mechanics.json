@@ -1,0 +1,72 @@
+{
+  "category": "trading_mechanics",
+  "description": "Trading: commodities, supply/demand, trade routes",
+  "entries": [
+    {
+      "id": "commodity_categories",
+      "topic": "Commodity Categories",
+      "content": "Commodities traded at stations fall into named categories such as Chemicals, Consumer Items, Foods, Industrial Materials, Legal Drugs, Machinery, Medicines, Metals, Minerals, Salvage, Slaves (illegal in most jurisdictions), Technology, Textiles, Waste, and Weapons. Category and legality flags are reported in the MarketBuy and MarketSell journal events.",
+      "patch_verified": "4.0",
+      "source": "in-game journal observation (MarketBuy/MarketSell events)",
+      "last_updated": "2026-04-18",
+      "confidence": "high",
+      "needs_review": false,
+      "_justification": "Phase 1 seed entry. Commodity category taxonomy used for cargo inventory grouping and future trading pillar (Phase 6)."
+    },
+    {
+      "id": "insurance_percentage",
+      "topic": "Standard Insurance Percentage",
+      "content": "The standard rebuy cost in Elite Dangerous is 5% of the total insured value of the ship (hull + all fitted modules). The Rebuy Calculator uses 5% as the default rate. A commander can purchase premium insurance in-game for a lower rate, but that selection is not exposed in the journal -- Phase 2 uses 5% as the universal default. The insured value is the sum of Loadout.HullValue and Loadout.ModulesValue.",
+      "patch_verified": "4.0",
+      "source": "Elite Dangerous in-game insurance screen, community verification, Frontier forums",
+      "last_updated": "2026-04-28",
+      "confidence": "high",
+      "needs_review": false,
+      "_justification": "Week 10. Rebuy Calculator (Feature 11) reads this constant. 5% is universally documented and in-game verified across multiple ship classes. The _INSURANCE_FRACTION constant in rebuy.py derives from this entry."
+    },
+    {
+      "id": "cargo_rack_internal_names",
+      "topic": "Cargo Rack Internal Module Name Prefixes",
+      "content": "Cargo racks in the Elite Dangerous Loadout event have Item field values beginning with 'int_cargorack_'. For example 'int_cargorack_size4_class1'. Mining equipment with supplemental capacity uses 'int_dronecontroller_collection' and similar patterns. OmniCOVAS cargo capacity calculation sums CargoCapacity from modules whose Item starts with 'int_cargorack_'.",
+      "patch_verified": "4.0",
+      "source": "Elite Dangerous Loadout journal event observation, outfitting module naming documentation",
+      "last_updated": "2026-04-28",
+      "confidence": "high",
+      "needs_review": false,
+      "_justification": "Week 10. Documents the naming convention used by cargo.py to identify cargo rack modules when computing state.cargo_capacity from Loadout data."
+    },
+    {
+      "id": "station_service_types",
+      "topic": "Station Service Types",
+      "content": "Elite Dangerous stations offer a defined set of services: Refuel, Repair, Rearm, Outfitting, Shipyard, Market, BlackMarket, Contacts, Missions, Tuning (Engineer), MaterialTrader, TechBroker, CarrierFuel, CarrierAdministration. The Docked journal event contains a StationServices list with the services available at that station.",
+      "patch_verified": "4.0",
+      "source": "Elite Dangerous journal documentation, in-game Docked event observation",
+      "last_updated": "2026-04-28",
+      "confidence": "high",
+      "needs_review": false,
+      "_justification": "Week 10. Documents station services for future Repair & Rearm Intel (Phase 2.5) and Trading Pillar (Phase 6). Docked event handler already captures StationName and StationType."
+    },
+    {
+      "id": "station_type_service_availability",
+      "topic": "Station Type vs Service Availability",
+      "content": "Not all station types offer all services. Outposts lack Shipyard and often Outfitting. Asteroid Bases are limited-service. Planetary Ports are full-service. Fleet Carriers offer a commander-configured subset. Megaships vary. The Docked StationServices list is the authoritative runtime source -- do not infer service availability from station type alone.",
+      "patch_verified": "4.0",
+      "source": "Elite Dangerous in-game observation, community wiki",
+      "last_updated": "2026-04-28",
+      "confidence": "medium",
+      "needs_review": true,
+      "_justification": "Week 10. Context for Repair & Rearm Intel (Phase 2.5). Medium confidence: service availability changes with Frontier updates. needs_review=true until per-station-type matrix is verified at current patch."
+    },
+    {
+      "id": "rebuy_calculation_formula",
+      "topic": "Rebuy Cost Calculation Formula",
+      "content": "Rebuy cost = int((HullValue + ModulesValue) * 0.05). HullValue and ModulesValue are sourced from the Loadout journal event. When ModulesValue is absent (older game versions), it falls back to summing ModuleInfo.value per fitted module. The result is truncated to an integer (floor). Premium insurance reduces this cost but is not tracked in the journal.",
+      "patch_verified": "4.0",
+      "source": "Elite Dangerous in-game rebuy screen, Died event rebuy field cross-check",
+      "last_updated": "2026-04-28",
+      "confidence": "high",
+      "needs_review": false,
+      "_justification": "Week 10. Documents the exact formula used by rebuy.py calculate_rebuy(). int() truncation matches the game's own credit display behaviour."
+    }
+  ]
+}

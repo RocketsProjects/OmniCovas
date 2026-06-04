@@ -1,0 +1,25 @@
+{
+  "name": "omnicovas",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke:ui": "powershell -ExecutionPolicy Bypass -File scripts/smoke_ui_full.ps1",
+    "smoke:ui:static": "powershell -ExecutionPolicy Bypass -File scripts/smoke_ui_static.ps1",
+    "smoke:ui:browser": "node scripts/smoke_ui_browser.mjs",
+    "smoke:ui:officer": "powershell -ExecutionPolicy Bypass -File scripts/smoke_ui_full.ps1 -OfficerOneShot -BrowserSmoke -StrictUIV3",
+    "smoke:ui:responsive": "powershell -ExecutionPolicy Bypass -File scripts/smoke_ui_full.ps1 -OfficerOneShot -BrowserSmoke -StrictUIV3 -ResponsiveSmoke",
+    "smoke:ui:tauri": "powershell -ExecutionPolicy Bypass -File scripts/smoke_ui_tauri.ps1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@tauri-apps/cli": "^2.10.1",
+    "vitest": "^4.1.5",
+    "happy-dom": "^20.9.0"
+  }
+}

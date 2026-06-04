@@ -1,0 +1,399 @@
+/* ── Intel Route Surface — PB07.5-05 ── */
+
+/* PB-UIV3-HARMONY §4·3 — Intel fact-domain terminal scaffold.
+   Live Context Header leads; the domain tab strip uses §5 cyan/neutral tab
+   grammar (neutral at rest, cyan current). Future domains are honest reserved
+   chips — disabled, never dead or fake. */
+.intel-live-context-header {
+  margin-bottom: var(--space-3);
+}
+
+.intel-domain-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.intel-domain-tab {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 3px 3px 0 0;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-3);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.intel-domain-tab:hover {
+  color: var(--color-fg);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.intel-domain-tab[aria-current="true"] {
+  color: var(--color-info);
+  border-bottom-color: var(--color-info);
+  background: var(--color-info-bg);
+}
+
+.intel-domain-tab:focus-visible {
+  outline: 2px solid var(--color-info);
+  outline-offset: -2px;
+}
+
+/* Reserved domains are clickable tabs that open an honest, compact reserved
+   workspace — dimmer at rest than live domains, never a dead label. */
+.intel-domain-tab--reserved {
+  align-items: center;
+  color: var(--color-fg-unknown);
+  display: inline-flex;
+  gap: 6px;
+  opacity: 0.8;
+}
+
+.intel-domain-tab--reserved:hover {
+  color: var(--color-fg-muted);
+  opacity: 1;
+}
+
+.intel-domain-tab-badge {
+  background: rgba(140, 160, 180, 0.12);
+  border-radius: 2px;
+  color: var(--color-fg-muted);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  padding: 1px 4px;
+}
+
+/* PB-UIV3-HARMONY §4·3 — single domain workspace. Only the active domain
+   panel is shown; each renders its own command-deck card workspace so domain
+   selection swaps the visible workspace. */
+.intel-workspace {
+  display: block;
+  width: 100%;
+}
+
+.intel-domain-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.intel-domain-panel[hidden] { display: none; }
+
+/* Briefs / surfaces fill the workspace width when they are the active domain. */
+.intel-domain-panel > .local-brief,
+.intel-domain-panel > .local-market-search,
+.intel-domain-panel > .local-module,
+.intel-domain-panel > .local-phase9-drawer,
+.intel-domain-panel > .support-card {
+  width: 100%;
+  min-height: 280px;
+}
+
+.intel-search-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.intel-workspace-lead {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+/* Honest reserved-domain workspace card. */
+.intel-reserved-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 220px;
+  padding: var(--space-5);
+  border: 1px dashed var(--color-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.intel-reserved-eyebrow {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.intel-reserved-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.intel-reserved-desc {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  max-width: 56ch;
+}
+
+.intel-route {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+}
+
+.intel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  gap: var(--space-4);
+  max-width: 100%;
+}
+
+/* Fact Rows */
+.intel-fact-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.intel-fact-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: var(--space-3);
+}
+
+.intel-fact-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.intel-fact-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.intel-fact-value {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg);
+  word-break: break-word;
+}
+
+.intel-fact-value--fallback {
+  color: var(--color-fg-muted);
+  font-style: italic;
+}
+
+/* Metadata inside drawers */
+.intel-fact-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-bg-surface-alt);
+  border-radius: var(--radius-card);
+}
+
+.intel-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.intel-chip {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.125rem 0.5rem;
+  white-space: nowrap;
+}
+
+.intel-fact-caveat {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+.intel-proof-link {
+  font-size: var(--font-size-xs);
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.intel-proof-link:hover {
+  text-decoration: underline;
+}
+
+/* Economic Section */
+.intel-economic-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.intel-economic-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) 0;
+}
+
+.intel-economic-summary-label {
+  color: var(--color-fg-muted);
+}
+
+.intel-economic-summary-status {
+  font-weight: var(--font-weight-semibold);
+}
+
+.intel-economic-summary-status--fallback {
+  color: var(--color-fg-muted);
+  font-style: italic;
+}
+
+.intel-economic-details-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.intel-economic-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.intel-economic-detail-section h4 {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-fg);
+}
+
+.intel-economic-meta-lines {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+}
+
+.intel-economic-meta-lines p {
+  margin: 0;
+}
+
+.intel-economic-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.intel-economic-list-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-bg-panel);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+}
+
+.intel-economic-list-title {
+  color: var(--color-fg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.intel-economic-list-detail {
+  color: var(--color-fg-muted);
+}
+
+.intel-economic-cap-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Show all affordance (§12.6) */
+.intel-economic-show-all {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.intel-economic-show-all-btn {
+  font-size: var(--font-size-xs);
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.intel-economic-show-all-btn:hover,
+.intel-economic-show-all-btn:focus-visible {
+  opacity: 0.8;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* In-game instruction for missing companion JSON snapshots (§11) */
+.intel-snapshot-instruction {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  margin: var(--space-1) 0 0;
+}
+
+/* Source chip on economic summary row (§8) */
+.intel-economic-summary-chip {
+  margin-left: auto;
+}
+
+/* Fact-row visible state badge and source chip (§7 + §8) */
+.intel-fact-state-badge,
+.intel-fact-source-chip {
+  align-self: flex-start;
+}
+
+/* Source List */
+.intel-source-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.intel-source-details {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+}
+
+.intel-empty-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+  font-style: italic;
+  margin: 0;
+}

@@ -1,0 +1,83 @@
+/* OmniCOVAS Page Layout Primitives
+   Route page containers, section spacing, helper/absence text, status notices.
+   Complements command-deck.css — these are layout utilities, not command-deck
+   design-language classes. */
+
+/* ── Page container ── */
+.ocv-page-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+/* ── Page section block ── */
+.ocv-page-section {
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.ocv-page-section h2 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-fg);
+}
+
+.ocv-page-section h3 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-md);
+  color: var(--color-fg);
+}
+
+.ocv-page-section p {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-fg-muted);
+  line-height: var(--line-height);
+}
+
+/* ── Helper text (explanatory, below primary content) ── */
+.ocv-page-helper {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--space-3) 0;
+  line-height: var(--line-height);
+}
+
+/* ── Absence text (no-data / empty state) ── */
+.ocv-page-absence {
+  color: var(--color-fg-unknown);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  padding: var(--space-3);
+}
+
+/* ── Status / notice surface ── */
+.ocv-page-notice {
+  background: var(--color-info-bg);
+  border-left: 3px solid var(--color-info);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height);
+  margin-bottom: var(--space-4);
+}
+
+@media (max-width: 600px) {
+  .ocv-page-wrap { padding: var(--space-4); }
+}
+
+/* ── PB05-09R: Route Visibility Guard ──
+   Ensures that route roots (section.view) with the .ocv-page class
+   respect the shell's visibility contract. .ocv-page in command-deck.css
+   defaults to display:flex which overrides the base .view {display:none}. */
+
+.view.ocv-page:not(.active) {
+  display: none !important;
+}
+
+.view.ocv-page.active {
+  display: flex !important;
+}

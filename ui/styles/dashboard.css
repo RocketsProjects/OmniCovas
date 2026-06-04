@@ -1,0 +1,548 @@
+/* OmniCOVAS Dashboard — Live Command Surface layout
+   PB07.5-02 — Command hero + 5 cards above accepted Phase 5 schematic baseline.
+   All values reference tokens.css. */
+
+/* === UI v3 Dashboard command surface === */
+
+.dashboard-uiv3-surface {
+  color: var(--uiv3-text-primary);
+  display: grid;
+  gap: 10px;
+  margin: 0 auto;
+  /* PB-PHASE10-SUPER-04 #1: fill the desktop workspace. width:100% stops the
+     surface shrink-wrapping to its content (which margin:0 auto then centred as
+     a narrow island); max-width keeps it readable on ultra-wide monitors. */
+  width: 100%;
+  max-width: 1680px;
+  padding: 10px 22px 14px;
+}
+
+.dashboard-uiv3-route-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.dashboard-uiv3-hero {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.dashboard-uiv3-hero-copy {
+  min-width: 0;
+}
+
+.dashboard-uiv3-breadcrumb {
+  align-items: center;
+  color: var(--uiv3-accent-cyan);
+  display: flex;
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  gap: 8px;
+  letter-spacing: 0;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.dashboard-uiv3-title {
+  color: var(--uiv3-text-primary);
+  font-family: var(--uiv3-font-ui);
+  font-size: clamp(34px, 4.2vw, 56px);
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 0.98;
+  margin: 0;
+}
+
+.dashboard-uiv3-subtitle {
+  color: var(--uiv3-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 14px 0 0;
+  max-width: 780px;
+}
+
+.dashboard-uiv3-alert-pill {
+  align-items: center;
+  align-self: start;
+  background: rgba(0, 208, 144, 0.06);
+  border: 1px solid rgba(0, 208, 144, 0.30);
+  color: var(--uiv3-status-ok);
+  display: inline-flex;
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  gap: 8px;
+  justify-self: end;
+  padding: 7px 10px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dashboard-uiv3-alert-pill--warn {
+  background: rgba(255, 204, 0, 0.07);
+  border-color: rgba(255, 204, 0, 0.30);
+  color: var(--uiv3-status-warn);
+}
+
+.dashboard-uiv3-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent),
+    var(--uiv3-panel);
+  border: 1px solid var(--uiv3-border);
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.dashboard-uiv3-card--primary {
+  background:
+    linear-gradient(180deg, rgba(255, 140, 64, 0.045), transparent 46%),
+    var(--uiv3-panel);
+  border-color: var(--uiv3-border-strong);
+  padding: 0;
+}
+
+.dashboard-uiv3-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  padding: 14px 16px;
+}
+
+.dashboard-uiv3-eyebrow {
+  color: var(--uiv3-accent-cyan);
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.dashboard-uiv3-card-title {
+  color: var(--uiv3-text-primary);
+  font-family: var(--uiv3-font-ui);
+  font-size: 22px;
+  font-weight: 620;
+  letter-spacing: 0;
+  line-height: 1.18;
+  margin: 0;
+}
+
+.dashboard-uiv3-card--primary .dashboard-uiv3-card-title {
+  color: var(--uiv3-accent-orange);
+  font-size: clamp(20px, 2.2vw, 28px);
+}
+
+.dashboard-uiv3-card-copy,
+.dashboard-uiv3-empty {
+  color: var(--uiv3-text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.dashboard-uiv3-card-meta,
+.dashboard-uiv3-fact-row,
+.dashboard-uiv3-support-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboard-uiv3-card-meta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-uiv3-fact-row {
+  border-top: 1px solid var(--uiv3-border);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: auto 0 0;
+  padding-top: 12px;
+}
+
+.dashboard-uiv3-fact-label,
+.dashboard-uiv3-metric-label {
+  color: var(--uiv3-text-dim);
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.dashboard-uiv3-fact-value,
+.dashboard-uiv3-metric-value {
+  color: var(--uiv3-text-primary);
+  font-family: var(--uiv3-font-mono);
+  font-size: 12px;
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-uiv3-fact-row dd {
+  margin-left: 0;
+}
+
+.dashboard-uiv3-metric-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dashboard-uiv3-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dashboard-uiv3-ghost-action,
+.dashboard-uiv3-card-action {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--uiv3-border);
+  border-radius: 4px;
+  color: var(--uiv3-text-muted);
+  display: inline-flex;
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  justify-content: center;
+  min-height: 31px;
+  padding: 0 11px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.dashboard-uiv3-card-action {
+  align-self: flex-start;
+  color: var(--uiv3-accent-orange);
+  margin-top: auto;
+}
+
+.dashboard-uiv3-ghost-action.is-disabled {
+  cursor: default;
+  opacity: 0.56;
+}
+
+.dashboard-uiv3-support-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-uiv3-activity-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-uiv3-activity-item {
+  border-left: 1px solid var(--uiv3-border-active);
+  display: grid;
+  gap: 3px;
+  padding-left: 10px;
+}
+
+.dashboard-uiv3-activity-time,
+.dashboard-uiv3-activity-type {
+  color: var(--uiv3-text-dim);
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.dashboard-uiv3-activity-summary {
+  color: var(--uiv3-text-primary);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.dashboard-uiv3-tool-list {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-uiv3-tool-link {
+  border: 1px solid var(--uiv3-border);
+  border-radius: 4px;
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.dashboard-uiv3-tool-link:hover,
+.dashboard-uiv3-card-action:hover {
+  border-color: var(--uiv3-border-active);
+  color: var(--uiv3-text-primary);
+}
+
+.dashboard-uiv3-tool-label {
+  color: var(--uiv3-accent-cyan);
+  font-family: var(--uiv3-font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.dashboard-uiv3-tool-summary {
+  color: var(--uiv3-text-dim);
+  font-size: 12px;
+}
+
+.dashboard-uiv3-rail-header {
+  flex: 0 0 auto;
+}
+
+.dashboard-uiv3-rail-link {
+  text-decoration: none;
+}
+
+.dashboard-uiv3-rail-panel {
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+}
+
+.dashboard-uiv3-reticle-card {
+  min-height: 0;
+}
+
+.dashboard-uiv3-reticle {
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle at center, rgba(68, 153, 255, 0.16) 0 2px, transparent 3px),
+    radial-gradient(circle at center, transparent 0 38%, rgba(68, 153, 255, 0.22) 39% 40%, transparent 41%),
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(68, 153, 255, 0.25) 50%, transparent calc(50% + 1px)),
+    linear-gradient(0deg, transparent calc(50% - 1px), rgba(68, 153, 255, 0.25) 50%, transparent calc(50% + 1px));
+  border: 1px solid var(--uiv3-border-cyan);
+  border-radius: 50%;
+  margin: 0 auto 4px;
+  max-width: 84px;
+  width: 58%;
+}
+
+.dashboard-uiv3-rail-note {
+  color: var(--uiv3-text-dim);
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  margin: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dashboard-uiv3-meter {
+  display: grid;
+  gap: 6px;
+}
+
+.uiv3-left-rail {
+  gap: 12px;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.uiv3-left-rail .uiv3-left-rail-panel {
+  padding: 12px;
+}
+
+.uiv3-left-rail .dashboard-uiv3-metric-row {
+  align-items: baseline;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.uiv3-left-rail .dashboard-uiv3-metric-value {
+  margin: 0;
+  max-width: 92px;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-uiv3-meter-track {
+  background: rgba(255, 255, 255, 0.045);
+  display: block;
+  height: 4px;
+  overflow: hidden;
+}
+
+.dashboard-uiv3-meter-fill {
+  background: var(--uiv3-accent-cyan);
+  display: block;
+  height: 100%;
+  min-width: 2px;
+}
+
+.dashboard-uiv3-meter-fill.is-unknown {
+  background: var(--uiv3-text-dim);
+  opacity: 0.35;
+  width: 0;
+}
+
+.dashboard-uiv3-spine-op {
+  color: var(--uiv3-accent-orange);
+}
+
+@media (max-width: 1120px) {
+  .dashboard-uiv3-card-meta,
+  .dashboard-uiv3-fact-row,
+  .dashboard-uiv3-support-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-uiv3-hero {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-uiv3-alert-pill {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboard-uiv3-surface {
+    padding: 14px;
+  }
+
+  .dashboard-uiv3-card-inner,
+  .dashboard-uiv3-card {
+    padding: 16px;
+  }
+}
+
+/* ════════════════════════════════════════
+   ROUTE HERO MOUNT
+   ════════════════════════════════════════ */
+
+.dashboard-hero-mount {
+  margin-bottom: var(--space-4);
+}
+
+/* ════════════════════════════════════════
+   COMMAND CARDS GRID (5 primary cards)
+   2-column at medium viewports, 3-column at wide
+   ════════════════════════════════════════ */
+
+.dashboard-command-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+/* ════════════════════════════════════════
+   DETAIL DRAWER CONTENT — definition list
+   Used inside command card DetailDrawers
+   ════════════════════════════════════════ */
+
+.detail-drawer-dl {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+}
+
+.detail-drawer-dt {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.detail-drawer-dd {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg);
+  font-family: var(--font-family-mono);
+  margin: 0;
+  padding: 0;
+}
+
+/* ════════════════════════════════════════
+   COMMAND SUMMARY BAND
+   ════════════════════════════════════════ */
+
+.dashboard-summary-band {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.dashboard-summary-band .ocv-command-summary-grid {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-2) var(--space-4);
+}
+
+.dashboard-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-summary-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-telemetry-label);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.dashboard-telemetry-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-fg);
+  font-family: var(--font-family-mono);
+}
+
+/* ════════════════════════════════════════
+   ABSENCE STATE
+   ════════════════════════════════════════ */
+
+.dashboard-absence-state {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-unknown);
+  font-style: italic;
+  text-align: center;
+  padding: var(--space-2) var(--space-4);
+  margin: 0;
+  line-height: var(--line-height);
+}
+
+/* ════════════════════════════════════════
+   SCHEMATIC STATUS LINE
+   ════════════════════════════════════════ */
+
+.dashboard-schematic-status-bar {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-1) 0;
+}
+
+/* ════════════════════════════════════════
+   PANEL TOGGLE STATE (PB05-07)
+   ════════════════════════════════════════ */
+
+.dashboard-panel-hidden {
+  display: none;
+}

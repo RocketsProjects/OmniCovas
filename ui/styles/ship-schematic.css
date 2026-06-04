@@ -1,0 +1,204 @@
+/* OmniCOVAS Ship Schematic Component
+   Technical blueprint wireframe for Dashboard ship display.
+   Token-driven — all values reference tokens.css.
+   PB05-06 integrates this into the Dashboard layout. */
+
+/* ════════════════════════════════════════
+   WRAPPER
+   ════════════════════════════════════════ */
+
+.ship-schematic {
+  position: relative;
+  width: 100%;
+  background: transparent;
+  border-radius: var(--radius-md);
+}
+
+/* ════════════════════════════════════════
+   SVG CANVAS
+   ════════════════════════════════════════ */
+
+.ship-schematic-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* ════════════════════════════════════════
+   SHAPE CLASSES
+   ════════════════════════════════════════ */
+
+.ship-schematic-shape {
+  fill: none;
+  stroke: var(--color-telemetry-label);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.ship-schematic-outline {
+  stroke: var(--color-shield-up);
+  stroke-width: 2;
+}
+
+.ship-schematic-line {
+  stroke: var(--color-telemetry-label);
+  stroke-width: 1;
+  stroke-dasharray: 8 4;
+  opacity: 0.55;
+}
+
+.ship-schematic-core {
+  stroke: var(--color-shield-up);
+  stroke-width: 1.5;
+  opacity: 0.75;
+}
+
+/* Generic fallback — muted, dashed */
+.ship-schematic-fallback {
+  stroke: var(--color-fg-unknown);
+  stroke-dasharray: 6 6;
+  stroke-width: 1.5;
+  opacity: 0.4;
+}
+
+/* ════════════════════════════════════════
+   HOTSPOT OVERLAY
+   ════════════════════════════════════════ */
+
+.ship-schematic-hotspots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ship-schematic-hotspot {
+  /* Marker class — no visual output */
+}
+
+/* ════════════════════════════════════════
+   HOTSPOT BUTTON
+   ════════════════════════════════════════ */
+
+.ship-schematic-hotspot-button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: var(--color-accent-dim);
+  border: 1px solid var(--color-border-active);
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.ship-schematic-hotspot-button:hover {
+  background: rgba(255, 136, 0, 0.22);
+  border-color: var(--color-accent);
+}
+
+.ship-schematic-hotspot-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ════════════════════════════════════════
+   HOTSPOT LABEL
+   ════════════════════════════════════════ */
+
+.ship-schematic-hotspot-label {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+  color: var(--color-accent);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ════════════════════════════════════════
+   HOTSPOT EXPANDED / COLLAPSED STATE (PB05-07)
+   ════════════════════════════════════════ */
+
+.ship-schematic-hotspot-button.is-expanded {
+  border-color: var(--color-accent);
+  background: rgba(255, 136, 0, 0.18);
+}
+
+.ship-schematic-hotspot-button[aria-expanded="false"],
+.ship-schematic-hotspot-button.is-collapsed {
+  opacity: 0.55;
+}
+
+/* ════════════════════════════════════════
+   STATIC RAIL SCHEMATIC (PB-UIV3-HARMONY · Design Authority §7)
+   The approved Sidewinder wireframe (sidewinder_schematic_transparent_white.png,
+   traceable to the handoff package) rendered as static decorative reference art
+   in the shell-owned SHIP STATE rail card. Identity-gated to the Sidewinder
+   only; no hotspots, no live-telemetry overlays. Text vitals remain
+   authoritative. The asset is faint white linework on transparent, so it sits
+   on a dark inset well with a subtle cyan glow for legibility (CSS treatment
+   only — decorative, never implying live module/heat/shield/damage state).
+   ════════════════════════════════════════ */
+.ship-schematic--static {
+  background:
+    radial-gradient(120% 90% at 50% 38%, rgba(68, 153, 255, 0.07) 0%, rgba(7, 8, 15, 0) 70%),
+    var(--uiv3-bg-elev-1, #0b0d18);
+  border: 1px solid var(--uiv3-border, rgba(140, 160, 180, 0.14));
+  border-radius: 3px;
+  margin: var(--space-2, 8px) auto var(--space-1, 4px);
+  max-width: 250px;
+  padding: 8px 6px;
+}
+
+.ship-schematic-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  margin: 0 auto;
+  object-fit: contain;
+  opacity: 1;
+  /* Lift the low-alpha white linework on the dark well: a slight brightness/
+     contrast bump plus a subtle stacked cyan glow (Design Authority §7's
+     "subtle cyan drop-shadow"). Decorative legibility only — not telemetry. */
+  filter:
+    brightness(1.25) contrast(1.08)
+    drop-shadow(0 0 0.5px rgba(68, 153, 255, 0.55))
+    drop-shadow(0 0 0.5px rgba(68, 153, 255, 0.40));
+}
+
+.dashboard-uiv3-schematic-head {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.dashboard-uiv3-schematic-ship {
+  font-size: 10px;
+}
+
+.dashboard-uiv3-schematic-empty {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0 4px;
+}
+
+.dashboard-uiv3-schematic-empty-text {
+  color: var(--uiv3-text-muted, #8a92a8);
+  font-family: var(--uiv3-font-mono, monospace);
+  font-size: 10px;
+  margin: 0;
+  text-align: center;
+}

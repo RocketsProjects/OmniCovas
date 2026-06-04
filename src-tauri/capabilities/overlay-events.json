@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "overlay-events",
+  "description": "Allow the overlay window to listen for local banner events.",
+  "windows": ["overlay"],
+  "permissions": ["core:event:allow-listen"]
+}

@@ -1,0 +1,14 @@
+{
+  "kb_version": "0.3.0",
+  "schema_version": 1,
+  "last_full_audit_date": "2026-04-28",
+  "game_version_at_last_audit": "unknown",
+  "total_entries": 44,
+  "entries_needing_review": 8,
+    "notes": [
+      "Phase 1 seed entries: hull, shields, fuel, cargo, wanted, FSD jump",
+      "Phase 2 additions: ship identity, hull/shield thresholds, fuel thresholds, heat thresholds, module thresholds, cargo filter, wanted per system, FSDJump vs StartJump",
+      "Week 9 Part E additions: 3 heat thresholds + 5 heat rule entries; Week 9 Part G additions: core_module_slots, hardpoint_slot_sizes, hardpoint_slot_naming_convention, module_offline_threshold, shield_regen_broken_threshold, pip_archetypes",
+      "Week 10 additions: ship_hull_values (combat_mechanics); insurance_percentage, cargo_rack_internal_names, station_service_types, station_type_service_availability, rebuy_calculation_formula (trading_mechanics)"
+    ]
+  }

@@ -1,0 +1,379 @@
+<!-- Phase 3 Week 13 — Activity Log (Full) -->
+<main id="activity-log-container" role="main" aria-label="Activity log and event history">
+  <div class="page-header">
+    <h1>📋 Activity Log</h1>
+    <p>Every action OmniCOVAS takes is logged here. Fully auditable.</p>
+  </div>
+
+  <!-- Filters and Search -->
+  <div id="log-controls" class="log-controls">
+    <div class="search-box">
+      <input
+        type="text"
+        id="log-search"
+        placeholder="Search by event type or summary"
+        aria-label="Search activity log"
+      />
+    </div>
+
+    <div class="filter-box">
+      <label>Filter by category:</label>
+      <div class="filter-checkboxes">
+        <label for="log-filter-critical-view">
+          <input type="checkbox" class="log-filter" id="log-filter-critical-view" name="log-filter-critical-view" value="critical" checked />
+          Critical
+        </label>
+        <label for="log-filter-extended-view">
+          <input type="checkbox" class="log-filter" id="log-filter-extended-view" name="log-filter-extended-view" value="extended" checked />
+          Extended
+        </label>
+        <label for="log-filter-telemetry-view">
+          <input type="checkbox" class="log-filter" id="log-filter-telemetry-view" name="log-filter-telemetry-view" value="telemetry" checked />
+          Telemetry
+        </label>
+        <label for="log-filter-ai-view">
+          <input type="checkbox" class="log-filter" id="log-filter-ai-view" name="log-filter-ai-view" value="ai" checked />
+          AI
+        </label>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button id="log-export-btn" class="secondary-button" aria-label="Export activity log as JSON">
+        ⬇️ Export
+      </button>
+      <button id="log-clear-btn" class="secondary-button" aria-label="Clear activity log">
+        🗑️ Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- Log Table -->
+  <div id="log-table-container" class="log-table-container">
+    <table id="log-table" class="log-table" role="grid" aria-label="Activity log entries">
+      <thead>
+        <tr>
+          <th scope="col">Timestamp</th>
+          <th scope="col">Event Type</th>
+          <th scope="col">Source</th>
+          <th scope="col">Summary</th>
+          <th scope="col">AI Tier</th>
+        </tr>
+      </thead>
+      <tbody id="log-body">
+        <!-- Populated by JavaScript -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div id="log-pagination" class="pagination">
+    <button id="log-prev-btn" class="pagination-button" aria-label="Previous page">
+      ← Previous
+    </button>
+    <span id="log-page-info" class="page-info">Page 1</span>
+    <button id="log-next-btn" class="pagination-button" aria-label="Next page">
+      Next →
+    </button>
+  </div>
+
+  <!-- Clear Confirmation Modal -->
+  <div id="log-clear-modal" class="modal" style="display: none;" role="dialog" aria-labelledby="clear-modal-title">
+    <div class="modal-content">
+      <h2 id="clear-modal-title">Clear Activity Log?</h2>
+      <p>This will delete all logged events. This action cannot be undone.</p>
+
+      <div class="modal-buttons">
+        <button id="log-clear-confirm-btn" class="danger-button" aria-label="Confirm clearing activity log">
+          Clear Log
+        </button>
+        <button id="log-clear-cancel-btn" class="secondary-button" aria-label="Cancel clearing">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<style>
+  #activity-log-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    color: var(--color-text-primary);
+  }
+
+  .page-header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  /* Controls */
+  .log-controls {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .search-box {
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+  }
+
+  .search-box input:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .filter-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-box label {
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .filter-checkboxes {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal;
+    cursor: pointer;
+  }
+
+  .filter-checkboxes input {
+    cursor: pointer;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .secondary-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .secondary-button:hover {
+    background: var(--color-bg-hover);
+  }
+
+  .secondary-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Table */
+  .log-table-container {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+  }
+
+  .log-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--color-bg-secondary);
+  }
+
+  .log-table th {
+    background: var(--color-bg);
+    border-bottom: 2px solid var(--color-border);
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+  }
+
+  .log-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+  }
+
+  .log-table tr:hover {
+    background: var(--color-bg-hover);
+  }
+
+  .log-timestamp {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+  }
+
+  .log-event-type {
+    font-weight: 500;
+  }
+
+  .log-event-type.critical {
+    color: var(--color-critical);
+  }
+
+  .log-event-type.extended {
+    color: var(--color-warn);
+  }
+
+  .log-event-type.ai {
+    color: var(--color-accent);
+  }
+
+  .log-source {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+  }
+
+  .log-summary {
+    word-break: break-word;
+  }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .pagination-button {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .pagination-button:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+  }
+
+  .pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .page-info {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: var(--color-bg-secondary);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 500px;
+  }
+
+  .modal-content h2 {
+    margin: 0 0 1rem 0;
+    color: var(--color-text-primary);
+  }
+
+  .modal-content p {
+    margin: 0 0 1.5rem 0;
+    color: var(--color-text-secondary);
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .modal-buttons button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .danger-button {
+    background: var(--color-critical);
+    color: white;
+  }
+
+  .danger-button:hover {
+    background: var(--color-critical-dark);
+  }
+
+  @media (max-width: 768px) {
+    #activity-log-container {
+      padding: 1rem;
+    }
+
+    .log-controls {
+      flex-direction: column;
+    }
+
+    .search-box {
+      min-width: unset;
+    }
+
+    .log-table {
+      font-size: 0.85rem;
+    }
+
+    .log-table th,
+    .log-table td {
+      padding: 0.5rem;
+    }
+  }
+</style>
+
+<script type="module" src="/views/activity-log.js"></script>

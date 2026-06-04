@@ -1,0 +1,348 @@
+.systems-route {
+  color: var(--uiv3-text-primary);
+  width: 100%;
+}
+
+.systems-surface {
+  display: grid;
+  gap: 18px;
+  margin: 0 auto;
+  /* PB-PHASE10-SUPER-04 #2: widen to fill desktop workspace (reduce empty canvas). */
+  max-width: 1680px;
+  padding: 20px 24px 28px;
+  width: 100%;
+}
+
+.systems-hero {
+  align-items: end;
+  border-bottom: 1px solid var(--uiv3-border);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-bottom: 18px;
+}
+
+.systems-hero-copy {
+  min-width: 0;
+}
+
+.systems-breadcrumb {
+  align-items: center;
+  color: var(--uiv3-accent-cyan);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  gap: 9px;
+  letter-spacing: 0;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+}
+
+.systems-breadcrumb-separator {
+  color: var(--uiv3-text-dim);
+}
+
+.systems-breadcrumb-active {
+  color: var(--uiv3-accent-orange);
+}
+
+.systems-title {
+  color: var(--uiv3-text-primary);
+  font-size: 34px;
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.systems-subtitle {
+  color: var(--uiv3-text-muted);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 10px 0 0;
+  max-width: 760px;
+}
+
+.systems-status-pill {
+  align-items: center;
+  background: var(--uiv3-panel-soft);
+  border: 1px solid var(--uiv3-border-cyan);
+  color: var(--uiv3-text-primary);
+  display: inline-flex;
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  gap: 8px;
+  justify-self: end;
+  min-height: 34px;
+  padding: 0 12px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* PB-UIV3-HARMONY §4·7 repair — master-detail hub. The grouped posture rail
+   sits on the left; the selected detail workspace renders top-aligned beside
+   it on the right. Selecting an area updates the right-hand workspace in place
+   so the detail is never detached at the bottom of the page. */
+.systems-workspace {
+  align-items: start;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+}
+
+.systems-area-grid {
+  display: grid;
+  gap: 14px;
+  /* In the master-detail rail the cards stack vertically; the rail column is
+     narrow, so one card per row reads as a coherent nav list. */
+  grid-template-columns: 1fr;
+}
+
+/* PB-UIV3-HARMONY §4·7 — posture groups give Systems a hub structure. */
+.systems-area-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 24px);
+}
+
+.systems-area-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.systems-area-group-label {
+  color: var(--uiv3-accent-cyan);
+  font-family: var(--uiv3-font-mono, monospace);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.systems-area-card {
+  align-items: stretch;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent),
+    var(--uiv3-panel);
+  border: 1px solid var(--uiv3-border);
+  border-radius: 4px;
+  color: var(--uiv3-text-primary);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: 14px 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.systems-area-card:hover {
+  border-color: var(--uiv3-border-strong);
+}
+
+.systems-area-card:focus-visible {
+  outline: 2px solid var(--uiv3-focus);
+  outline-offset: 2px;
+}
+
+.systems-area-card--active {
+  background:
+    linear-gradient(180deg, rgba(255, 136, 0, 0.075), transparent),
+    var(--uiv3-area-card-active-bg);
+  border-color: var(--uiv3-border-active);
+  box-shadow: inset 0 0 0 1px rgba(255, 136, 0, 0.12);
+}
+
+.systems-area-card--reserved {
+  border-style: dashed;
+}
+
+.systems-area-topline {
+  align-items: baseline;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.systems-area-title {
+  color: var(--uiv3-text-primary);
+  font-family: var(--uiv3-font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.systems-area-card--active .systems-area-title,
+.systems-area-card--active .systems-area-state {
+  color: var(--uiv3-accent-orange);
+}
+
+.systems-area-state {
+  color: var(--uiv3-accent-cyan);
+  flex: 0 0 auto;
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.systems-area-description {
+  color: var(--uiv3-text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.systems-area-posture {
+  color: var(--uiv3-text-dim);
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  letter-spacing: 0;
+  margin-top: auto;
+  text-transform: uppercase;
+}
+
+.systems-area-card--active .systems-area-posture {
+  color: var(--uiv3-status-ok);
+}
+
+.systems-detail-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent),
+    var(--uiv3-panel);
+  border: 1px solid var(--uiv3-border);
+  border-radius: 4px;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  padding: 22px 24px;
+}
+
+.systems-detail-main {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.systems-panel-eyebrow,
+.systems-detail-label {
+  color: var(--uiv3-accent-cyan);
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.systems-panel-title {
+  color: var(--uiv3-text-primary);
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.systems-panel-body {
+  color: var(--uiv3-text-muted);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 760px;
+}
+
+.systems-panel-link {
+  color: var(--uiv3-accent-cyan);
+  font-family: var(--uiv3-font-mono);
+  font-size: 11px;
+  letter-spacing: 0;
+  margin-top: 6px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.systems-panel-link:focus-visible {
+  outline: 2px solid var(--uiv3-focus);
+  outline-offset: 2px;
+}
+
+.systems-detail-rows {
+  display: grid;
+  gap: 0;
+}
+
+.systems-detail-row {
+  align-items: baseline;
+  border-bottom: 1px solid var(--uiv3-border);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 34px;
+  padding: 8px 0;
+}
+
+.systems-detail-value {
+  color: var(--uiv3-text-primary);
+  font-family: var(--uiv3-font-mono);
+  font-size: 12px;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+@media (max-width: 1100px) {
+  /* Below the master-detail breakpoint the rail returns to a multi-column
+     card grid stacked above the detail workspace. */
+  .systems-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .systems-area-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .systems-detail-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .systems-surface {
+    padding: 16px 14px 24px;
+  }
+
+  .systems-hero {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .systems-status-pill {
+    justify-self: start;
+  }
+
+  .systems-area-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .systems-detail-row {
+    grid-template-columns: 1fr;
+  }
+
+  .systems-detail-value {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .systems-area-card {
+    transition: none !important;
+  }
+}

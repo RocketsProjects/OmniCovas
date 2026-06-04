@@ -1,0 +1,16 @@
+{
+  "category": "powerplay2_mechanics",
+  "description": "Powerplay 2.0: merits, activities, power rewards",
+  "entries": [
+    {
+      "id": "pp2_merit_system",
+      "topic": "Merit System",
+      "content": "Powerplay 2.0 replaced the legacy merit/allocation system with a pledge-based merit accumulation model. Commanders earn merits by completing activities that support their pledged Power in controlled, unoccupied, or fortified systems. Specific merit values per activity are subject to patch-level balance changes.",
+      "patch_verified": "unknown",
+      "source": "Frontier Developments release notes",
+      "last_updated": "2026-04-18",
+      "confidence": "medium",
+      "needs_review": true
+    }
+  ]
+}

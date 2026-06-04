@@ -1,0 +1,356 @@
+/* OmniCOVAS — Privacy / Data Firewall page styles
+   Extracted from inline <style> in index.html (PB05-09).
+   Route-specific presentation only. Uses tokens from tokens.css.
+   No hard-coded colors. */
+
+#view-privacy {
+  padding: var(--space-5);
+}
+
+#privacy-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Page sections ───────────────────────────────────────────────────────── */
+
+#view-privacy section {
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+#view-privacy section h2 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-fg);
+}
+
+#view-privacy section p {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-fg-muted);
+  line-height: var(--line-height);
+}
+
+/* ── Toggle grid ────────────────────────────────────────────────────────── */
+
+.privacy-toggles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+/* Correction #13: privacy toggle rows align as title left, description left,
+   control right — no floating inline toggles. Using subgrid-like layout
+   via display:contents so the existing JS structure participates in the
+   parent grid. */
+.toggle-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: var(--space-2);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+}
+
+.toggle-card[data-enabled="true"] {
+  border-color: rgba(68, 153, 255, 0.35);
+}
+
+.toggle-card.toggle-card--locked {
+  opacity: 0.7;
+}
+
+.toggle-header {
+  display: contents;
+}
+
+.toggle-card .toggle-label {
+  grid-column: 1;
+  grid-row: 1;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-fg);
+  margin: 0;
+}
+
+.toggle-card .toggle-switch {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  justify-self: end;
+}
+
+.toggle-card .toggle-status {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+}
+
+.toggle-card .toggle-description {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+}
+
+.toggle-card .toggle-description--locked {
+  grid-column: 1 / -1;
+  grid-row: auto;
+  font-style: italic;
+}
+
+.toggle-switch {
+  width: 50px;
+  height: 28px;
+  background: var(--color-border);
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--transition-normal);
+}
+
+.toggle-switch input {
+  display: none;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  left: 26px;
+}
+
+.toggle-switch:has(input:checked) {
+  background: var(--color-command);
+}
+
+.toggle-switch:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: all var(--transition-normal);
+}
+
+.toggle-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+  line-height: var(--line-height);
+}
+
+/* ── Data flows grid ────────────────────────────────────────────────────── */
+
+.flows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.flow-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+}
+
+.flow-destination {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-fg);
+  margin-bottom: var(--space-2);
+}
+
+.flow-status {
+  display: inline-block;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-2);
+}
+
+.flow-status.active {
+  background: var(--color-surface);
+  color: var(--color-accent);
+}
+
+.flow-status.disabled {
+  background: var(--color-border);
+  color: var(--color-fg-muted);
+}
+
+.flow-status.not_shipped {
+  background: var(--color-surface);
+  color: var(--color-fg-muted);
+}
+
+.flow-frequency,
+.flow-purpose {
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+}
+
+.flow-purpose {
+  margin-top: var(--space-2);
+}
+
+/* ── No-flows banner ────────────────────────────────────────────────────── */
+
+.modal-no-flows-banner {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height);
+}
+
+/* ── Action buttons ─────────────────────────────────────────────────────── */
+
+.privacy-secondary-button,
+.privacy-primary-button,
+.privacy-danger-button {
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast);
+}
+
+.privacy-secondary-button {
+  background: var(--color-command-dim);
+  border: 1px solid var(--color-command);
+  color: var(--color-command);
+}
+
+.privacy-secondary-button:hover {
+  border-color: var(--color-command-hover);
+  color: var(--color-command-hover);
+  background: rgba(255, 136, 0, 0.20);
+}
+
+.privacy-secondary-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.privacy-primary-button {
+  background: var(--color-command);
+  color: white;
+}
+
+.privacy-primary-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.privacy-danger-button {
+  background: var(--color-critical);
+  color: white;
+}
+
+.privacy-danger-button:focus-visible {
+  outline: 2px solid var(--color-critical);
+  outline-offset: 2px;
+}
+
+/* ── Modals ─────────────────────────────────────────────────────────────── */
+
+.privacy-modal {
+  position: fixed;
+  inset: 0;
+  background: var(--color-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  z-index: var(--z-modal);
+}
+
+.privacy-modal-content {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+}
+
+.privacy-modal-content h2 {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-fg);
+}
+
+.privacy-modal-content p {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-fg-muted);
+}
+
+.privacy-modal-content ul {
+  margin: 0 0 var(--space-4) var(--space-5);
+  color: var(--color-fg-muted);
+}
+
+.privacy-modal-content ul li {
+  margin-bottom: var(--space-2);
+}
+
+.privacy-modal-danger {
+  border: 2px solid var(--color-critical);
+}
+
+.privacy-modal-buttons {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.privacy-modal-buttons button {
+  flex: 1;
+}
+
+/* ── Local-only notice ──────────────────────────────────────────────────── */
+
+.privacy-local-only-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-info-bg);
+  border-left: 3px solid var(--color-info);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+  line-height: var(--line-height);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  #privacy-container {
+    padding: var(--space-4);
+  }
+
+  .privacy-toggles-grid,
+  .flows-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-modal-content {
+    padding: var(--space-5);
+  }
+}

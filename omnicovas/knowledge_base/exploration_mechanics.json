@@ -1,0 +1,50 @@
+{
+  "category": "exploration_mechanics",
+  "description": "Exploration: FSS, DSS, route plotting, system scanning",
+  "entries": [
+    {
+      "id": "fss_vs_dss",
+      "topic": "FSS vs DSS Scanning",
+      "content": "The Full Spectrum Scanner (FSS) resolves all bodies in a system from any point within the system and is the primary discovery tool. The Detailed Surface Scanner (DSS) must be used at close range to a specific body to map its surface, reveal geological and biological signals, and earn the mapping bonus on the exploration data.",
+      "patch_verified": "4.0",
+      "source": "in-game journal observation (FSSDiscoveryScan, SAAScanComplete events)",
+      "last_updated": "2026-04-18",
+      "confidence": "high",
+      "needs_review": false,
+      "_justification": "Phase 1 seed entry. No changes needed."
+    },
+    {
+      "id": "jump_range_source",
+      "topic": "Jump Range Data Source",
+      "content": "The maximum jump range of a ship at its current load is provided in the Loadout journal event as the field MaxJumpRange, measured in light-years. This value accounts for current fuel load, cargo mass, and fitted FSD. OmniCOVAS reads jump_range_ly directly from this field and does NOT recompute it from first principles. First-principles jump range calculation (using mass, FSD rating, boost) is reserved for the Exploration pillar (Pillar 3, Phase 5).",
+      "patch_verified": "4.0",
+      "source": "Elite Dangerous journal documentation, Loadout event schema",
+      "last_updated": "2026-04-19",
+      "confidence": "high",
+      "needs_review": false,
+      "_justification": "Week 7. Documents the intentional architecture decision: Phase 2 reads Loadout.MaxJumpRange, not physics. Prevents accidental first-principles reimplementation in Pillar 1."
+    },
+    {
+      "id": "jump_range_typical_values",
+      "topic": "Typical Jump Range Values by Ship Class",
+      "content": "Jump ranges vary significantly by ship class and FSD engineering. Typical unengineered values: Sidewinder ~7-10 ly, Eagle ~14 ly, Cobra Mk III ~20-25 ly, Python ~8-15 ly (heavy cargo ship), Anaconda ~9-22 ly, Asp Explorer ~25-35 ly. Engineered FSDs (Increased Range, Long Range mod) can add 50-100% to base range. These are reference values only; actual range comes from Loadout.MaxJumpRange.",
+      "patch_verified": "4.0",
+      "source": "community ship guides, EDDB ship data, in-game testing",
+      "last_updated": "2026-04-19",
+      "confidence": "medium",
+      "needs_review": true,
+      "_justification": "Week 7. Reference for sanity-checking jump_range_ly values in tests and debugging. Medium confidence because these are approximate community values, not Frontier-published specs. Needs review against current game version."
+    },
+    {
+      "id": "neutron_boost_mechanics",
+      "topic": "Neutron Star FSD Boost",
+      "content": "Flying through the jet cone of a neutron star applies a 4x FSD boost for the next hyperspace jump, allowing significantly longer single jumps than the ship's base MaxJumpRange. This boosted jump range is NOT reflected in Loadout.MaxJumpRange -- the boost is temporary and applied at jump time. Phase 2 does not model neutron boosts; this is Exploration pillar (Phase 5) territory.",
+      "patch_verified": "4.0",
+      "source": "Elite Dangerous wiki, in-game observation",
+      "last_updated": "2026-04-19",
+      "confidence": "high",
+      "needs_review": false,
+      "_justification": "Week 7. Documents a known gap in Phase 2 jump range tracking. Neutron boosts appear as anomalously long jumps in FSDJump event data -- Phase 5 will handle these."
+    }
+  ]
+}

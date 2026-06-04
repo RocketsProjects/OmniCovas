@@ -1,0 +1,118 @@
+# OmniCOVAS API Rate Limit Registry
+# Blueprint v4.1 Section 5 — Law 3 (API Respect Protocol)
+#
+# Every external API the project integrates must have an entry here before
+# any client code is written. This file is the single source of truth for
+# rate limit values. Never hardcode limits in client modules.
+#
+# Fields per entry:
+#   requests_per_minute / requests_per_hour / requests_per_day:
+#       As documented by the provider. Use the most restrictive published limit.
+#   verified: true if confirmed directly from provider docs or personal contact.
+#   source: URL or description of where the limit was verified.
+#   implementation_phase: When OmniCOVAS will first call this API.
+#   notes: Anything a developer needs to know before touching this API.
+
+gemini:
+  # google-genai SDK — default AI provider
+  # Phase 1 GeminiProvider enforces these in code (GEMINI_FREE_RPM, GEMINI_FREE_RPD).
+  # This file is the authoritative source; update here first, then update the constant.
+  requests_per_minute: 15
+  requests_per_day: 1500
+  verified: true
+  source: "https://aistudio.google.com/app/apikey — Free Tier limits, verified 2026-04-18"
+  implementation_phase: 1
+  notes: >
+    Free tier limits apply per API key. Gemini 2.0 Flash model used by default.
+    Rate limit enforcement is client-side in GeminiProvider._rate_limit_allows_request().
+    RPD limit is not currently enforced in code — tracked as a known gap.
+
+eddn:
+  # Elite Dangerous Data Network — crowdsourced market/exploration data
+  # OmniCOVAS subscribes (read-only). Submission is opt-in per Privacy-by-Default.
+  mode: subscriber
+  submission_opt_in: true
+  verified: true
+  source: "https://github.com/EDCD/EDDN — no documented submission rate limit for well-behaved clients"
+  implementation_phase: 5
+  notes: >
+    Submission is event-driven, not polled. Schema validation required before submission.
+    Use official EDDN schemas only. Include OmniCOVAS/[version] in upload header.
+
+edsm:
+  requests_per_hour: 360
+  verified: true
+  source: "https://www.edsm.net/en/api-v1 — documented limit, verified 2026-04-18"
+  implementation_phase: 5
+  cache_policy:
+    system_data_ttl_seconds: 86400
+    body_data_ttl_seconds: 604800
+    station_data_ttl_seconds: 3600
+  notes: >
+    Honors X-Rate-Limit-* response headers. Cache aggressively.
+    Commander tracking is opt-in per Privacy-by-Default.
+
+inara:
+  requests_per_minute: 2
+  verified: true
+  source: "Direct communication with Artie (Inara developer), verified 2026-04-18"
+  implementation_phase: 5
+  whitelist_required: true
+  cache_policy:
+    cmdr_data_ttl_seconds: 86400
+    faction_data_ttl_seconds: 21600
+    community_goal_ttl_seconds: 1800
+    engineer_ttl_seconds: 604800
+  notes: >
+    Whitelisting application must be submitted before any live calls.
+    Batch events where possible. Contribute > query philosophy.
+    Application deferred to end of Phase 3.
+
+frontier_capi:
+  requests_per_minute: 1
+  verified: true
+  source: "Frontier Developer documentation — verified 2026-04-18"
+  implementation_phase: 3
+  oauth_required: true
+  developer_approval_required: true
+  notes: >
+    Developer application must be approved before CAPI calls go live.
+    PKCE OAuth flow required. Tokens stored in DPAPI vault.
+    Application submitted at end of Phase 3.
+
+spansh:
+  requests_per_minute: 30
+  verified: false
+  source: "Not publicly documented — cautious default based on community reports"
+  implementation_phase: 5
+  notes: >
+    Primary integration via bulk data dumps (weekly refresh), not live API.
+    Live API used only for route plotting. Contact Gareth Harper for confirmation.
+    Cautious 30/min default until verified directly.
+
+edastro:
+  requests_per_15_minutes: 100
+  verified: true
+  source: "EDAstro API documentation — verified 2026-04-18"
+  implementation_phase: 5
+  notes: >
+    Local cache layer required (Graceful Failure — Principle 5).
+    Attribution: "Data from EDAstro" in any UI consuming this data.
+
+elite_bgs:
+  requests_per_minute: 1
+  verified: false
+  source: "Community reports — not officially documented"
+  implementation_phase: 8
+  notes: >
+    Primary use: historical BGS snapshot for offline analysis.
+    Contact Elite BGS maintainers via GitHub issues before implementation.
+
+bgs_tally:
+  integration_type: optional_outbound
+  verified: false
+  source: "Community tool — contact aussig via GitHub issues"
+  implementation_phase: 8
+  notes: >
+    Optional integration. User must configure their BGS-Tally instance.
+    No rate limit documented. Treat as courtesy integration.

@@ -1,0 +1,421 @@
+<!-- Phase 3 Week 13 — Settings Panel (Three-Tier Customization) -->
+<main id="settings-container" role="main" aria-label="Settings and customization">
+  <div class="page-header">
+    <h1>⚙️ Settings</h1>
+    <p>Customize OmniCOVAS to your playstyle.</p>
+  </div>
+
+  <!-- Tier 1: Preset Profiles -->
+  <section id="tier1-section" aria-labelledby="tier1-heading">
+    <h2 id="tier1-heading">Tier 1: Preset Profiles</h2>
+    <p>Choose a quick preset. This sets recommended Tier 2 &amp; 3 defaults.</p>
+
+    <div class="preset-grid" id="preset-grid">
+      <!-- Populated by JavaScript -->
+    </div>
+  </section>
+
+  <!-- Tier 2: Pillar Categories -->
+  <section id="tier2-section" aria-labelledby="tier2-heading">
+    <h2 id="tier2-heading">Tier 2: Pillar Categories</h2>
+    <p>Enable or disable entire feature categories.</p>
+
+    <div id="tier2-toggles" class="toggles-grid">
+      <!-- Populated by JavaScript -->
+    </div>
+  </section>
+
+  <!-- Tier 3: Granular Settings -->
+  <section id="tier3-section" aria-labelledby="tier3-heading">
+    <h2 id="tier3-heading">Tier 3: Granular Settings</h2>
+    <p>Fine-tune individual features.</p>
+
+    <!-- Overlay Settings -->
+    <div class="setting-group">
+      <h3>Overlay Settings</h3>
+
+      <label>
+        Opacity
+        <input
+          type="range"
+          id="overlay-opacity"
+          min="0.5"
+          max="1.0"
+          step="0.05"
+          value="0.95"
+          aria-label="Overlay opacity"
+        />
+        <span id="opacity-display">95%</span>
+      </label>
+
+      <label>
+        Anchor Position
+        <select id="overlay-anchor" aria-label="Overlay anchor position">
+          <option value="tl">Top-Left</option>
+          <option value="tr">Top-Right</option>
+          <option value="bl">Bottom-Left</option>
+          <option value="br">Bottom-Right</option>
+          <option value="center" selected>Center</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- AI Provider -->
+    <div class="setting-group">
+      <h3>AI Provider (Tier 2 Features)</h3>
+
+      <label>
+        Provider
+        <select id="ai-provider" aria-label="AI provider selection">
+          <option value="null" selected>NullProvider (Rule-Based)</option>
+          <option value="gemini">Gemini (Google)</option>
+          <option value="local_llm">Local LLM (Ollama)</option>
+        </select>
+      </label>
+
+      <label>
+        API Key (if applicable)
+        <input
+          type="password"
+          id="ai-api-key"
+          placeholder="Saved securely in encrypted vault"
+          aria-label="AI provider API key"
+        />
+      </label>
+    </div>
+
+    <!-- Output Modes -->
+    <div class="setting-group">
+      <h3>Output Mode (per feature)</h3>
+
+      <label>
+        <input
+          type="radio"
+          name="output-mode"
+          value="overlay"
+          checked
+          aria-label="Output to overlay only"
+        />
+        Overlay Only
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          name="output-mode"
+          value="voice"
+          disabled
+          aria-label="Output via voice (coming in Phase 3.1)"
+        />
+        Voice (coming in Phase 3.1)
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          name="output-mode"
+          value="both"
+          disabled
+          aria-label="Output to both overlay and voice (coming in Phase 3.1)"
+        />
+        Both (coming in Phase 3.1)
+      </label>
+    </div>
+  </section>
+
+  <!-- Action Buttons -->
+  <section id="actions-section">
+    <h2>Save &amp; Manage</h2>
+
+    <div class="action-buttons">
+      <button class="primary-button" id="save-settings-btn" aria-label="Save all settings">
+        💾 Save Settings
+      </button>
+
+      <button
+        class="secondary-button"
+        id="reset-settings-btn"
+        aria-label="Reset all settings to defaults"
+      >
+        ↻ Reset to Defaults
+      </button>
+
+      <button
+        class="secondary-button"
+        id="export-settings-btn"
+        aria-label="Export settings as JSON"
+      >
+        ⬇️ Export Settings
+      </button>
+
+      <button
+        class="secondary-button"
+        id="import-settings-btn"
+        aria-label="Import settings from JSON"
+      >
+        ⬆️ Import Settings
+      </button>
+    </div>
+  </section>
+</main>
+
+<style>
+  #settings-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    color: var(--color-text-primary);
+  }
+
+  .page-header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+  }
+
+  section h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.3rem;
+    color: var(--color-text-primary);
+  }
+
+  section p {
+    margin: 0 0 1rem 0;
+    color: var(--color-text-secondary);
+  }
+
+  section h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.1rem;
+    color: var(--color-text-primary);
+  }
+
+  /* Preset Grid */
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+
+  .preset-button {
+    padding: 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .preset-button:hover {
+    border-color: var(--color-accent);
+    background: var(--color-bg-hover);
+  }
+
+  .preset-button.active {
+    border-color: var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+
+  .preset-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .preset-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .preset-name {
+    display: block;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+  }
+
+  /* Toggles Grid */
+  .toggles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .toggle-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .toggle-item:hover {
+    background: var(--color-bg-hover);
+  }
+
+  .toggle-item input[type="checkbox"] {
+    cursor: pointer;
+  }
+
+  .toggle-label {
+    flex: 1;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .toggle-phase {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* Setting Groups */
+  .setting-group {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+  }
+
+  .setting-group h3 {
+    margin-top: 0;
+  }
+
+  .setting-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .setting-group input,
+  .setting-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .setting-group input[type="range"] {
+    width: calc(100% - 60px);
+    display: inline-block;
+    margin-right: 1rem;
+    vertical-align: middle;
+  }
+
+  .setting-group input[type="radio"] {
+    width: auto;
+    display: inline;
+    margin-right: 0.5rem;
+  }
+
+  .setting-group input[type="radio"] + label {
+    display: inline;
+    margin-bottom: 0.5rem;
+    margin-right: 1rem;
+  }
+
+  #opacity-display {
+    display: inline-block;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  /* Buttons */
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .primary-button,
+  .secondary-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .primary-button {
+    background: var(--color-accent);
+    color: white;
+  }
+
+  .primary-button:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .primary-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .secondary-button {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+  }
+
+  .secondary-button:hover {
+    background: var(--color-bg-hover);
+  }
+
+  .secondary-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 600px) {
+    #settings-container {
+      padding: 1rem;
+    }
+
+    .preset-grid {
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .toggles-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .action-buttons button {
+      min-width: unset;
+    }
+  }
+</style>
+
+<script src="/views/settings.js"></script>

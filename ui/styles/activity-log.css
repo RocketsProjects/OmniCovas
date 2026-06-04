@@ -1,0 +1,450 @@
+/* OmniCOVAS — Activity Log / Flight Recorder page styles
+   Route-specific presentation only. Uses tokens from tokens.css.
+   No hard-coded colors. */
+
+#view-activity-log {
+  padding: var(--space-5);
+}
+
+/* Repair R8: visually distinct Log section structure — segmented nav
+   bar at top, prominent section headings with index badges, and clear
+   borders between sections so it reads as five organized areas. */
+.log-section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: var(--space-4);
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+/* PB-UIV3-HARMONY §5: the Activity Log evidence strip (Events / Sources /
+   Known Data / Proof / Diagnostics) is a TAB ROW — neutral at rest with a CYAN
+   active indicator, not the former filled-orange pills. Activity Log owns
+   proof; its tabs are evidence navigation, so cyan (telemetry/links) is the
+   correct active accent, leaving command-orange for actions. */
+.log-section-link {
+  flex: 1 1 auto;
+  text-align: center;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  color: var(--color-fg-muted);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+.log-section-link:last-child { border-right: none; }
+.log-section-link:hover,
+.log-section-link:focus-visible {
+  color: var(--color-fg);
+  background: rgba(255, 255, 255, 0.03);
+  text-decoration: none;
+}
+.log-section-link.is-active,
+.log-section-link[aria-selected="true"] {
+  color: var(--color-info);
+  background: var(--color-info-bg);
+  border-bottom-color: var(--color-info);
+}
+.log-section {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.14);
+}
+.log-section-heading {
+  margin: 0 0 var(--space-3) 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: var(--font-size-base);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+}
+.log-section-hint {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+.log-view-panel {
+  display: grid;
+  gap: var(--space-3);
+}
+.log-view-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.log-view-list-item,
+.log-proof-card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-panel);
+}
+.log-inline-field {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  min-width: 0;
+}
+.log-inline-label {
+  color: var(--color-telemetry-label);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.log-inline-value {
+  min-width: 0;
+  color: var(--color-fg);
+  overflow-wrap: anywhere;
+}
+.log-proof-card-title {
+  margin: 0;
+  color: var(--color-accent);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+.log-proof-card-summary {
+  margin: 0;
+  color: var(--color-fg);
+}
+.log-entry-details {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  background: rgba(0, 0, 0, 0.12);
+}
+/* PB-UIV3-HARMONY §4·6 / §5: the audit-proof disclosure is an evidence/detail
+   affordance — cyan, with a clear hover/focus highlight so it reads obviously
+   as "open the proof", not flat text. Proof architecture is unchanged. */
+.log-entry-details summary {
+  cursor: pointer;
+  color: var(--color-info);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background-color 0.15s;
+}
+.log-entry-details summary:hover,
+.log-entry-details summary:focus-visible {
+  background: var(--color-info-bg);
+}
+.log-entry-proof-list,
+.log-entry-payload-keys,
+.log-diagnostics-stats {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0 0;
+}
+.log-entry-proof-list dt,
+.log-entry-payload-keys dt,
+.log-diagnostics-stats dt {
+  color: var(--color-telemetry-label);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.log-entry-proof-list dd,
+.log-entry-payload-keys dd,
+.log-diagnostics-stats dd {
+  margin: 0;
+  color: var(--color-fg);
+  overflow-wrap: anywhere;
+}
+.log-entry-key-inventory h4 {
+  margin: var(--space-3) 0 0 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+}
+.log-redaction-note {
+  margin: var(--space-3) 0 0 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+.log-diagnostics-stat {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.45fr) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+.log-sort-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.log-sort-label select {
+  padding: 4px var(--space-2);
+  background: var(--color-bg);
+  color: var(--color-fg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+#view-activity-log .ocv-recorder-timeline {
+  display: grid;
+  gap: var(--space-1);
+  max-height: 14rem;
+  margin-bottom: var(--space-4);
+  overflow-y: auto;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-panel);
+}
+
+#view-activity-log .log-entry {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, auto) minmax(9rem, 0.65fr) minmax(0, 1fr);
+  gap: var(--space-2) var(--space-3);
+  align-items: start;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+}
+
+#view-activity-log .log-entry .log-time {
+  white-space: nowrap;
+}
+
+#view-activity-log .log-entry .log-type,
+#view-activity-log .log-entry .log-msg {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+@media (max-width: 760px) {
+  #view-activity-log .log-entry {
+    grid-template-columns: 1fr;
+  }
+
+  #view-activity-log .log-entry .log-time {
+    white-space: normal;
+  }
+}
+
+/* ── Filter bar ─────────────────────────────────────────────────────────── */
+
+.log-filter-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.log-filter-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.log-filter-label input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--color-accent);
+}
+
+/* ── Recorder table ─────────────────────────────────────────────────────── */
+
+.ocv-recorder-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.ocv-recorder-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.ocv-recorder-table thead th {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--color-telemetry-label);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-bg);
+  white-space: nowrap;
+}
+
+.ocv-recorder-table tbody tr {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.ocv-recorder-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.ocv-recorder-table tbody tr:hover {
+  background: var(--color-bg-hover);
+}
+
+.ocv-recorder-table td {
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-fg);
+  vertical-align: top;
+}
+
+/* ── Row cell classes (set by controller) ───────────────────────────────── */
+
+.log-timestamp {
+  color: var(--color-fg-muted);
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+}
+
+.log-event-type {
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.04em;
+}
+
+.log-event-type.critical { color: var(--color-critical); }
+.log-event-type.extended  { color: var(--color-telemetry-label); }
+.log-event-type.ai        { color: var(--color-accent); }
+.log-event-type.telemetry { color: var(--color-fg-muted); }
+
+.log-source {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+}
+
+.log-summary {
+  color: var(--color-fg);
+  line-height: var(--line-height);
+}
+
+/* waiting/empty state cell (colSpan 5) */
+.log-waiting {
+  text-align: center;
+  padding: var(--space-6) !important;
+  color: var(--color-fg-unknown);
+  font-style: italic;
+}
+
+/* Compact feed — category accent (left border) aligned with table column colors */
+#view-activity-log .ocv-recorder-timeline .log-entry.critical {
+  border-left: 3px solid var(--color-critical);
+}
+#view-activity-log .ocv-recorder-timeline .log-entry.extended {
+  border-left: 3px solid var(--color-telemetry-label);
+}
+#view-activity-log .ocv-recorder-timeline .log-entry.ai {
+  border-left: 3px solid var(--color-accent);
+}
+#view-activity-log .ocv-recorder-timeline .log-entry.warn {
+  border-left: 3px solid var(--color-warn, var(--color-telemetry-label));
+}
+
+/* ── Pagination bar ─────────────────────────────────────────────────────── */
+
+.log-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+}
+
+.log-page-info {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+}
+
+/* ── Clear modal (scoped to log) ────────────────────────────────────────── */
+
+#log-clear-modal {
+  position: fixed;
+  inset: 0;
+  background: var(--color-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  z-index: var(--z-modal);
+}
+
+#log-clear-modal .ocv-modal-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  max-width: 440px;
+  width: 100%;
+  box-shadow: var(--shadow-modal);
+}
+
+#log-clear-modal .ocv-modal-content h2 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-fg);
+}
+
+#log-clear-modal .ocv-modal-content p {
+  margin: 0 0 var(--space-5) 0;
+  color: var(--color-fg-muted);
+  line-height: var(--line-height);
+}
+
+.ocv-modal-buttons {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.ocv-modal-buttons button {
+  flex: 1;
+}
+
+.ocv-btn-danger {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-critical);
+  background: rgba(255, 51, 51, 0.15);
+  color: var(--color-critical);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.ocv-btn-danger:hover {
+  background: rgba(255, 51, 51, 0.25);
+}
+
+.ocv-btn-danger:focus-visible {
+  outline: 2px solid var(--color-critical);
+  outline-offset: 2px;
+}

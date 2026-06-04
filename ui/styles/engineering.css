@@ -1,0 +1,618 @@
+.engineering-route,
+.engineering-shell {
+  display: grid;
+  gap: var(--space-5);
+  width: 100%;
+}
+
+.engineering-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(20rem, 1fr);
+  gap: var(--space-4);
+  align-items: end;
+  border-block-end: 1px solid var(--color-border-subtle);
+  padding-block-end: var(--space-4);
+}
+
+.engineering-header-copy {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 48rem;
+}
+
+.engineering-kicker,
+.engineering-subtitle,
+.engineering-source-note,
+.engineering-card-note,
+.engineering-empty,
+.engineering-action-status {
+  margin: 0;
+  color: var(--color-fg-muted);
+  line-height: 1.5;
+}
+
+.engineering-kicker {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.engineering-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+.engineering-summary-row,
+.engineering-header-source,
+.engineering-card-actions,
+.engineering-gate-actions,
+.engineering-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.engineering-summary-row {
+  justify-content: end;
+}
+
+.engineering-header-source {
+  grid-column: 1 / -1;
+}
+
+.engineering-metric {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 7rem;
+  border: 1px solid var(--color-border-subtle);
+  /* §5: cockpit-hardware radius (2–3px), not soft web cards. */
+  border-radius: 3px;
+  background: var(--color-bg-panel);
+  padding: var(--space-3);
+}
+
+.engineering-metric-label {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+}
+
+.engineering-metric-value {
+  color: var(--color-fg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Honest empty state: a zero count is dimmed so it reads as "none", not a
+   broken bright stat. Populated counts keep the bold bright treatment. */
+.engineering-metric-value.is-zero {
+  color: var(--color-fg-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+/* PB-UIV3-HARMONY §4·5 — guided-planning stage nav (Goals / Plans / Materials).
+   Cyan/neutral §5 navigation grammar: neutral at rest, cyan current. */
+.engineering-stage-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.engineering-stage-tab {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 3px 3px 0 0;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-4);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.engineering-stage-tab:hover {
+  color: var(--color-fg);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.engineering-stage-tab[aria-current="true"] {
+  color: var(--color-info);
+  border-bottom-color: var(--color-info);
+  background: var(--color-info-bg);
+}
+
+.engineering-stage-tab:focus-visible {
+  outline: 2px solid var(--color-info);
+  outline-offset: -2px;
+}
+
+/* PB-UIV3-HARMONY §4·5 — Current Engineering Focus lead card.
+   The guided-helper anchor: names the active focus, shows local planning
+   counts, and gives one command-orange next action. */
+.engineering-focus-card {
+  display: grid;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(68, 153, 255, 0.05), transparent 60%),
+    var(--color-surface);
+  padding: var(--space-4) var(--space-5);
+}
+
+.engineering-focus-eyebrow {
+  margin: 0;
+  color: var(--color-info);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.engineering-focus-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.1;
+}
+
+.engineering-focus-sub {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+
+.engineering-focus-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.engineering-focus-metrics .engineering-metric {
+  flex: 1 1 8rem;
+}
+
+/* Single command-orange next action (§5: one primary action per workspace). */
+.engineering-next-action {
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-left: 2px solid var(--color-command);
+  border-radius: 4px;
+  background: var(--color-command-dim);
+  padding: var(--space-3) var(--space-4);
+}
+
+.engineering-next-action-kicker {
+  margin: 0;
+  color: var(--color-command);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.engineering-next-action-btn {
+  justify-self: start;
+  padding: var(--space-2) var(--space-5);
+  border: none;
+  border-radius: 4px;
+  background: var(--color-command);
+  color: #11131b;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+.engineering-next-action-btn:hover { background: var(--color-command-hover); }
+.engineering-next-action-btn:focus-visible {
+  outline: 2px solid var(--color-command);
+  outline-offset: 2px;
+}
+
+.engineering-next-action-hint {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+
+.engineering-focus-note {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  font-style: italic;
+}
+
+/* Stage workspace: only the active stage panel is shown (the rest carry
+   [hidden]). Each stage's sections render as framed cards. */
+.engineering-stage-workspace {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.engineering-stage-panel {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.engineering-stage-panel[hidden] { display: none; }
+
+.engineering-stage-panel .engineering-section,
+.engineering-secondary-body .engineering-section {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--space-4);
+  border-block-end: 1px solid var(--color-border-subtle);
+}
+
+/* Readiness / source gates / proof folded below the working surface. */
+.engineering-secondary {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.engineering-secondary-summary {
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.engineering-secondary-summary:hover { color: var(--color-fg); }
+
+.engineering-secondary[open] > .engineering-secondary-summary {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.engineering-secondary-body {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+/* Material-gap readiness progress (§4·5). */
+.engineering-gap-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(140, 160, 180, 0.18);
+  overflow: hidden;
+}
+
+.engineering-gap-progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-info);
+  border-radius: 3px;
+}
+
+.engineering-gap-progress-fill.is-ready {
+  background: var(--color-ok);
+}
+
+.engineering-gap-progress-label {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.02em;
+}
+
+.engineering-gap-progress-label--unknown {
+  font-style: italic;
+}
+
+.engineering-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.engineering-guide {
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-panel);
+  padding: var(--space-4);
+}
+
+.engineering-guide-title,
+.engineering-guide-copy {
+  margin: 0;
+}
+
+.engineering-guide-title {
+  color: var(--color-fg);
+  font-size: var(--font-size-lg);
+}
+
+.engineering-guide-copy,
+.engineering-guide-step-copy {
+  color: var(--color-fg-muted);
+  line-height: 1.5;
+}
+
+.engineering-guide-steps {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+}
+
+.engineering-guide-step {
+  display: grid;
+  gap: var(--space-1);
+  border-inline-start: 2px solid var(--color-border-subtle);
+  padding-inline-start: var(--space-3);
+}
+
+.engineering-guide-number {
+  color: var(--color-accent);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.engineering-guide-step-title {
+  color: var(--color-fg);
+}
+
+.engineering-primary-column,
+.engineering-secondary-column,
+.engineering-section,
+.engineering-list,
+.engineering-form,
+.engineering-readiness-group {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.engineering-section {
+  scroll-margin-top: var(--space-5);
+  border-block-end: 1px solid var(--color-border-subtle);
+  padding-block-end: var(--space-5);
+}
+
+.engineering-secondary-column .engineering-section {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--space-4);
+}
+
+/* PB-PHASE10-SUPER-04 #4: frame the primary Engineering sections (Goals, Build
+   Plans, Material Gaps, Acquisition Plans) as distinct cards so the page reads
+   as a local-only planning surface rather than a raw stacked form sheet. */
+.engineering-primary-column .engineering-section {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--space-4);
+}
+
+.engineering-section-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.engineering-section-title,
+.engineering-subsection-title,
+.engineering-card-title,
+.engineering-readiness-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+.engineering-section-title {
+  font-size: var(--font-size-xl);
+}
+
+.engineering-subsection-title,
+.engineering-card-title {
+  font-size: var(--font-size-md);
+}
+
+.engineering-readiness-title {
+  font-size: var(--font-size-sm);
+}
+
+.engineering-form {
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  align-items: end;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-panel);
+  padding: var(--space-3);
+}
+
+.engineering-form-field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.engineering-form-label {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+}
+
+.engineering-form input,
+.engineering-form select,
+.engineering-form textarea {
+  width: 100%;
+  min-height: 2.25rem;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-fg);
+  font: inherit;
+  padding: var(--space-2);
+}
+
+.engineering-form textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.engineering-form-actions {
+  align-self: end;
+}
+
+.engineering-card,
+.engineering-readiness-item {
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--space-3);
+}
+
+.engineering-field {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, max-content) minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.engineering-field-label {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+}
+
+.engineering-field-value {
+  color: var(--color-fg);
+  overflow-wrap: anywhere;
+}
+
+.engineering-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.65rem;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 999px;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
+  padding: var(--space-1) var(--space-2);
+}
+
+.engineering-badge.ok {
+  border-color: var(--color-success-border, var(--color-border-subtle));
+  color: var(--color-success, var(--color-fg));
+}
+
+.engineering-badge.warn {
+  border-color: var(--color-warning-border, var(--color-border-subtle));
+  color: var(--color-warning, var(--color-fg));
+}
+
+.engineering-badge.off,
+.engineering-badge.muted {
+  background: var(--color-bg-panel);
+}
+
+.engineering-mini-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-inline-start: var(--space-4);
+  color: var(--color-fg-muted);
+}
+
+.engineering-gate-line {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.engineering-gate-label {
+  color: var(--color-fg);
+  font-weight: var(--font-weight-bold);
+}
+
+.engineering-action {
+  min-height: 2.25rem;
+}
+
+.dashboard-engineering-pin-mount {
+  margin-block: var(--space-3);
+}
+
+.dashboard-engineering-pin {
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-panel);
+  padding: var(--space-3);
+}
+
+.dashboard-engineering-pin-header,
+.dashboard-engineering-pin-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard-engineering-pin-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.dashboard-engineering-pin-row {
+  flex-wrap: wrap;
+}
+
+.dashboard-engineering-pin-label {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+}
+
+.dashboard-engineering-pin-value {
+  color: var(--color-fg);
+}
+
+@media (max-width: 900px) {
+  .engineering-header,
+  .engineering-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .engineering-guide-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .engineering-summary-row {
+    justify-content: start;
+  }
+}
+
+@media (max-width: 560px) {
+  .engineering-field {
+    grid-template-columns: 1fr;
+  }
+}

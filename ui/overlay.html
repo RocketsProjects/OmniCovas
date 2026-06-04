@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniCOVAS Overlay</title>
+  <!-- Link to design tokens then HUD Projection specific styles -->
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/overlay.css" />
+</head>
+<body>
+  <!--
+    PB05 Contract Classes (Verified by tests/test_overlay_integration.py):
+    anchor-top-left, anchor-top-right, anchor-bottom-left, anchor-bottom-right, anchor-center
+    .status-dot, .status-dot.grab
+  -->
+  <div id="overlay-container"></div>
+  <script type="module" src="overlay.js"></script>
+</body>
+</html>

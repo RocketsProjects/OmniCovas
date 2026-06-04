@@ -1,0 +1,74 @@
+/* OmniCOVAS Modal Primitives
+   Backdrop, panel, header, body, actions, and danger variants.
+   Focus-trap wiring is NOT part of PB05-04 — JS wiring deferred. */
+
+/* ── Backdrop (full-screen overlay) ── */
+.ocv-modal {
+  position: fixed;
+  inset: 0;
+  background: var(--color-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  z-index: var(--z-modal);
+}
+
+/* ── Content panel ── */
+.ocv-modal-panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-modal);
+}
+
+/* ── Header ── */
+.ocv-modal-header {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ── Body text ── */
+.ocv-modal-body {
+  color: var(--color-fg-muted);
+  margin-bottom: var(--space-4);
+  line-height: var(--line-height);
+}
+
+/* ── Actions row ── */
+.ocv-modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.ocv-modal-actions button { flex: 1; }
+
+/* ── Danger variant ── */
+.ocv-modal-panel--danger {
+  border: 2px solid var(--color-critical);
+}
+
+/* ── Notice banner within a modal ── */
+.ocv-modal-notice {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height);
+}
+
+@media (max-width: 600px) {
+  .ocv-modal { padding: var(--space-4); }
+  .ocv-modal-panel { padding: var(--space-5); }
+  .ocv-modal-actions { flex-direction: column; }
+}

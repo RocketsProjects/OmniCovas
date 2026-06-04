@@ -1,0 +1,16 @@
+{
+  "category": "bgs_mechanics",
+  "description": "Background Simulation: factions, influence, conflicts",
+  "entries": [
+    {
+      "id": "bgs_tick",
+      "topic": "BGS Tick",
+      "content": "The Background Simulation recalculates faction influence, state transitions, and conflict resolution once per 24-hour cycle, commonly called 'the tick'. Actions taken before the tick count for the previous cycle; actions after count for the next. The exact tick time varies and is tracked by the community via Elite BGS.",
+      "patch_verified": "4.0",
+      "source": "community consensus, Elite BGS",
+      "last_updated": "2026-04-18",
+      "confidence": "high",
+      "needs_review": false
+    }
+  ]
+}

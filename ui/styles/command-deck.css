@@ -1,0 +1,325 @@
+/* OmniCOVAS Command Deck Primitives
+   Route-agnostic UI building blocks for the PB05 v2 Command Deck language.
+   Token-driven — no hard-coded values.
+   PB05-05+ wire these classes into route markup. */
+
+/* ════════════════════════════════════════
+   PAGE SCAFFOLDING
+   ════════════════════════════════════════ */
+
+.ocv-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.ocv-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.ocv-page-title {
+  font-size: var(--font-size-xl);
+  /* §5: a route title is identity, not a command action — light primary text
+     with the cyan .ocv-page-kicker as the accent above it (matches the
+     Systems / Operations / Intel route-title grammar). Not command-orange. */
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.ocv-page-kicker {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-telemetry-label);
+  margin: 0;
+}
+
+.ocv-page-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+  margin: 0;
+  line-height: var(--line-height);
+}
+
+/* ════════════════════════════════════════
+   PANEL
+   ════════════════════════════════════════ */
+
+.ocv-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+
+.ocv-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.ocv-panel-title {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+  flex: 1;
+  margin: 0;
+}
+
+.ocv-panel-body {
+  padding: var(--space-4);
+}
+
+/* ════════════════════════════════════════
+   CHIPS / BADGES
+   ════════════════════════════════════════ */
+
+.ocv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.06em;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  background: var(--color-surface);
+  color: var(--color-fg-muted);
+}
+
+.ocv-chip-muted {
+  background: rgba(136, 136, 170, 0.10);
+  color: var(--color-fg-muted);
+  border-color: rgba(136, 136, 170, 0.20);
+}
+
+.ocv-chip-accent {
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
+  border-color: var(--color-border);
+}
+
+.ocv-chip-telemetry {
+  background: rgba(68, 153, 255, 0.10);
+  color: var(--color-telemetry-label);
+  border-color: var(--color-telemetry-border);
+}
+
+.ocv-chip-warning {
+  background: rgba(255, 204, 0, 0.12);
+  color: var(--color-warn);
+  border-color: rgba(255, 204, 0, 0.30);
+}
+
+.ocv-chip-critical {
+  background: rgba(255, 51, 51, 0.12);
+  color: var(--color-critical);
+  border-color: rgba(255, 51, 51, 0.30);
+}
+
+/* ════════════════════════════════════════
+   COMMAND SUMMARY
+   ════════════════════════════════════════ */
+
+.ocv-command-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ocv-command-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+/* ════════════════════════════════════════
+   CALLOUT PANEL
+   ════════════════════════════════════════ */
+
+.ocv-callout-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-telemetry-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.ocv-callout-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: var(--font-size-sm);
+}
+
+.ocv-callout-line:last-child { border-bottom: none; }
+
+/* ════════════════════════════════════════
+   SCHEMATIC FRAME (placeholder — no schematic data in PB05-04)
+   ════════════════════════════════════════ */
+
+.ocv-schematic-frame {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ocv-schematic-hotspot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-accent-dim);
+  border: 1px solid var(--color-accent);
+  pointer-events: none;
+}
+
+.ocv-hotspot-button {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-accent-dim);
+  border: 1px solid var(--color-accent);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ocv-hotspot-button:hover {
+  background: var(--color-surface-hover);
+  box-shadow: 0 0 8px var(--color-accent-dim);
+}
+
+.ocv-hotspot-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ════════════════════════════════════════
+   PANEL ZONE
+   ════════════════════════════════════════ */
+
+.ocv-panel-zone {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ════════════════════════════════════════
+   ROUTE-SPECIFIC IDENTITY PRIMITIVES
+   ════════════════════════════════════════ */
+
+/* Activity Log — Flight Recorder / Black Box */
+.ocv-recorder-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Resources — Diagnostics Console */
+.ocv-diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+/* Privacy — Firewall / Data Control */
+.ocv-firewall-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+/* Settings — Configuration Bay */
+.ocv-config-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-5);
+}
+
+/* Credits — Registry Plaque */
+.ocv-registry-plaque {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-panel);
+}
+
+/* ════════════════════════════════════════
+   PB07.6-10: DENSITY MODES (FOUNDATION ONLY)
+   ════════════════════════════════════════ */
+
+/* Pilot mode: Cockpit-glance density. Shrinks gaps, increases primary values, hides non-essentials. */
+.ocv-density-pilot .command-card {
+  padding: var(--space-2) var(--space-3);
+  gap: var(--space-1);
+}
+
+.ocv-density-pilot .command-card-primary {
+  font-size: var(--font-size-xl);
+}
+
+.ocv-density-pilot .ocv-page-subtitle,
+.ocv-density-pilot .empty-state-reason,
+.ocv-density-pilot .omni-proof-drawer-caveat {
+  display: none;
+}
+
+.ocv-density-pilot .route-hero {
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+/* Commander mode: Balanced default. */
+.ocv-density-commander {
+  /* Inherits default styles */
+}
+
+/* Proof mode: Auditor density. Focuses on proof summaries, adds visual rhythm to drawers.
+   NOTE: Does NOT manually open <details>. PB07.6-10 respects native closed state. */
+.ocv-density-proof .omni-proof-drawer-summary,
+.ocv-density-proof .detail-drawer-summary {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.ocv-density-proof .omni-proof-drawer,
+.ocv-density-proof .detail-drawer {
+  margin-top: var(--space-3);
+  border-top: 1px dashed var(--color-border-subtle);
+  padding-top: var(--space-3);
+}
+
+.ocv-density-proof .omni-proof-drawer-body,
+.ocv-density-proof .detail-drawer-body {
+  font-size: var(--font-size-base);
+  color: var(--color-fg);
+}

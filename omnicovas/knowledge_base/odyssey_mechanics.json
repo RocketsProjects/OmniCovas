@@ -1,0 +1,16 @@
+{
+  "category": "odyssey_mechanics",
+  "description": "On-foot gameplay: suits, weapons, settlements",
+  "entries": [
+    {
+      "id": "suit_grades",
+      "topic": "Suit Grades",
+      "content": "Odyssey suits exist in grades 1 through 5. Each grade increases base health and shields and provides additional mod slots. Suits are upgraded at Pioneer Supplies vendors using materials and credits. The current suit and its grade are reported in the SuitLoadout journal event.",
+      "patch_verified": "4.0",
+      "source": "in-game journal observation (SuitLoadout event)",
+      "last_updated": "2026-04-18",
+      "confidence": "high",
+      "needs_review": false
+    }
+  ]
+}

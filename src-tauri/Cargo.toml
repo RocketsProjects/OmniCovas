@@ -1,0 +1,26 @@
+[package]
+name = "omnicovas"
+version = "0.1.0"
+description = "Intelligence suite for Elite Dangerous commanders."
+authors = ["RocketsProjects"]
+license = "LicenseRef-OmniCOVAS-Free-To-Use-Source-Available-Proprietary"
+repository = "https://github.com/RocketsProjects/omnicovas"
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "omnicovas_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2", features = [] }
+tauri-plugin-log = "2"
+tauri-plugin-window-state = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-shell = "2"

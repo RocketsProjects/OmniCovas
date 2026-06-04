@@ -1,0 +1,16 @@
+{
+  "category": "engineering_materials",
+  "description": "Engineering mods, material requirements, blueprints",
+  "entries": [
+    {
+      "id": "material_categories",
+      "topic": "Material Categories",
+      "content": "Engineering materials fall into three categories tracked in the journal: Raw (mineable, found on planet surfaces), Manufactured (from signal sources and salvage), and Encoded (from data scans and surface scans). Each category has its own storage cap and is reported in the Materials journal event on session start.",
+      "patch_verified": "4.0",
+      "source": "in-game journal observation (Materials event)",
+      "last_updated": "2026-04-18",
+      "confidence": "high",
+      "needs_review": false
+    }
+  ]
+}

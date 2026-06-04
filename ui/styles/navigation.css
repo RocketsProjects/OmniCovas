@@ -1,0 +1,541 @@
+/* ── Navigation Route Surface — PB07.5-05 ── */
+
+/* PB-UIV3-HARMONY §4·4 — planner-mode strip (Current · Plan · Bookmarks ·
+   History). Cyan/neutral §5 navigation grammar; the dataset-gated planner
+   engines (Plan / History) are honest reserved modes, never dead buttons. */
+.navigation-planner-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.navigation-planner-mode {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 3px 3px 0 0;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-4);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.navigation-planner-mode:hover {
+  color: var(--color-fg);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.navigation-planner-mode[aria-current="true"] {
+  color: var(--color-info);
+  border-bottom-color: var(--color-info);
+  background: var(--color-info-bg);
+}
+
+.navigation-planner-mode:focus-visible {
+  outline: 2px solid var(--color-info);
+  outline-offset: -2px;
+}
+
+.navigation-planner-mode--reserved {
+  align-items: center;
+  color: var(--color-fg-unknown);
+  cursor: default;
+  display: inline-flex;
+  gap: 6px;
+  opacity: 0.75;
+}
+
+.navigation-planner-mode-badge {
+  background: rgba(140, 160, 180, 0.12);
+  border-radius: 2px;
+  color: var(--color-fg-muted);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  margin-left: 6px;
+  padding: 1px 4px;
+}
+
+.navigation-route {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+}
+
+/* PB-UIV3-HARMONY §4·4 — the grid now hosts mode workspaces; only the active
+   planner-mode panel is visible. */
+.navigation-grid {
+  display: block;
+  max-width: 100%;
+}
+
+.navigation-mode-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+  width: 100%;
+}
+
+.navigation-mode-panel[hidden] { display: none; }
+
+/* Current Route leads its workspace as a full-width hero; the supporting
+   cards (Local Context, Route Activation) flow beneath it. */
+.navigation-mode-panel--current > #navigation-current-route {
+  grid-column: 1 / -1;
+}
+
+/* Inviting no-route planner shell. */
+.navigation-planner-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-left: 2px solid var(--color-info);
+  border-radius: 4px;
+  background: rgba(68, 153, 255, 0.05);
+}
+
+.navigation-planner-prompt-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.navigation-planner-prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.navigation-planner-prompt-btn {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-fg);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.navigation-planner-prompt-btn:hover {
+  border-color: var(--color-border-active);
+  background: var(--color-surface-hover);
+}
+
+.navigation-planner-prompt-btn:focus-visible {
+  outline: 2px solid var(--color-info);
+  outline-offset: 2px;
+}
+
+/* Reserved planner workspaces (Plan / History). */
+.navigation-reserved-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.navigation-reserved-note {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+/* Active Route & Fact Rows */
+.navigation-active-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.navigation-fact-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.navigation-fact-row:last-of-type {
+  border-bottom: none;
+}
+
+.navigation-fact-label {
+  color: var(--color-fg-muted);
+}
+
+.navigation-fact-value {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg);
+}
+
+.navigation-fact-value--fallback {
+  color: var(--color-fg-muted);
+  font-style: italic;
+}
+
+/* Hop List */
+.navigation-hop-list {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navigation-hop-item {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg);
+}
+
+.navigation-hop-system {
+  font-weight: var(--font-weight-semibold);
+}
+
+.navigation-hop-class {
+  color: var(--color-fg-muted);
+  margin-left: var(--space-2);
+}
+
+/* Provenance & Details */
+.navigation-provenance-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-bg-surface-alt);
+  border-radius: var(--radius-card);
+}
+
+.navigation-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.navigation-chip {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.125rem 0.5rem;
+}
+
+.navigation-detail-line {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+/* External Context (Spansh) */
+.navigation-spansh-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.navigation-spansh-link {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+}
+
+.navigation-spansh-link:hover {
+  text-decoration: underline;
+}
+
+.navigation-spansh-attr {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+/* Gate Proposal */
+.navigation-gate-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.navigation-gate-btn {
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+}
+
+.navigation-gate-btn:hover {
+  background: var(--color-bg-surface-alt);
+}
+
+.navigation-gate-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+/* Library & Bookmarks */
+.navigation-library-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.navigation-library-controls {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.navigation-library-btn {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-fg);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.navigation-library-btn:hover {
+  background: var(--color-bg-surface-alt);
+}
+
+.navigation-library-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.navigation-library-subtitle {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+.navigation-library-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navigation-library-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2);
+  background: var(--color-bg-panel);
+  border-radius: var(--radius-sm);
+}
+
+.navigation-library-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.navigation-library-item-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.navigation-library-item-target {
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-muted);
+}
+
+.navigation-library-delete-btn {
+  background: none;
+  border: none;
+  color: var(--color-fg-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 var(--space-1);
+}
+
+.navigation-library-delete-btn:hover {
+  color: var(--color-critical);
+}
+
+.navigation-fallback {
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.navigation-waiting {
+  font-size: var(--font-size-sm);
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+/* Local Context fact containers — each fact is self-contained (label + value never interleave). */
+.navigation-context-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.navigation-context-fact:last-of-type {
+  border-bottom: none;
+}
+
+.navigation-context-fact-label {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+}
+
+.navigation-context-fact-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg);
+}
+
+.navigation-context-fact-value--fallback {
+  color: var(--color-fg-muted);
+  font-style: italic;
+}
+
+/* PB-UIV3-HARMONY §4·4 — Campaign circuits panel. Relocated into the secondary
+   Bookmarks workspace (off the default-visible surface) and given a spaced
+   summary so the title and count never run together as the Commander-flagged
+   "Campaign circuitsNone saved" string. */
+.navigation-campaign-circuits {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md, 8px);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.navigation-campaign-circuits-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  list-style: none;
+}
+
+.navigation-campaign-circuits-summary::-webkit-details-marker { display: none; }
+
+.navigation-campaign-circuits-title {
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.navigation-campaign-circuits-count {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.navigation-campaign-circuits[open] > .navigation-campaign-circuits-summary {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.navigation-campaign-circuits-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+.navigation-campaign-circuits-empty {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+.navigation-circuit-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--color-bg-panel);
+}
+
+.navigation-circuit-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.navigation-circuit-title {
+  color: var(--color-fg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.navigation-circuit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.navigation-circuit-stop-count {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+}
+
+.navigation-circuit-campaign-link,
+.navigation-circuit-proof-link,
+.navigation-circuit-stop-intel-btn {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 4px);
+  background: transparent;
+  color: var(--color-fg);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.navigation-circuit-stops-list {
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navigation-circuit-stop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}

@@ -1,0 +1,51 @@
+/* OmniCOVAS Icon System Styles
+   Controlled by PB05 tokens for consistent theme integration. */
+
+.ocv-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.ocv-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: 1.8; /* Slightly thinner for professional look */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  transition: stroke var(--transition-fast);
+}
+
+/* --- Sizes --- */
+.ocv-icon-sm { width: 14px; height: 14px; }
+.ocv-icon-md { width: 18px; height: 18px; }
+.ocv-icon-lg { width: 24px; height: 24px; }
+
+/* --- Colors / States --- */
+.ocv-icon-muted {
+  color: var(--color-fg-muted);
+}
+
+.ocv-icon-accent {
+  color: var(--color-accent);
+}
+
+.ocv-icon-telemetry {
+  color: var(--color-telemetry-label);
+}
+
+.ocv-icon-critical {
+  color: var(--color-critical);
+}
+
+/* Sidebar nav specific icon sizing */
+.nav-icon.ocv-icon {
+  width: 18px;
+  height: 18px;
+}

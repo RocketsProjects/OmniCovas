@@ -1,0 +1,38 @@
+/* Tritanopia palette override — replaces blue/yellow signals with red/pink */
+:root {
+  --color-ok:            #ff6699;
+  --color-warn:          #ff3366;
+  --color-critical:      #cc0033;
+  --color-hull-full:     #ff6699;
+  --color-hull-warn:     #ff3366;
+  --color-hull-critical: #cc0033;
+  --color-shield-up:     #ff6699;
+  --color-info:          #ff6699;
+  --color-info-bg:       rgba(255, 102, 153, 0.10);
+
+  /* === UI v3 cockpit tokens === */
+  --uiv3-bg:                   #07080f;
+  --uiv3-bg-elev-1:            #0b0d18;
+  --uiv3-bg-elev-2:            #0d1020;
+  --uiv3-panel:                rgba(20, 24, 36, 0.55);
+  --uiv3-panel-soft:           rgba(20, 24, 36, 0.36);
+  --uiv3-panel-strong:         rgba(20, 24, 36, 0.85);
+  --uiv3-border:               rgba(140, 160, 180, 0.18);
+  --uiv3-border-strong:        rgba(140, 160, 180, 0.28);
+  --uiv3-border-active:        rgba(255, 102, 153, 0.50);
+  --uiv3-border-cyan:          rgba(255, 102, 153, 0.30);
+  --uiv3-text-primary:         #e6e8ef;
+  --uiv3-text-muted:           #8a92a8;
+  --uiv3-text-dim:             #5a6478;
+  --uiv3-text-unknown:         #4b5366;
+  --uiv3-accent-cyan:          #ff6699;
+  --uiv3-accent-blue:          #ff6699;
+  --uiv3-accent-orange:        #ff3366;
+  --uiv3-accent-gold:          #ff3366;
+  --uiv3-status-ok:            #ff6699;
+  --uiv3-status-warn:          #ff3366;
+  --uiv3-status-alert:         #cc0033;
+  --uiv3-status-info:          #ff6699;
+  --uiv3-focus:                #ff99bb;
+  --uiv3-area-card-active-bg:  rgba(255, 102, 153, 0.08);
+}
