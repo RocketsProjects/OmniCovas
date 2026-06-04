@@ -28,6 +28,11 @@ dependencies = [
     "pywin32>=311",
     "pyyaml>=6.0.3",
     "sqlalchemy>=2.0.49",
+    # Security floor: GHSA-86qp-5c8j-p5mr / CVE-2026-48710 — missing Host header
+    # validation poisons request.url.path, bypassing path-based checks. Fixed in
+    # starlette 1.0.1. Pulled transitively via fastapi; pinned here to keep the
+    # security intent explicit and prevent resolver backsliding below the fix.
+    "starlette>=1.0.1",
     "structlog>=25.5.0",
     "uvicorn[standard]>=0.44.0",
     "watchdog>=6.0.0",
