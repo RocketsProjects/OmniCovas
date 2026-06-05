@@ -809,6 +809,28 @@ async function discover() {
   return probeForBridge();
 }
 
+/* ── License status check (fires before onboarding gate) ── */
+async function checkLicenseStatus() {
+  try {
+    const response = await fetch(`${Shell.httpBase}/week13/license/status`);
+    if (!response.ok) return false;
+    const status = await response.json();
+    if (status.needs_acceptance === true) {
+      if (typeof window.OmniOnboarding?.showLicenseScreen === 'function') {
+        window.OmniOnboarding.showLicenseScreen();
+      } else {
+        /* onboarding.js not yet initialized; drain when it loads */
+        window.__pendingLicenseShow = true;
+      }
+      return true; /* license gate active; skip onboarding check */
+    }
+    return false;
+  } catch (err) {
+    console.warn('license_status_unavailable', err);
+    return false;
+  }
+}
+
 /* ── Onboarding status check ── */
 async function checkOnboardingStatus() {
   try {
@@ -951,7 +973,9 @@ async function boot() {
   await fetchState();
   refreshUiv3FrameSnapshots();
   openWebSocket();
-  checkOnboardingStatus(); /* fire-and-forget; non-fatal */
+  checkLicenseStatus().then(licenseGateActive => { /* non-fatal */
+    if (!licenseGateActive) checkOnboardingStatus();
+  });
 
   Shell.booting = false;
 }

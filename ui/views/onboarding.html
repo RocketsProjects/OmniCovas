@@ -1,5 +1,64 @@
 <!-- Phase 3 Week 13 — First-Run Onboarding (Three-Path Model) -->
+<!-- Pass 1 launcher/license slice: License screen added as first, blocking step. -->
 <div id="onboarding-container" role="main" aria-label="First-run onboarding wizard">
+
+  <!-- License Acknowledgement Screen (first, blocking) -->
+  <div id="onboarding-license" style="display: none;">
+    <div class="onboarding-panel onboarding-panel--license">
+      <h1>OmniCOVAS License</h1>
+      <p class="subtitle">
+        Please read and accept the license before using OmniCOVAS.
+      </p>
+
+      <div
+        id="onboarding-license-text"
+        class="license-text-box"
+        role="region"
+        aria-label="License text"
+        aria-live="polite"
+        tabindex="0"
+      >
+        Loading license…
+      </div>
+
+      <label class="license-agree-label" for="onboarding-license-checkbox">
+        <input
+          type="checkbox"
+          id="onboarding-license-checkbox"
+          name="onboarding-license-checkbox"
+          aria-required="true"
+        />
+        I have read and agree to the OmniCOVAS Free-To-Use Source-Available
+        Proprietary License (Version 1.0).
+      </label>
+
+      <div class="onboarding-buttons">
+        <button
+          type="button"
+          class="primary-button"
+          id="onboarding-license-agree-btn"
+          disabled
+          aria-label="Agree to license and continue"
+        >
+          Agree &amp; Continue
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          id="onboarding-license-decline-btn"
+          aria-label="Decline license and exit application"
+        >
+          Decline &amp; Exit
+        </button>
+      </div>
+
+      <p class="license-contact-note">
+        Contact:
+        <span id="onboarding-license-contact">rocketsprojects.git@gmail.com</span>
+      </p>
+    </div>
+  </div>
+
   <!-- Path Selection Screen -->
   <div id="onboarding-path-selection" style="display: none;">
     <div class="onboarding-panel">

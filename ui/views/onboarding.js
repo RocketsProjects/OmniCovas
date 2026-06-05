@@ -6,8 +6,9 @@
  *  B. Custom Setup (5-15 minute wizard)
  *  C. Power User (full Settings + Privacy)
  *
- * Startup sequence: shell.js checks /week13/onboarding/status after bridge
- * discovery, then calls window.OmniOnboarding.show() if wizard is needed.
+ * Startup sequence: shell.js checks /week13/license/status and
+ * /week13/onboarding/status after bridge discovery.  The license gate fires
+ * first; the path-selection wizard is only reachable after license acceptance.
  */
 
 class OnboardingController {
@@ -25,6 +26,7 @@ class OnboardingController {
       settings: false,
       privacy: false,
     };
+    this._licenseAccepted = false;
     this.init();
   }
 
@@ -40,10 +42,22 @@ class OnboardingController {
   }
 
   init() {
+    this.bindLicenseButtons();
     this.bindPathButtons();
     this.bindStepButtons();
   }
 
+  /** Show the wizard starting at the license screen. */
+  showLicenseScreen() {
+    const container = document.getElementById("onboarding-container");
+    if (container) container.style.display = "flex";
+    this._loadLicenseText();
+    this.hideAll();
+    document.getElementById("onboarding-license").style.display = "block";
+    document.getElementById("onboarding-license-agree-btn")?.focus();
+  }
+
+  /** Show the wizard starting at the path-selection screen (license already accepted). */
   show() {
     const container = document.getElementById("onboarding-container");
     if (container) container.style.display = "flex";
@@ -54,16 +68,79 @@ class OnboardingController {
     if (firstControl) firstControl.focus();
   }
 
+  async _loadLicenseText() {
+    const el = document.getElementById("onboarding-license-text");
+    if (!el) return;
+    try {
+      const res = await fetch("/assets/legal/LICENSE.md");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      el.textContent = text;
+    } catch (err) {
+      el.textContent = "License text could not be loaded. Review LICENSE.md in the application directory before agreeing.";
+      console.warn("[Onboarding] Failed to load bundled license:", err);
+    }
+  }
+
+  bindLicenseButtons() {
+    const checkbox = document.getElementById("onboarding-license-checkbox");
+    const agreeBtn = document.getElementById("onboarding-license-agree-btn");
+    const declineBtn = document.getElementById("onboarding-license-decline-btn");
+
+    checkbox?.addEventListener("change", () => {
+      if (agreeBtn) agreeBtn.disabled = !checkbox.checked;
+    });
+
+    agreeBtn?.addEventListener("click", () => {
+      if (!checkbox?.checked) return;
+      this._acceptLicense();
+    });
+
+    declineBtn?.addEventListener("click", () => {
+      this._declineLicense();
+    });
+  }
+
   showPathSelection() {
     this.hideAll();
     document.getElementById("onboarding-path-selection").style.display = "block";
   }
 
   hideAll() {
+    const licenseEl = document.getElementById("onboarding-license");
+    if (licenseEl) licenseEl.style.display = "none";
     document.getElementById("onboarding-path-selection").style.display = "none";
     document.getElementById("onboarding-easy-mode").style.display = "none";
     document.getElementById("onboarding-custom-mode").style.display = "none";
     document.getElementById("onboarding-power-user").style.display = "none";
+  }
+
+  async _acceptLicense() {
+    const url = this.apiUrl("/week13/license/accept");
+    if (!url) {
+      console.warn("[Onboarding] Bridge not ready; cannot persist license acceptance.");
+      return;
+    }
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      this._licenseAccepted = true;
+      this.show();
+    } catch (err) {
+      console.error("[Onboarding] Failed to persist license acceptance:", err);
+    }
+  }
+
+  _declineLicense() {
+    const invoke = window.__TAURI__?.core?.invoke;
+    if (typeof invoke === "function") {
+      invoke("plugin:window|close").catch(() => {});
+    } else {
+      window.close();
+    }
   }
 
   bindPathButtons() {
@@ -337,9 +414,16 @@ class OnboardingController {
 
 function _initOnboarding() {
   const controller = new OnboardingController();
-  window.OmniOnboarding = { show: () => controller.show() };
-  // Drain pending flag in case shell.js resolved status before this script initialized.
-  if (window.__pendingOnboardingShow) {
+  window.OmniOnboarding = {
+    show: () => controller.show(),
+    showLicenseScreen: () => controller.showLicenseScreen(),
+  };
+  // Drain pending license flag (shell.js resolved license check before this script loaded).
+  if (window.__pendingLicenseShow) {
+    window.__pendingLicenseShow = false;
+    controller.showLicenseScreen();
+  } else if (window.__pendingOnboardingShow) {
+    // Drain onboarding flag only if no license gate is pending.
     window.__pendingOnboardingShow = false;
     controller.show();
   }

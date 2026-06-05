@@ -680,6 +680,8 @@ class SettingsController {
     document.getElementById('btc-test-generic-btn')?.addEventListener('click', () => this._testGenericBanner());
     document.getElementById('btc-test-selected-btn')?.addEventListener('click', () => this._testSelectedBanner());
     document.getElementById('btc-test-all-btn')?.addEventListener('click', () => this._testAllBanners());
+    document.getElementById('rerun-setup-btn')?.addEventListener('click', () => this.resetSetup());
+    document.getElementById('reset-license-btn')?.addEventListener('click', () => this.resetLicenseAck());
   }
 
   setPreset(preset) {
@@ -750,6 +752,34 @@ class SettingsController {
     } catch (err) {
       console.error('Failed to export settings:', err);
       alert('Failed to export settings. See console for details.');
+    }
+  }
+
+  async resetSetup() {
+    if (!confirm('Re-run the first-time setup wizard? This will re-show the setup wizard on next launch. Your license acknowledgement and settings are not affected.')) return;
+    const url = this.apiUrl('/week13/onboarding/reset');
+    if (!url) return;
+    try {
+      const res = await fetch(url, { method: 'POST' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      alert('Setup wizard will re-run on next launch.');
+    } catch (err) {
+      console.error('[Settings] Failed to reset setup:', err);
+      alert('Failed to reset setup. See console for details.');
+    }
+  }
+
+  async resetLicenseAck() {
+    if (!confirm('Reset your license acknowledgement? You will need to re-read and agree to the OmniCOVAS license before using the app again.')) return;
+    const url = this.apiUrl('/week13/license/reset');
+    if (!url) return;
+    try {
+      const res = await fetch(url, { method: 'POST' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      alert('License acknowledgement reset. The license screen will appear on next launch.');
+    } catch (err) {
+      console.error('[Settings] Failed to reset license acknowledgement:', err);
+      alert('Failed to reset license acknowledgement. See console for details.');
     }
   }
 

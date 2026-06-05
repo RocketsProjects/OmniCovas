@@ -59,6 +59,12 @@ CONFIG_KEYS = frozenset(
         # Phase 3 Week 13 onboarding and settings
         "first_run_completed",
         "first_run_completed_at",
+        # License acknowledgement (Pass 1 — launcher/license slice)
+        "license_accepted",
+        "license_accepted_version",
+        "license_accepted_at",
+        # Legacy key (do not use — superseded by first_run_completed above)
+        # "first_run_complete",  # kept as documentation only; not stored
         "settings_preset",
         "settings_ai_provider",
         "settings_overlay_opacity",

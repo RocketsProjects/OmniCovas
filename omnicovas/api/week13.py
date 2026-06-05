@@ -112,6 +112,70 @@ async def complete_onboarding(
     return {"status": "ok"}
 
 
+CURRENT_LICENSE_VERSION = "1.0"
+
+
+@router.get("/license/status")
+async def get_license_status() -> dict[str, Any]:
+    """Check whether the commander has accepted the current license version."""
+    vault = _ensure_vault()
+
+    accepted_str = vault.get("license_accepted")
+    accepted_version = vault.get("license_accepted_version")
+    accepted_at = vault.get("license_accepted_at")
+
+    accepted = accepted_str == "true"
+    needs_acceptance = not accepted or accepted_version != CURRENT_LICENSE_VERSION
+
+    return {
+        "accepted": accepted,
+        "accepted_version": accepted_version,
+        "current_version": CURRENT_LICENSE_VERSION,
+        "needs_acceptance": needs_acceptance,
+        "accepted_at": accepted_at if accepted else None,
+    }
+
+
+@router.post("/license/accept")
+async def accept_license() -> dict[str, str]:
+    """Record commander license acceptance for the current license version."""
+    vault = _ensure_vault()
+    vault.set("license_accepted", "true")
+    vault.set("license_accepted_version", CURRENT_LICENSE_VERSION)
+    vault.set("license_accepted_at", datetime.utcnow().isoformat() + "Z")
+    logger.info("license_accepted | version=%s", CURRENT_LICENSE_VERSION)
+    return {"status": "ok", "version": CURRENT_LICENSE_VERSION}
+
+
+@router.post("/license/reset")
+async def reset_license_acceptance() -> dict[str, str]:
+    """Clear license acceptance state (re-arms the first-run license gate)."""
+    vault = _ensure_vault()
+    for key in ("license_accepted", "license_accepted_version", "license_accepted_at"):
+        try:
+            vault.delete(key)
+        except Exception:
+            pass
+    logger.info("license_acceptance_reset")
+    return {"status": "ok"}
+
+
+@router.post("/onboarding/reset")
+async def reset_onboarding() -> dict[str, str]:
+    """Clear onboarding completion state (re-arms the first-run wizard).
+
+    Does NOT touch license acceptance keys — use /license/reset for that.
+    """
+    vault = _ensure_vault()
+    for key in ("first_run_completed", "first_run_completed_at"):
+        try:
+            vault.delete(key)
+        except Exception:
+            pass
+    logger.info("onboarding_reset")
+    return {"status": "ok"}
+
+
 PRIVACY_TOGGLES = frozenset(
     {
         "eddn_submission",
