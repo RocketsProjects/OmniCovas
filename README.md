@@ -112,6 +112,38 @@ This is beta software. Expect rough edges, evolving UI, developer-focused setup 
 
 ---
 
+## Install and run
+
+Use official release artifacts only. Public beta binaries should come from the
+official GitHub Releases page for `RocketsProjects/omnicovas`; sponsor-preview
+binaries should come only from an approved sponsor-preview release channel.
+
+For normal installation:
+
+1. Download the release package.
+2. Run `setup.exe`.
+3. Launch `OmniCovas.exe` after installation.
+4. On first run, acknowledge the OmniCOVAS license/onboarding gate.
+
+`setup.exe` is the normal Windows installer. `OmniCovas.exe` is the normal app
+launcher. The first-run license acknowledgement does not require an account.
+
+OmniCOVAS is local-first by default: commander data stays on your machine unless
+you explicitly enable an outbound feature. Provider and outbound features default
+to off, and RAG authority-retrieval tooling is external to the runtime app.
+
+OmniCOVAS is free-to-use source-available proprietary software, not open source.
+You may use, inspect, build, and locally modify your own copy for personal,
+noncommercial use. Redistribution, rehosting, repackaging, sublicensing, sale,
+commercialization, or publication of OmniCOVAS or modified versions requires
+written permission. See `LICENSE.md`.
+
+Current beta binaries are unsigned. Windows SmartScreen may warn that the
+publisher is unverified until code signing is in place. Treat binaries from
+unofficial mirrors, reposts, or repackaged downloads as untrusted.
+
+---
+
 ## What OmniCOVAS is meant to help with
 
 The long-term plan is broad, but it is being built in small verified pieces.
