@@ -49,6 +49,8 @@ $pyinstallerArgs = @(
     "pyinstaller",
     "--clean",
     "--onefile",
+    "--hidden-import",
+    "aiosqlite",
     "--name",
     $sidecarStem,
     "--distpath",

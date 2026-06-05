@@ -50,6 +50,11 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const BRIDGE_DISCOVERY_TIMEOUT_MS = 120000;
+const TAURI_EVENT_WAIT_MS = 30000;
+const TAURI_COMMAND_ATTEMPTS = 180;
+const TAURI_COMMAND_RETRY_MS = 500;
+
 function normalizeBridge(payload) {
   if (!payload) return null;
 
@@ -705,7 +710,7 @@ function setBridge(port, httpBase, wsBase) {
 }
 
 /* ── Tauri bridge-ready listener ── */
-function waitForTauriBridgeReady(timeoutMs = 10000) {
+function waitForTauriBridgeReady(timeoutMs = TAURI_EVENT_WAIT_MS) {
   return new Promise((resolve) => {
     let resolved = false;
     let unlistenPromise = null;
@@ -756,7 +761,7 @@ async function getBridgeFromTauriCommand() {
     return null;
   }
 
-  for (let i = 0; i < 20; i += 1) {
+  for (let i = 0; i < TAURI_COMMAND_ATTEMPTS; i += 1) {
     try {
       const bridge = normalizeBridge(await invoke('get_bridge_info'));
 
@@ -767,7 +772,7 @@ async function getBridgeFromTauriCommand() {
       /* command unavailable or not ready yet */
     }
 
-    await sleep(500);
+    await sleep(TAURI_COMMAND_RETRY_MS);
   }
 
   return null;
@@ -794,6 +799,7 @@ async function probeForBridge() {
 
 /* ── Port discovery ── */
 async function discover() {
+  const startedAt = Date.now();
   const fromTauriEvent = await waitForTauriBridgeReady();
 
   if (fromTauriEvent) {
@@ -804,6 +810,15 @@ async function discover() {
 
   if (fromTauriCommand) {
     return fromTauriCommand;
+  }
+
+  const elapsedMs = Date.now() - startedAt;
+  if (elapsedMs < BRIDGE_DISCOVERY_TIMEOUT_MS) {
+    await sleep(BRIDGE_DISCOVERY_TIMEOUT_MS - elapsedMs);
+    const lateBridge = await getBridgeFromTauriCommand();
+    if (lateBridge) {
+      return lateBridge;
+    }
   }
 
   return probeForBridge();
