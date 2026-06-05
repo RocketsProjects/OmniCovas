@@ -577,6 +577,39 @@ fn stop_packaged_sidecar() {
     }
 }
 
+fn close_secondary_windows(app_handle: &tauri::AppHandle, main_label: &str) {
+    log_sidecar_diagnostic("overlay/window cleanup start");
+
+    let mut closed_count = 0;
+    for (label, webview_window) in app_handle.webview_windows() {
+        if label == main_label {
+            continue;
+        }
+
+        log_sidecar_diagnostic(format!(
+            "closing secondary window before app exit: label={}",
+            label
+        ));
+
+        match webview_window.close() {
+            Ok(()) => {
+                closed_count += 1;
+            }
+            Err(error) => {
+                log_sidecar_diagnostic(format!(
+                    "secondary window close failed before app exit: label={} error={}",
+                    label, error
+                ));
+            }
+        }
+    }
+
+    log_sidecar_diagnostic(format!(
+        "overlay/window cleanup complete: closed_count={}",
+        closed_count
+    ));
+}
+
 fn log_startup_context(is_dev: bool) {
     log_sidecar_diagnostic(format!(
         "tauri setup start: is_dev={} current_exe={:?}",
@@ -657,8 +690,16 @@ pub fn run() {
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { .. } = event {
                 if window.label() == "main" {
-                    log_sidecar_diagnostic("main window close requested; stopping owned sidecar");
+                    log_sidecar_diagnostic("main window close requested");
+                    log_sidecar_diagnostic("sidecar cleanup start");
                     stop_packaged_sidecar();
+                    log_sidecar_diagnostic("sidecar cleanup complete");
+
+                    let app_handle = window.app_handle().clone();
+                    close_secondary_windows(&app_handle, window.label());
+
+                    log_sidecar_diagnostic("app exit requested");
+                    app_handle.exit(0);
                 } else {
                     log_sidecar_diagnostic(format!(
                         "non-main window close ignored for sidecar lifecycle: label={}",
