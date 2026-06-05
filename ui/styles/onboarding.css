@@ -22,7 +22,14 @@
   max-width: 560px;
   width: 100%;
   box-shadow: var(--shadow-modal);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
+}
+
+#onboarding-container.onboarding-overlay--hidden,
+.onboarding-stage--hidden,
+.onboarding-step-panel--hidden {
+  display: none;
 }
 
 .onboarding-panel h1 {

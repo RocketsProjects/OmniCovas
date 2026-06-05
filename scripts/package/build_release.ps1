@@ -8,9 +8,10 @@ Steps (in order):
   3. Run `npm run tauri build` (produces OmniCovas.exe, NSIS setup, MSI).
   4. Create dist/release/.
   5. Copy/rename the main app binary  -> dist/release/OmniCovas.exe
-  6. Copy/rename the NSIS installer   -> dist/release/setup.exe
-  7. Copy the MSI as a secondary      -> dist/release/OmniCovas_<ver>_x64_en-US.msi
-  8. Copy LICENSE.md, NOTICE.md, THIRD_PARTY_NOTICES.md into dist/release/.
+  6. Copy the sidecar companion       -> dist/release/omnicovas-sidecar.exe
+  7. Copy/rename the NSIS installer   -> dist/release/setup.exe
+  8. Copy the MSI as a secondary      -> dist/release/OmniCovas_<ver>_x64_en-US.msi
+  9. Copy LICENSE.md, NOTICE.md, THIRD_PARTY_NOTICES.md into dist/release/.
 
 dist/release/ is gitignored and forbidden from export. Never commit generated
 .exe/.msi artifacts. Distribute only via GitHub Releases (Official Distribution
@@ -149,14 +150,26 @@ if (-not $SkipBuild) {
     Write-Host "==> Tauri build SKIPPED (-SkipBuild)"
 }
 
-# ── Step 4: Create dist/release/ ─────────────────────────────────────────────
+# ── Step 4: Create clean dist/release/ ───────────────────────────────────────
 
-Invoke-Step "Create dist/release/" {
+Invoke-Step "Create clean dist/release/" {
     if ($DryRun) {
-        Write-Host "  [DRY-RUN] Would create: $distDir"
+        Write-Host "  [DRY-RUN] Would recreate clean directory: $distDir"
     } else {
+        $distRoot = Join-Path $repoRoot "dist"
+        $resolvedDistRoot = [System.IO.Path]::GetFullPath($distRoot)
+        $resolvedDistDir = [System.IO.Path]::GetFullPath($distDir)
+        $expectedPrefix = $resolvedDistRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+        if (-not $resolvedDistDir.StartsWith($expectedPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Refusing to clean unexpected release path: $resolvedDistDir"
+        }
+
+        New-Item -ItemType Directory -Force -Path $distRoot | Out-Null
+        if (Test-Path -LiteralPath $distDir) {
+            Remove-Item -LiteralPath $distDir -Recurse -Force
+        }
         New-Item -ItemType Directory -Force -Path $distDir | Out-Null
-        Write-Host "  Created: $distDir"
+        Write-Host "  Created clean directory: $distDir"
     }
 }
 
@@ -169,6 +182,9 @@ $msiDir           = Join-Path $bundleDir "msi"
 
 # Main binary: src-tauri/target/release/OmniCovas.exe
 $mainBinarySrc = Join-Path $releaseTargetDir "$productName.exe"
+
+# Sidecar companion: required beside direct launcher artifact.
+$sidecarSrc = Join-Path $releaseTargetDir "omnicovas-sidecar.exe"
 
 # NSIS: src-tauri/target/release/bundle/nsis/OmniCovas_<ver>_x64-setup.exe
 $nsisSrc = Join-Path $nsisDir "${productName}_${version}_x64-setup.exe"
@@ -185,7 +201,16 @@ Invoke-Step "Copy main binary -> dist/release/OmniCovas.exe" {
         -Label  "main app binary"
 }
 
-# ── Step 6: Copy NSIS installer -> setup.exe ─────────────────────────────────
+# ── Step 6: Copy sidecar companion ───────────────────────────────────────────
+
+Invoke-Step "Copy sidecar companion -> dist/release/omnicovas-sidecar.exe" {
+    Copy-Artifact `
+        -Source $sidecarSrc `
+        -Dest   (Join-Path $distDir "omnicovas-sidecar.exe") `
+        -Label  "direct launcher sidecar"
+}
+
+# ── Step 7: Copy NSIS installer -> setup.exe ─────────────────────────────────
 
 Invoke-Step "Copy NSIS installer -> dist/release/setup.exe" {
     Copy-Artifact `
@@ -194,14 +219,14 @@ Invoke-Step "Copy NSIS installer -> dist/release/setup.exe" {
         -Label  "NSIS installer"
 }
 
-# ── Step 7: Copy MSI (secondary) ─────────────────────────────────────────────
+# ── Step 8: Copy MSI (secondary) ─────────────────────────────────────────────
 
 Invoke-Step "Copy MSI -> dist/release/ (secondary artifact)" {
     $msiDest = Join-Path $distDir "${productName}_${version}_x64_en-US.msi"
     Copy-Artifact -Source $msiSrc -Dest $msiDest -Label "MSI"
 }
 
-# ── Step 8: Copy legal files ──────────────────────────────────────────────────
+# ── Step 9: Copy legal files ──────────────────────────────────────────────────
 
 Invoke-Step "Copy legal files into dist/release/" {
     $legalFiles = @("LICENSE.md", "NOTICE.md", "THIRD_PARTY_NOTICES.md")

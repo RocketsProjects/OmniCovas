@@ -1349,9 +1349,66 @@
 
 <!-- ── First-run onboarding ── -->
 <!-- Phase 3 Week 13 — First-Run Onboarding (Three-Path Model) -->
-<div id="onboarding-container" role="dialog" aria-modal="true" aria-label="First-run commissioning wizard" style="display:none">
+<div id="onboarding-container" class="onboarding-overlay--hidden" role="dialog" aria-modal="true" aria-label="First-run commissioning wizard">
+  <!-- License Acknowledgement Screen (first, blocking) -->
+  <div id="onboarding-license" class="onboarding-stage onboarding-stage--hidden">
+    <div class="onboarding-panel onboarding-panel--license">
+      <h1>OmniCOVAS License</h1>
+      <p class="subtitle">
+        Please read and accept the license before using OmniCOVAS.
+      </p>
+
+      <div
+        id="onboarding-license-text"
+        class="license-text-box"
+        role="region"
+        aria-label="License text"
+        aria-live="polite"
+        tabindex="0"
+      >
+        Loading license...
+      </div>
+
+      <label class="license-agree-label" for="onboarding-license-checkbox">
+        <input
+          type="checkbox"
+          id="onboarding-license-checkbox"
+          name="onboarding-license-checkbox"
+          aria-required="true"
+        />
+        I have read and agree to the OmniCOVAS Free-To-Use Source-Available
+        Proprietary License (Version 1.0).
+      </label>
+
+      <div class="onboarding-buttons">
+        <button
+          type="button"
+          class="primary-button"
+          id="onboarding-license-agree-btn"
+          disabled
+          aria-label="Agree to license and continue"
+        >
+          Agree &amp; Continue
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          id="onboarding-license-decline-btn"
+          aria-label="Decline license and exit application"
+        >
+          Decline &amp; Exit
+        </button>
+      </div>
+
+      <p class="license-contact-note">
+        Contact:
+        <span id="onboarding-license-contact">rocketsprojects.git@gmail.com</span>
+      </p>
+    </div>
+  </div>
+
   <!-- Path Selection Screen -->
-  <div id="onboarding-path-selection" style="display: none;">
+  <div id="onboarding-path-selection" class="onboarding-stage onboarding-stage--hidden">
     <div class="onboarding-panel">
       <h1>OmniCOVAS Commissioning</h1>
       <p class="subtitle">
@@ -1404,7 +1461,7 @@
   </div>
 
   <!-- Path A: Quick Launch (Single-Screen Preset Selection) -->
-  <div id="onboarding-easy-mode" style="display: none;">
+  <div id="onboarding-easy-mode" class="onboarding-stage onboarding-stage--hidden">
     <div class="onboarding-panel">
       <h1>Quick Launch</h1>
       <p class="subtitle">Select your playstyle. This preset will set recommended defaults.</p>
@@ -1457,9 +1514,9 @@
   </div>
 
   <!-- Path B: Guided Calibration (Multi-Step Wizard) -->
-  <div id="onboarding-custom-mode" style="display: none;">
+  <div id="onboarding-custom-mode" class="onboarding-stage onboarding-stage--hidden">
     <!-- Step 1: Preset Selection -->
-    <div id="onboarding-custom-preset" class="onboarding-panel" style="display: none;">
+    <div id="onboarding-custom-preset" class="onboarding-panel onboarding-step-panel onboarding-step-panel--hidden">
       <h1>Guided Calibration: Step 1/5</h1>
       <p class="subtitle">Playstyle Preset</p>
 
@@ -1505,7 +1562,7 @@
     </div>
 
     <!-- Step 2: AI Provider -->
-    <div id="onboarding-custom-ai" class="onboarding-panel" style="display: none;">
+    <div id="onboarding-custom-ai" class="onboarding-panel onboarding-step-panel onboarding-step-panel--hidden">
       <h1>Guided Calibration: Step 2/5</h1>
       <p class="subtitle">AI Provider (Optional)</p>
 
@@ -1552,7 +1609,7 @@
     </div>
 
     <!-- Step 3: Privacy Toggles -->
-    <div id="onboarding-custom-privacy" class="onboarding-panel" style="display: none;">
+    <div id="onboarding-custom-privacy" class="onboarding-panel onboarding-step-panel onboarding-step-panel--hidden">
       <h1>Guided Calibration: Step 3/5</h1>
       <p class="subtitle">Privacy &amp; Data Sharing</p>
 
@@ -1606,7 +1663,7 @@
     </div>
 
     <!-- Step 4: Output Mode -->
-    <div id="onboarding-custom-output" class="onboarding-panel" style="display: none;">
+    <div id="onboarding-custom-output" class="onboarding-panel onboarding-step-panel onboarding-step-panel--hidden">
       <h1>Guided Calibration: Step 4/5</h1>
       <p class="subtitle">Output Mode</p>
 
@@ -1630,6 +1687,20 @@
           <span class="mode-name">HUD Projection + Voice &mdash; reserved</span>
           <span class="mode-desc">
             Combined delivery remains reserved until native-first voice is approved.
+          </span>
+        </label>
+      </div>
+
+      <div class="onboarding-buttons">
+        <button
+          class="primary-button"
+          id="onboarding-custom-output-next-btn"
+          aria-label="Continue to final step"
+        >
+          Next
+        </button>
+        <button
+          class="secondary-button"
           id="onboarding-custom-output-back-btn"
           aria-label="Go back to previous step"
         >
@@ -1639,7 +1710,7 @@
     </div>
 
     <!-- Step 5: HUD Projection Position -->
-    <div id="onboarding-custom-overlay" class="onboarding-panel" style="display: none;">
+    <div id="onboarding-custom-overlay" class="onboarding-panel onboarding-step-panel onboarding-step-panel--hidden">
       <h1>Guided Calibration: Step 5/5</h1>
       <p class="subtitle">HUD Projection Position</p>
 
@@ -1686,7 +1757,7 @@
   </div>
 
   <!-- Path C: Manual Control (Direct Link to Settings) -->
-  <div id="onboarding-power-user" style="display: none;">
+  <div id="onboarding-power-user" class="onboarding-stage onboarding-stage--hidden">
     <div class="onboarding-panel">
       <h1>Manual Control</h1>
       <p class="subtitle">
