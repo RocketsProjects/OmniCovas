@@ -1,33 +1,26 @@
-# OmniCOVAS
+OmniCOVAS
+Your personal shipboard companion for Elite Dangerous.
 
-A local-first command deck for Elite Dangerous on Windows 10 and Windows 11.
-OmniCOVAS brings supported ship and session telemetry, navigation, engineering
-plans, recorded visits, galactic knowledge, and commander notes into one desktop
-application. Facts retain their source and freshness; missing information remains
-unknown. Core workflows work without an AI provider.
+Elite Dangerous offers an entire galaxy of possibilities, but your ship data, plans, discoveries, and useful information can end up scattered across the game and outside tools.
 
-This repository contains curated application source and the files needed to build
-it. Its `main` branch preserves public history. Source synchronization does not
-constitute a software release or release acceptance. There is currently no
-published installer or release; build from source for local use.
+OmniCOVAS brings them together in a Windows command deck. It connects your current session with galactic knowledge, Engineering plans, and the places you've experienced—helping you stay oriented and make more of your time in the cockpit.
 
-## Privacy and control
+Your journey matters. Your companion should remember it.
+Explore your command deck
+- Stay aware. Follow supported ship and session information, from your current location and condition to relevant warnings and events.
+- Plan your builds. Explore outfitting and Engineering plans, review material requirements, and organize what you need next.
+- Discover galactic intelligence. Look up useful information about systems, stations, and the wider galaxy, with context for your travels.
+- Remember where you've been. Your Commander Chronicle brings together recorded visits and personal history, turning familiar places into part of your story.
+- Keep the right information close. Navigation, objectives, and contextual notifications help you focus on your chosen activity without unnecessary interruptions.
+OmniCOVAS is built around connections between these tools. A ship project can lead to a material-gathering journey; that journey can become part of your Commander's history. The long-term goal is a companion that can help a newcomer learn the galaxy and give an experienced pilot meaningful support across exploration, combat, mining, trading, Powerplay, and more.
+How it works
+OmniCOVAS runs alongside Elite Dangerous and reads information the game makes available through its local Journal, status, and companion files. Your Commander data stays local by default. Optional external sources and AI assistance are under your control; the core experience does not require an AI provider.
+Getting started
+Windows 10/11 · Build from source
 
-Commander data stays local by default. External providers and outbound features
-require explicit opt-in and applicable permissions. Optional AI assists with
-explanation and planning; it is not a source of game facts. Protected actions
-require commander confirmation. OmniCOVAS does not automate gameplay.
+There is no published installer yet. You can build OmniCOVAS locally for personal use from this repository.
 
-The app is pre-release software. Accessibility coverage is partial; live-game,
-fullscreen/overlay, mixed-display, screen-reader, signing, and release acceptance
-remain separate verification work.
-
-## Build from source
-
-Requirements: Windows 10/11, Git, Python 3.11, Node.js LTS, Rust with the MSVC
-toolchain, Microsoft C++ Build Tools, WebView2, and the `uv` package manager.
-
-```powershell
+You'll need Git, Python 3.11, Node.js LTS, Rust with the MSVC toolchain, Microsoft C++ Build Tools, WebView2, and uv.
 git clone https://github.com/RocketsProjects/OmniCovas.git
 cd OmniCovas
 uv sync --all-extras --locked
@@ -35,37 +28,11 @@ npm.cmd ci
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package/sync_license.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package/build_tauri_sidecar.ps1
 npm.cmd run tauri build
-```
+Launch your local build alongside Elite Dangerous. Start with Dashboard for session awareness, explore Engineering for your next ship project, and use Intel, Navigation, and Operations as your journey takes shape. Customize optional features in Settings.
 
-For local development, `npm.cmd run tauri dev` starts the desktop shell. Its Python
-interpreter is selected from `OMNICOVAS_DEV_PYTHON`, the local `.venv`, `uv`, then
-`python` on PATH. The packaged application uses the generated sidecar.
+Local builds are unsigned, so Windows may show a publisher warning.
+Help shape OmniCOVAS
+Built by an Elite Dangerous player for fellow Commanders, OmniCOVAS welcomes bug reports, feature ideas, usability feedback, and compatibility findings. Open an issue and tell us what would improve your time in the galaxy.
 
-Build output is local and unsigned. Windows SmartScreen may warn about an
-unverified publisher. Building an installer does not authorize distributing it.
-The test suites and internal verification tooling are maintained in development;
-they are not part of this application snapshot.
-
-Some reference datasets are deliberately excluded pending redistribution
-clearance. The application handles unavailable references without treating missing
-data as verified facts. Shipped galactic knowledge carries its attribution in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Feedback and security
-
-Bug reports and non-code feedback are welcome. Code contributions require prior
-written agreement; see [CONTRIBUTING.md](CONTRIBUTING.md) and [CLA.md](CLA.md).
-Report vulnerabilities privately to rocketsprojects.git@gmail.com; see
-[SECURITY.md](SECURITY.md).
-
-## License and notices
-
-OmniCOVAS is free-to-use source-available proprietary software, not open source.
-Personal, noncommercial use, inspection, local builds, and local modifications
-are subject to [LICENSE.md](LICENSE.md). Redistribution, publication, rehosting,
-repackaging, sublicensing, and commercialization require written permission.
-See [NOTICE.md](NOTICE.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-Elite Dangerous, Frontier Developments, COVAS, and related marks belong to their
-respective owners. OmniCOVAS is an independent, unofficial project and is not
-affiliated with or endorsed by Frontier Developments plc.
+Interested in contributing code? Please read [Contributing](CONTRIBUTING.md) and contact the maintainer before submitting a patch or pull request; code contributions require prior agreement.
+OmniCOVAS is free for personal, noncommercial use and source-available, not open source. See the [License](LICENSE.md) and [Security Policy](SECURITY.md). It is an independent, unofficial Elite Dangerous companion and is not affiliated with Frontier Developments.
