@@ -1,0 +1,121 @@
+/* NHI-03/04 desktop attention lane. Same column as the Galactic Intelligence
+   briefing stack, so the desktop has one consistent place for notices; when
+   briefings are open the lane sits above them. Transient by design: it never
+   reserves route space, and its controls are keyboard operable. */
+.ocv-attention {
+  position: fixed;
+  right: 16px;
+  bottom: calc(var(--uiv3-bottom-spine-height, 44px) + 12px);
+  z-index: 41;
+  width: min(392px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+body.gi-briefings-open .ocv-attention {
+  bottom: calc(var(--uiv3-bottom-spine-height, 44px) + 22px + var(--gi-briefings-height, 0px));
+}
+
+.ocv-attention[hidden] { display: none; }
+
+/* --ocv-attention-height is the lane's rendered height (createAttentionLane). */
+body.ocv-attention-open #content-area {
+  padding-bottom: calc(var(--ocv-attention-height, 0px) + 28px);
+}
+body.ocv-attention-open.gi-briefings-open #content-area {
+  padding-bottom: calc(var(--ocv-attention-height, 0px) + var(--gi-briefings-height, 0px) + 38px);
+}
+
+.ocv-attention-live:empty { display: none; }
+
+.ocv-attention-card {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: #0b1020;
+  color: #f2f4f8;
+  border: 1px solid #3fb6c9;
+  border-left-width: 4px;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  animation: ocv-attention-in 120ms ease-out;
+  overflow-wrap: anywhere;
+}
+
+.ocv-attention-card--critical { border-color: #ff8a8a; }
+.ocv-attention-card--warning { border-color: #ffd166; }
+
+.ocv-attention-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b8c2d6;
+}
+
+.ocv-attention-card--critical .ocv-attention-label { color: #ffb3b3; }
+.ocv-attention-card--warning .ocv-attention-label { color: #ffe08a; }
+
+.ocv-attention-heading {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ocv-attention-body,
+.ocv-attention-note {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.ocv-attention-note { color: #b8c2d6; }
+
+.ocv-attention-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ocv-attention-actions button:focus-visible {
+  outline: 2px solid #ffb35a;
+  outline-offset: 3px;
+}
+
+@keyframes ocv-attention-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ocv-attention-card { animation: none; }
+}
+
+/* Settings: Notifications & Overlay (matches the Galactic Intelligence panel). */
+.ns-settings,
+.ns-owner { display: flex; flex-direction: column; gap: 12px; max-width: 760px; margin-bottom: 20px; }
+.ns-settings p,
+.ns-owner p { margin: 0; }
+.ns-lead { color: var(--color-fg, #e6edf5); }
+.ns-scope,
+.ns-help { font-size: 12px; color: var(--color-fg-muted, #a9bacb); }
+.ns-group { border: 1px solid #2c3a49; border-radius: 6px; padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+.ns-group legend { padding: 0 6px; font-weight: 600; }
+.ns-field,
+.ns-choice { display: flex; flex-direction: column; gap: 2px; }
+.ns-check,
+.ns-choice-label { display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 28px; }
+.ns-choice-title { font-weight: 600; }
+.ns-choice .ns-help,
+.ns-field .ns-help { padding-left: 26px; }
+.ns-select-label { font-size: 13px; }
+.ns-field select { max-width: 320px; min-height: 28px; }
+.ns-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.ns-status { min-height: 1.2em; font-size: 12px; }
+.ns-owner-state { font-weight: 600; }
+.ns-settings :is(input, select, button):focus-visible,
+.ns-owner button:focus-visible { outline: 2px solid #ffb35a; outline-offset: 2px; }

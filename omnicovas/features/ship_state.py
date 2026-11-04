@@ -147,6 +147,8 @@ async def handle_loadout(
         ShipIdent     -> current_ship_ident
         HullHealth    -> hull_health  (0.0-1.0)
         MaxJumpRange  -> jump_range_ly
+        UnladenMass   -> unladen_mass (tons)
+        CargoCapacity -> cargo_capacity (tons)
         FuelCapacity.Main   -> fuel_capacity_main (tons)
         FuelCapacity.Reserve -> fuel_capacity_reserve (tons)
         Modules       -> loadout_hash (SHA-256 of sorted slot/item/blueprint)
@@ -160,6 +162,8 @@ async def handle_loadout(
     ship_ident = event.get("ShipIdent")
     hull_health = event.get("HullHealth")
     max_jump = event.get("MaxJumpRange")
+    unladen_mass = event.get("UnladenMass")
+    cargo_capacity = event.get("CargoCapacity")
     fuel_capacity_block: dict[str, Any] | None = event.get("FuelCapacity")
     modules_raw = event.get("Modules", [])
     hull_value = event.get("HullValue")
@@ -187,6 +191,16 @@ async def handle_loadout(
     if max_jump is not None:
         state.update_field(
             "jump_range_ly", float(max_jump), TelemetrySource.JOURNAL, ts
+        )
+    if isinstance(unladen_mass, (int, float)) and not isinstance(unladen_mass, bool):
+        state.update_field(
+            "unladen_mass", float(unladen_mass), TelemetrySource.JOURNAL, ts
+        )
+    if isinstance(cargo_capacity, (int, float)) and not isinstance(
+        cargo_capacity, bool
+    ):
+        state.update_field(
+            "cargo_capacity", int(cargo_capacity), TelemetrySource.JOURNAL, ts
         )
 
     # FuelCapacity block: {"Main": float, "Reserve": float}
@@ -298,6 +312,10 @@ async def handle_shipyard_swap(
     state.update_field("current_ship_ident", None, TelemetrySource.JOURNAL, ts)
     state.update_field("hull_health", None, TelemetrySource.JOURNAL, ts)
     state.update_field("jump_range_ly", None, TelemetrySource.JOURNAL, ts)
+    state.update_field("unladen_mass", None, TelemetrySource.JOURNAL, ts)
+    state.update_field("cargo_capacity", None, TelemetrySource.JOURNAL, ts)
+    state.update_field("fuel_capacity_main", None, TelemetrySource.JOURNAL, ts)
+    state.update_field("fuel_capacity_reserve", None, TelemetrySource.JOURNAL, ts)
     state.update_field("loadout_hash", None, TelemetrySource.JOURNAL, ts)
     state.update_field("modules", {}, TelemetrySource.JOURNAL, ts)
 

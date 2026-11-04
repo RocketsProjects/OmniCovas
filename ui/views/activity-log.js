@@ -24,6 +24,8 @@ const SECONDARY_FILTERS = Object.freeze([
   { value: 'gate', label: 'Confirmation gate' },
   { value: 'operations', label: 'Operations' },
   { value: 'engineering', label: 'Engineering' },
+  { value: 'memory', label: 'Commander Memory' },
+  { value: 'startup', label: 'Startup outcomes' },
   { value: 'phase9-bgs', label: 'Phase 9 BGS' },
   { value: 'phase9-powerplay', label: 'Phase 9 Powerplay' },
   { value: 'phase9-campaign', label: 'Phase 9 Campaign' },
@@ -140,8 +142,29 @@ const PHASE_9_ALLOWED_SOURCE_CHAIN_KEYS = Object.freeze([
   'needs_review'
 ]);
 
+const ENTITY_DIMENSIONS = Object.freeze({
+  system: Object.freeze(['system', 'system_name', 'star_system', 'starsystem']),
+  station: Object.freeze(['station', 'station_name']),
+  commodity: Object.freeze(['commodity', 'commodity_name', 'commodity_localised']),
+  module: Object.freeze(['module', 'module_name', 'module_type']),
+  ship: Object.freeze(['ship', 'ship_type', 'ship_model']),
+  mission: Object.freeze(['mission', 'mission_id', 'mission_name']),
+  route: Object.freeze(['route', 'route_id', 'destination', 'target_system', 'circuit_id']),
+  event: Object.freeze(['event_type', 'event', 'source_event']),
+  session: Object.freeze(['session', 'session_id']),
+  source: Object.freeze(['source', 'source_id', 'source_type']),
+  file: Object.freeze(['file', 'filename', 'source_file', 'journal_filename']),
+});
+
+const ENTITY_DIMENSION_KEYS = Object.freeze(Object.keys(ENTITY_DIMENSIONS));
+const ENTITY_VALUE_LIMIT = 64;
+
 function normalizeText(value) {
   return String(value || '').trim().toLowerCase();
+}
+
+function normalizeSummaryIdentity(value) {
+  return normalizeText(value).replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
 function normalizeEventType(entry) {
@@ -152,6 +175,9 @@ function rawEventType(entry) {
   return String(entry?.event_type || entry?.event || '').trim();
 }
 
+let activeActivityLogController = null;
+let pendingActivityLogIntent = null;
+
 class ActivityLogController {
   constructor() {
     this.allEntries = [];
@@ -159,6 +185,9 @@ class ActivityLogController {
     this.currentPage = 0;
     this.pageSize = 50;
     this.activeView = 'events';
+    this.sortMode = 'newest';
+    this._loadedOnce = false;
+    activeActivityLogController = this;
     this._primitivesPromise = Promise.all([
       import('../components/command-primitives.js').catch(e => {
         console.error('[ActivityLog] Failed to load command primitives:', e);
@@ -192,6 +221,25 @@ class ActivityLogController {
     return base ? `${base}${path}` : null;
   }
 
+  /** Route a protected local action through the one shared Commander gate. */
+  async confirmProtectedAction(options) {
+    const gate = window.OmniConfirmationGate;
+    if (!gate?.confirmLocalAction) {
+      console.error('[ActivityLog] Shared Confirmation Gate is unavailable.');
+      return false;
+    }
+    return gate.confirmLocalAction(options);
+  }
+
+  /** Show a non-blocking result through the same shared gate surface. */
+  notify(message, kind = 'info') {
+    if (window.OmniConfirmationGate?.announce) {
+      window.OmniConfirmationGate.announce(message, { kind });
+    } else {
+      console.info(`[ActivityLog] ${message}`);
+    }
+  }
+
   async init() {
     this.rebuildFilters();
     this.bindEvents();
@@ -213,6 +261,7 @@ class ActivityLogController {
     if (!viewNav) return;
 
     viewNav.replaceChildren();
+    viewNav.classList.add('route-subnav');
     viewNav.setAttribute('role', 'tablist');
     viewNav.setAttribute('aria-label', 'Activity Log category views');
 
@@ -238,12 +287,33 @@ class ActivityLogController {
     if (!filterGroup) return;
 
     filterGroup.replaceChildren();
-    const legend = document.createElement('legend');
-    legend.className = 'ocv-sr-only';
-    legend.textContent = 'Filter within current Activity Log view';
-    filterGroup.appendChild(legend);
+    const groups = [
+      {
+        label: 'Scope',
+        values: ['recent', 'source', 'blocked', 'gate', 'operations', 'engineering', 'memory', 'startup'],
+      },
+      {
+        label: 'Phase 9',
+        values: [
+          'phase9-bgs',
+          'phase9-powerplay',
+          'phase9-campaign',
+          'phase9-navigation',
+          'phase9-squadron',
+          'phase9-source-attempts',
+          'phase9-ai-drafts',
+        ],
+      },
+      { label: 'Other', values: ['handoffs', 'errors', 'raw'] },
+    ];
+    const byValue = new Map(SECONDARY_FILTERS.map((filter) => [filter.value, filter]));
+    const assigned = new Set(groups.slice(0, 2).flatMap((group) => group.values));
+    const explicitOther = new Set(groups[2].values);
+    groups[2].values = SECONDARY_FILTERS
+      .map((filter) => filter.value)
+      .filter((value) => explicitOther.has(value) || !assigned.has(value));
 
-    SECONDARY_FILTERS.forEach(f => {
+    const addFilter = (target, f) => {
       const id = `log-filter-secondary-${f.value}`;
       const label = document.createElement('label');
       label.className = 'log-filter-label';
@@ -256,11 +326,33 @@ class ActivityLogController {
       input.value = f.value;
       label.appendChild(input);
       label.appendChild(document.createTextNode(' ' + f.label));
-      filterGroup.appendChild(label);
+      target.appendChild(label);
+    };
+
+    groups.forEach((group) => {
+      if (group.values.length === 0) return;
+      const groupWrap = document.createElement('fieldset');
+      groupWrap.className = 'log-filter-subgroup';
+      const legend = document.createElement('legend');
+      legend.textContent = group.label;
+      groupWrap.appendChild(legend);
+      group.values.forEach((value) => {
+        const filter = byValue.get(value);
+        if (filter) addFilter(groupWrap, filter);
+      });
+      filterGroup.appendChild(groupWrap);
     });
   }
 
   _showWaiting() {
+    this.clearViewPanelContents();
+    const activeMount = this.getViewPanelMount(this.getActiveView());
+    if (activeMount && activeMount.id !== 'log-body') {
+      activeMount.appendChild(this.createPanelEmpty('Waiting for OmniCOVAS bridge…'));
+      this.updateViewControls();
+      return;
+    }
+
     const tbody = document.getElementById('log-body');
     if (!tbody) return;
     const tr = document.createElement('tr');
@@ -319,7 +411,7 @@ class ActivityLogController {
     await this.loadActivityLog();
     this.renderRouteHero();
     await this.renderPage();
-    this.applyRouteTransferArrival();
+    await this.applyRouteTransferArrival();
   }
 
   async renderRouteHero() {
@@ -330,15 +422,17 @@ class ActivityLogController {
     if (!container) return;
 
     container.querySelector('.route-hero')?.remove();
+    container.querySelector('.ocv-page-header')?.remove();
+    const latest = this.allEntries[0] ? this.formatEventLabel(this.allEntries[0]) : 'None';
 
     const hero = Primitives.createRouteHero({
       title: 'Activity Log',
-      kicker: 'Proof Ledger',
-      statusText: this.allEntries.length > 0 ? 'Events available' : (this.apiBase ? 'No events loaded' : 'Bridge not ready'),
+      kicker: 'Local event record',
+      statusText: this.allEntries.length > 0 ? 'Local events available' : (this.apiBase ? 'No events loaded' : 'Bridge not ready'),
       statusVariant: this.allEntries.length > 0 ? 'available' : (this.apiBase ? 'off' : 'not-loaded'),
       primaryValues: [
         { label: 'Events shown', value: this.filteredEntries.length },
-        { label: 'Latest', value: this.allEntries[0]?.event_type || 'None' }
+        { label: 'Latest', value: latest }
       ]
     });
 
@@ -353,11 +447,15 @@ class ActivityLogController {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       this.allEntries = data.entries || [];
+      const startupEntry = this.createStartupOutcomeEntry(window.Shell?.startupOutcome);
+      if (startupEntry) this.allEntries.push(startupEntry);
       this.filteredEntries = [...this.allEntries];
+      this._loadedOnce = true;
     } catch (err) {
       console.error("Failed to load activity log:", err);
       this.allEntries = [];
       this.filteredEntries = [];
+      this._loadedOnce = true;
     }
   }
 
@@ -390,6 +488,36 @@ class ActivityLogController {
       });
     });
 
+    document.getElementById("log-category-filter")?.addEventListener("change", () => {
+      this.applyFilters();
+    });
+
+    document.getElementById('log-entity-filter')?.addEventListener('change', () => {
+      this.applyFilters();
+    });
+
+    document.getElementById('log-sort')?.addEventListener('change', (event) => {
+      this.sortMode = event.target.value;
+      this.applyFilters();
+    });
+
+    window.addEventListener('omnicovas:startup-outcome', (event) => {
+      const withoutStartup = this.allEntries.filter((entry) => normalizeEventType(entry) !== 'STARTUP_OUTCOME');
+      const startupEntry = this.createStartupOutcomeEntry(event.detail);
+      this.allEntries = startupEntry ? [...withoutStartup, startupEntry] : withoutStartup;
+      this._computeFilteredEntries();
+      this.renderPage();
+    });
+
+    const moreFilters = document.getElementById('log-more-filters');
+    const moreFiltersSummary = moreFilters?.querySelector('[data-section-id="more-filters"]');
+    moreFilters?.addEventListener('toggle', () => {
+      const open = moreFilters.open;
+      moreFiltersSummary?.classList.toggle('is-active', open);
+      moreFiltersSummary?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (moreFiltersSummary) moreFiltersSummary.dataset.active = open ? 'true' : 'false';
+    });
+
     // Actions
     document.getElementById("log-export-btn")?.addEventListener("click", () => {
       this.exportLog();
@@ -397,15 +525,6 @@ class ActivityLogController {
 
     document.getElementById("log-clear-btn")?.addEventListener("click", () => {
       this.showClearConfirm();
-    });
-
-    // Clear modal
-    document.getElementById("log-clear-confirm-btn")?.addEventListener("click", () => {
-      this.clearLog();
-    });
-
-    document.getElementById("log-clear-cancel-btn")?.addEventListener("click", () => {
-      document.getElementById("log-clear-modal").style.display = "none";
     });
 
     // Pagination
@@ -429,6 +548,8 @@ class ActivityLogController {
     const searchEl = document.getElementById("log-search");
     const text = (searchEl?.value || "").toLowerCase();
     const activeView = this.getActiveView();
+    const selectedCategory = document.getElementById("log-category-filter")?.value || 'all';
+    const selectedEntity = document.getElementById('log-entity-filter')?.value || 'all';
 
     const selectedCategories = new Set();
     document.querySelectorAll(".log-filter:checked").forEach((cb) => {
@@ -437,13 +558,16 @@ class ActivityLogController {
 
     this.filteredEntries = this.allEntries.filter((entry) => {
       if (text) {
-        const searchable = this.getSearchableText(entry);
+        const searchable = this.getSearchableText(entry, selectedEntity);
         if (!searchable.includes(text)) {
            return false;
         }
       }
       const categories = this.getEventCategories(entry);
       if (!categories.includes(activeView)) {
+        return false;
+      }
+      if (selectedCategory !== 'all' && !categories.includes(selectedCategory)) {
         return false;
       }
       if (selectedCategories.size > 0) {
@@ -458,6 +582,8 @@ class ActivityLogController {
       }
       return true;
     });
+
+    this.filteredEntries = this.sortEntries(this.filteredEntries, document.getElementById('log-sort')?.value || this.sortMode);
 
     this.currentPage = 0;
   }
@@ -474,8 +600,36 @@ class ActivityLogController {
 
   getHumanSummary(entry) {
     const type = (entry.event_type || '').toUpperCase();
+    if (type === 'STARTUP_OUTCOME') return 'Local startup lifecycle outcome for this app session';
+    if (type.startsWith('COMMANDER_MEMORY_')) {
+      if (type.includes('PROPOSAL_')) return 'Commander Memory confirmation decision recorded';
+      if (type.includes('EXPORT_')) return 'Commander Memory export lifecycle record';
+      return entry.summary || 'Commander Memory local action recorded';
+    }
     if (this.isPhase9Entry(entry)) {
-      return this.formatEventLabel(entry);
+      const lowerType = rawEventType(entry).toLowerCase();
+      if (lowerType.startsWith('phase_9.bgs.')) {
+        return 'Local BGS evidence record';
+      }
+      if (lowerType.startsWith('phase_9.powerplay.')) {
+        return 'Local Powerplay evidence record';
+      }
+      if (lowerType.startsWith('phase_9.campaign.ai_draft')) {
+        return 'Commander-requested AI draft audit record; not a fact';
+      }
+      if (lowerType.startsWith('phase_9.campaign.')) {
+        return 'Local campaign workflow record';
+      }
+      if (lowerType.startsWith('phase_9.navigation.')) {
+        return 'Local navigation workflow record';
+      }
+      if (lowerType.startsWith('phase_9.squadron.')) {
+        return 'Local-only squadron coordination record';
+      }
+      if (lowerType.startsWith('phase_9.source_attempt')) {
+        return 'Source capability decision record';
+      }
+      return 'Phase 9 audit record';
     }
     if (SENSITIVE_TEXT_EVENTS.has(type)) return 'Text event recorded; private message redacted';
     if (SENSITIVE_IDENTITY_EVENTS.some(marker => type.includes(marker))) {
@@ -498,7 +652,18 @@ class ActivityLogController {
     return 'Event recorded';
   }
 
-  getSearchableText(entry) {
+  getDistinctHumanSummary(entry) {
+    const summary = this.getHumanSummary(entry);
+    const label = this.formatEventLabel(entry);
+    return normalizeSummaryIdentity(summary) === normalizeSummaryIdentity(label)
+      ? ''
+      : summary;
+  }
+
+  getSearchableText(entry, dimension = 'all') {
+    if (dimension !== 'all' && ENTITY_DIMENSION_KEYS.includes(dimension)) {
+      return this.getEntityValues(entry, dimension).join(' ').toLowerCase();
+    }
     const payload = entry?.payload && typeof entry.payload === 'object' ? entry.payload : {};
     const safePayload = this.isPhase9Entry(entry) ? this.getPhase9DisplayPayload(entry) : payload;
     const payloadKeys = Object.keys(safePayload);
@@ -511,7 +676,8 @@ class ActivityLogController {
       entry?.matrix_status,
       entry?.classification,
       entry?.home_status,
-      ...payloadKeys
+      ...payloadKeys,
+      ...ENTITY_DIMENSION_KEYS.flatMap((key) => this.getEntityValues(entry, key)),
     ];
 
     if (!this.isPrivacySensitiveEntry(entry)) {
@@ -520,6 +686,88 @@ class ActivityLogController {
     }
 
     return parts.filter(Boolean).join(' ').toLowerCase();
+  }
+
+  getEntityValues(entry, dimension) {
+    const keys = new Set(ENTITY_DIMENSIONS[dimension] || []);
+    if (keys.size === 0) return [];
+    const values = [];
+    const seen = new Set();
+    const add = (value) => {
+      if (values.length >= ENTITY_VALUE_LIMIT || value === null || value === undefined) return;
+      if (!['string', 'number'].includes(typeof value)) return;
+      const text = String(value).trim();
+      const normalized = text.toLowerCase();
+      if (!text || text.length > 160 || seen.has(normalized)) return;
+      seen.add(normalized);
+      values.push(text);
+    };
+    const walk = (value, depth = 0) => {
+      if (!value || depth > 3 || values.length >= ENTITY_VALUE_LIMIT) return;
+      if (Array.isArray(value)) {
+        value.slice(0, 20).forEach((item) => walk(item, depth + 1));
+        return;
+      }
+      if (typeof value !== 'object') return;
+      Object.entries(value).slice(0, 80).forEach(([rawKey, item]) => {
+        const key = this.normalizePayloadKey(rawKey);
+        if (keys.has(key)) add(item);
+        if (item && typeof item === 'object') walk(item, depth + 1);
+      });
+    };
+
+    if (dimension === 'event') {
+      add(entry?.event_type ?? entry?.event);
+      add(this.formatEventLabel(entry));
+    }
+    if (dimension === 'source') add(entry?.source);
+    if (!this.isPrivacySensitiveEntry(entry)) {
+      walk(entry?.payload);
+      walk(entry?.linked_entity_refs);
+      walk(entry?.source_chain);
+    }
+    return values;
+  }
+
+  sortEntries(entries, mode = 'newest') {
+    const timestamp = (entry) => Date.parse(entry?.timestamp || '') || 0;
+    const source = (entry) => normalizeText(entry?.source || 'activity_log');
+    const event = (entry) => normalizeText(entry?.event_type || entry?.event);
+    return entries.map((entry, index) => ({ entry, index })).sort((a, b) => {
+      if (mode === 'oldest') return timestamp(a.entry) - timestamp(b.entry) || a.index - b.index;
+      if (mode === 'source') {
+        return source(a.entry).localeCompare(source(b.entry))
+          || timestamp(b.entry) - timestamp(a.entry)
+          || event(a.entry).localeCompare(event(b.entry))
+          || a.index - b.index;
+      }
+      if (mode === 'event') {
+        return event(a.entry).localeCompare(event(b.entry))
+          || timestamp(b.entry) - timestamp(a.entry)
+          || source(a.entry).localeCompare(source(b.entry))
+          || a.index - b.index;
+      }
+      return timestamp(b.entry) - timestamp(a.entry) || a.index - b.index;
+    }).map(({ entry }) => entry);
+  }
+
+  createStartupOutcomeEntry(outcome) {
+    if (!outcome || typeof outcome !== 'object' || !outcome.stage) return null;
+    return {
+      event_type: 'STARTUP_OUTCOME',
+      timestamp: outcome.timestamp || new Date().toISOString(),
+      summary: `Startup finished as ${String(outcome.stage).replace(/_/g, ' ')}`,
+      source: 'local_startup_lifecycle',
+      category: 'telemetry',
+      payload: {
+        stage: String(outcome.stage),
+        bridge: String(outcome.bridge || 'unknown'),
+        local_sources: String(outcome.local_sources || 'unknown'),
+        session_state: String(outcome.session_state || 'unknown'),
+        persistence: 'session_only',
+        redacted: true,
+      },
+    };
   }
 
   getEventCategories(entry) {
@@ -532,6 +780,7 @@ class ActivityLogController {
     categories.push('proof');
     categories.push('recent');
     categories.push('raw');
+    categories.push(this.resolveCategory(entry));
 
     if (type.startsWith('SOURCE_') || type.startsWith('EXTERNAL_REQUEST_') || source === 'local_telemetry' || source === 'local_event_history') categories.push('source');
     if (this.isSourceEntry(entry)) categories.push('sources');
@@ -541,6 +790,8 @@ class ActivityLogController {
     if (type.includes('CONFIRMATION') || type.includes('PROPOSAL') || type.includes('GATE')) categories.push('gate');
     if (type.includes('COMBAT') || type.includes('TRADE') || type.includes('MINING') || type.includes('SQUADRON') || type.includes('EXPLORATION') || type.includes('DOCKED') || type.includes('FSD')) categories.push('operations');
     if (type.startsWith('ENGINEERING.') || entry.category === 'engineering') categories.push('engineering');
+    if (type.startsWith('COMMANDER_MEMORY_') || source.includes('commander_memory')) categories.push('memory', 'source', 'known-data');
+    if (type === 'STARTUP_OUTCOME') categories.push('startup', 'diagnostics');
     if (lowerType.startsWith('phase_9.bgs.')) categories.push('phase9-bgs', 'source', 'known-data');
     if (lowerType.startsWith('phase_9.powerplay.')) categories.push('phase9-powerplay', 'source', 'known-data');
     if (lowerType.startsWith('phase_9.campaign.')) categories.push('phase9-campaign', 'operations');
@@ -622,54 +873,72 @@ class ActivityLogController {
 
   async renderPage() {
     await this._primitivesPromise; // Ensure modules are loaded
-    const tbody = document.getElementById("log-body");
-    if (!tbody) return;
-
-    if (this.filteredEntries.length === 0) {
-      tbody.replaceChildren();
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.colSpan = 5;
-
-      if (this._primitives) {
-        const empty = this._primitives.createEmptyState({
-          status: this.apiBase ? 'No matching proof records' : 'Bridge not ready',
-          reason: this.apiBase ? 'Try adjusting your filters or search text.' : 'Waiting for OmniCOVAS bridge connection.'
-        });
-        td.appendChild(empty);
-      } else {
-        td.className = 'log-waiting';
-        td.textContent = this.apiBase ? 'No matching proof records' : 'Waiting for OmniCOVAS bridge…';
-      }
-
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-      this.renderViewPanels();
-      this.updatePagination();
-      this.updateViewControls();
-      return;
-    }
-
-    const start = this.currentPage * this.pageSize;
-    const end = start + this.pageSize;
-    const pageEntries = this.filteredEntries.slice(start, end);
-
-    tbody.replaceChildren();
-    for (const entry of pageEntries) {
-      const row = this.createLogRow(entry);
-      tbody.appendChild(row);
-    }
-
+    this.updateViewControls();
     this.renderViewPanels();
     this.updatePagination();
-    this.updateViewControls();
   }
 
   renderViewPanels() {
-    this.renderEventsPanel();
-    this.renderSourcesPanel();
-    this.renderProofPanel();
-    this.renderDiagnosticsPanel();
+    const activeView = this.getActiveView();
+    this.clearViewPanelContents();
+    if (activeView === 'events') this.renderEventsPanel();
+    if (activeView === 'sources') this.renderSourcesPanel();
+    if (activeView === 'known-data') this.renderKnownDataPanel();
+    if (activeView === 'proof') this.renderProofPanel();
+    if (activeView === 'diagnostics') this.renderDiagnosticsPanel();
+  }
+
+  getViewPanelMount(viewId) {
+    const mounts = {
+      events: 'log-entries',
+      sources: 'log-sources-view',
+      'known-data': 'log-body',
+      proof: 'log-proof-view',
+      diagnostics: 'log-diagnostics-view',
+    };
+    return document.getElementById(mounts[viewId] || '');
+  }
+
+  clearViewPanelContents() {
+    LOG_VIEWS.forEach((view) => {
+      this.getViewPanelMount(view.id)?.replaceChildren();
+    });
+  }
+
+  getPageEntries(entries = this.filteredEntries) {
+    const start = this.currentPage * this.pageSize;
+    return entries.slice(start, start + this.pageSize);
+  }
+
+  renderKnownDataPanel() {
+    const tbody = document.getElementById('log-body');
+    if (!tbody) return;
+
+    if (this.filteredEntries.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      if (this._primitives) {
+        td.appendChild(this._primitives.createEmptyState({
+          status: this.apiBase ? 'No matching known-data records' : 'Bridge not ready',
+          reason: this.apiBase
+            ? 'Try adjusting your filters or search text.'
+            : 'Waiting for OmniCOVAS bridge connection.',
+        }));
+      } else {
+        td.className = 'log-waiting';
+        td.textContent = this.apiBase
+          ? 'No matching known-data records'
+          : 'Waiting for OmniCOVAS bridge…';
+      }
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    this.getPageEntries().forEach((entry) => {
+      tbody.appendChild(this.createLogRow(entry));
+    });
   }
 
   renderEventsPanel() {
@@ -682,7 +951,7 @@ class ActivityLogController {
       return;
     }
 
-    this.filteredEntries.slice(0, this.pageSize).forEach((entry) => {
+    this.getPageEntries().forEach((entry) => {
       const item = document.createElement('article');
       item.className = `log-entry ${this.resolveCategory(entry)}`;
       item.dataset.logEventType = entry.event_type || 'unknown';
@@ -695,11 +964,14 @@ class ActivityLogController {
       type.className = 'log-type';
       type.textContent = this.formatEventLabel(entry);
 
-      const msg = document.createElement('span');
-      msg.className = 'log-msg';
-      msg.textContent = this.getHumanSummary(entry);
-
-      item.append(time, type, msg);
+      item.append(time, type);
+      const distinctSummary = this.getDistinctHumanSummary(entry);
+      if (distinctSummary) {
+        const msg = document.createElement('span');
+        msg.className = 'log-msg';
+        msg.textContent = distinctSummary;
+        item.appendChild(msg);
+      }
       timeline.appendChild(item);
     });
   }
@@ -716,14 +988,18 @@ class ActivityLogController {
 
     const list = document.createElement('ul');
     list.className = 'log-view-list';
-    this.filteredEntries.slice(0, this.pageSize).forEach((entry) => {
+    this.getPageEntries().forEach((entry) => {
       const item = document.createElement('li');
       item.className = 'log-view-list-item';
-      item.append(
+      const fields = [
         this.createInlineLabel('Source', entry.source || 'activity_log'),
         this.createInlineLabel('Event', this.formatEventLabel(entry)),
-        this.createInlineLabel('Summary', this.getHumanSummary(entry))
-      );
+      ];
+      const distinctSummary = this.getDistinctHumanSummary(entry);
+      if (distinctSummary) {
+        fields.push(this.createInlineLabel('Summary', distinctSummary));
+      }
+      item.append(...fields);
       list.appendChild(item);
     });
     panel.appendChild(list);
@@ -739,7 +1015,7 @@ class ActivityLogController {
       return;
     }
 
-    this.filteredEntries.slice(0, this.pageSize).forEach((entry) => {
+    this.getPageEntries().forEach((entry) => {
       panel.appendChild(this.createProofCard(entry));
     });
   }
@@ -751,12 +1027,13 @@ class ActivityLogController {
 
     const stats = document.createElement('dl');
     stats.className = 'log-diagnostics-stats';
+    const diagnosticStats = this.computeDiagnosticStats(this.allEntries);
     [
       ['Loaded entries', this.allEntries.length],
       ['Visible in view', this.filteredEntries.length],
-      ['Deferred/reserved rows', this.allEntries.filter(entry => this.getMatrixStatus(entry) === 'deferred_reserved').length],
-      ['Conflict/ambiguous rows', this.allEntries.filter(entry => this.getMatrixStatus(entry) === 'conflict_ambiguous').length],
-      ['Blocked/error rows', this.allEntries.filter(entry => this.isDiagnosticEntry(entry)).length]
+      ['Deferred/reserved rows', diagnosticStats.deferredReserved],
+      ['Conflict/ambiguous rows', diagnosticStats.conflictAmbiguous],
+      ['Blocked/error rows', diagnosticStats.diagnostic]
     ].forEach(([label, value]) => {
       const wrap = document.createElement('div');
       wrap.className = 'log-diagnostics-stat';
@@ -777,23 +1054,86 @@ class ActivityLogController {
 
     const list = document.createElement('ul');
     list.className = 'log-view-list';
-    diagnosticEntries.slice(0, this.pageSize).forEach((entry) => {
+    this.getPageEntries(diagnosticEntries).forEach((entry) => {
       const item = document.createElement('li');
       item.className = 'log-view-list-item';
-      item.append(
+      const fields = [
         this.createInlineLabel('Status', this.describeMatrixStatus(entry)),
         this.createInlineLabel('Event', this.formatEventLabel(entry)),
-        this.createInlineLabel('Summary', this.getHumanSummary(entry))
-      );
+      ];
+      const distinctSummary = this.getDistinctHumanSummary(entry);
+      if (distinctSummary) {
+        fields.push(this.createInlineLabel('Summary', distinctSummary));
+      }
+      item.append(...fields);
       list.appendChild(item);
     });
     panel.appendChild(list);
   }
 
-  applyRouteTransferArrival() {
+  computeDiagnosticStats(entries) {
+    const counts = {
+      deferredReserved: 0,
+      conflictAmbiguous: 0,
+      diagnostic: 0,
+    };
+    entries.forEach((entry) => {
+      const status = this.getMatrixStatus(entry);
+      if (status === 'deferred_reserved') counts.deferredReserved += 1;
+      if (status === 'conflict_ambiguous') counts.conflictAmbiguous += 1;
+      if (this.isDiagnosticEntry(entry)) counts.diagnostic += 1;
+    });
+    return counts;
+  }
+
+  async applyRouteTransferArrival() {
     const container = document.getElementById('view-activity-log');
     if (!container) return;
-    window.Shell?.applyRouteTransferArrival?.('/activity-log', container);
+    const liveIntent = window.Shell?.getRouteTransferIntent?.('/activity-log') || null;
+    const intent = liveIntent || pendingActivityLogIntent;
+    if (intent) await this.applyRouteTransferFilters(intent);
+    const arrival = liveIntent
+      ? window.Shell?.applyRouteTransferArrival?.('/activity-log', container)
+      : null;
+    if (intent) this.markFirstRouteTransferMatch(container);
+    pendingActivityLogIntent = null;
+    return arrival;
+  }
+
+  markFirstRouteTransferMatch(container = document.getElementById('view-activity-log')) {
+    container?.querySelectorAll('[data-route-handoff-match]').forEach((node) => {
+      node.removeAttribute('data-route-handoff-match');
+    });
+    const firstMatch = container?.querySelector('[data-log-event-type]');
+    if (firstMatch) firstMatch.setAttribute('data-route-handoff-match', 'true');
+    return firstMatch || null;
+  }
+
+  async applyRouteTransferFilters(intent) {
+    const rawEntity = String(intent?.targetEntityId || '').trim();
+    if (!rawEntity) return;
+    let dimension = 'all';
+    let query = rawEntity.replace(/-/g, ' ');
+    const colon = rawEntity.indexOf(':');
+    if (colon > 0 && ENTITY_DIMENSION_KEYS.includes(rawEntity.slice(0, colon))) {
+      dimension = rawEntity.slice(0, colon);
+      query = rawEntity.slice(colon + 1);
+    } else if (rawEntity === 'commander-memory') {
+      dimension = 'event';
+      query = 'commander memory';
+    } else if (rawEntity === 'startup-outcome') {
+      dimension = 'event';
+      query = 'startup outcome';
+    }
+
+    const search = document.getElementById('log-search');
+    const entity = document.getElementById('log-entity-filter');
+    if (search) search.value = query;
+    if (entity) entity.value = dimension;
+    document.querySelectorAll('.log-filter:checked').forEach((input) => { input.checked = false; });
+    this.activeView = 'proof';
+    this._computeFilteredEntries();
+    await this.renderPage();
   }
 
   createPanelEmpty(message) {
@@ -826,10 +1166,13 @@ class ActivityLogController {
     heading.textContent = this.formatEventLabel(entry);
     card.appendChild(heading);
 
-    const summary = document.createElement('p');
-    summary.className = 'log-proof-card-summary';
-    summary.textContent = this.getHumanSummary(entry);
-    card.appendChild(summary);
+    const distinctSummary = this.getDistinctHumanSummary(entry);
+    if (distinctSummary) {
+      const summary = document.createElement('p');
+      summary.className = 'log-proof-card-summary';
+      summary.textContent = distinctSummary;
+      card.appendChild(summary);
+    }
 
     card.appendChild(this.createProofDetails(entry));
     return card;
@@ -840,7 +1183,7 @@ class ActivityLogController {
     details.className = 'log-entry-details';
 
     const summaryEl = document.createElement('summary');
-    summaryEl.textContent = 'Expand audit details / proof';
+    summaryEl.textContent = 'Proof';
     details.appendChild(summaryEl);
 
     const list = document.createElement('dl');
@@ -860,6 +1203,28 @@ class ActivityLogController {
       details.appendChild(sourceChainDetails);
     }
 
+    const entityDetails = this.createEntityIndexDetails(entry);
+    if (entityDetails) details.appendChild(entityDetails);
+
+    return details;
+  }
+
+  createEntityIndexDetails(entry) {
+    const dimensions = ENTITY_DIMENSION_KEYS
+      .map((dimension) => [dimension, this.getEntityValues(entry, dimension)])
+      .filter(([, values]) => values.length > 0);
+    if (dimensions.length === 0) return null;
+    const details = document.createElement('details');
+    details.className = 'log-entity-index-details';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Indexed proof fields';
+    details.appendChild(summary);
+    const list = document.createElement('dl');
+    list.className = 'log-entry-proof-list';
+    dimensions.forEach(([dimension, values]) => {
+      this.appendProofField(list, dimension, values.join(', '));
+    });
+    details.appendChild(list);
     return details;
   }
 
@@ -1050,7 +1415,7 @@ class ActivityLogController {
     const aiTier = entry.ai_tier || "—";
     const category = this.resolveCategory(entry); // Old category for class name compatibility
 
-    const summary = this.getHumanSummary(entry);
+    const summary = this.getDistinctHumanSummary(entry);
 
     const timestampCell = document.createElement("td");
     timestampCell.className = "log-timestamp";
@@ -1061,10 +1426,7 @@ class ActivityLogController {
     const eventLabel = document.createElement('span');
     eventLabel.className = 'log-event-label';
     eventLabel.textContent = this.formatEventLabel(entry);
-    const summaryText = document.createElement('span');
-    summaryText.className = 'log-summary-text';
-    summaryText.textContent = summary;
-    eventCell.append(eventLabel, summaryText);
+    eventCell.appendChild(eventLabel);
 
     const sourceCell = document.createElement("td");
     sourceCell.className = "log-source";
@@ -1097,6 +1459,12 @@ class ActivityLogController {
 
     const summaryCell = document.createElement("td");
     summaryCell.className = "log-summary";
+    if (summary) {
+      const summaryText = document.createElement('span');
+      summaryText.className = 'log-summary-text';
+      summaryText.textContent = summary;
+      summaryCell.appendChild(summaryText);
+    }
 
     if (entry.payload && entry.payload.route_intent) {
        const link = document.createElement('a');
@@ -1243,30 +1611,206 @@ class ActivityLogController {
     if (nextBtn) nextBtn.disabled = this.currentPage >= maxPage - 1;
   }
 
+  /**
+   * Export the current filtered view to a local JSON file.
+   *
+   * Law 8 / Master §11.5: an export of commander data is a protected action,
+   * so it is authorized and recorded by the backend before any file is built.
+   *
+   * Law 5 (truthful proof): the browser cannot prove a download reached disk,
+   * so this reports two honest stages to the backend — the export was
+   * requested/authorized, and then either the download was *initiated* or it
+   * failed. Nothing here ever claims a completed export.
+   *
+   * One frozen snapshot of the filtered view drives the confirmation text,
+   * the audit metadata, and the generated payload, so the commander cannot be
+   * shown one count and given another.
+   */
   async exportLog() {
-    const json = JSON.stringify(
-      {
-        total: this.filteredEntries.length,
-        entries: this.filteredEntries,
-        exported_at: new Date().toISOString(),
-      },
-      null,
-      2
-    );
+    const snapshot = this.filteredEntries.slice();
+    const entryCount = snapshot.length;
 
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `omnicovas-activity-log-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const proposeUrl = this.apiUrl('/activity-log/export/propose');
+    const authorizeUrl = this.apiUrl('/activity-log/export/authorize');
+    const resultUrl = this.apiUrl('/activity-log/export/result');
+    if (!proposeUrl || !authorizeUrl || !resultUrl) {
+      this.notify('Cannot export: the local backend bridge is not connected.', 'error');
+      return;
+    }
+
+    // Stage 1 — propose. The commander answers in the shared Confirmation
+    // Gate; this client cannot authorize anything on its own.
+    let confirmationId = null;
+    try {
+      const res = await fetch(proposeUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entry_count: entryCount, scope: 'filtered_view' }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      confirmationId = (await res.json())?.confirmation_id ?? null;
+      if (!confirmationId) throw new Error('backend returned no confirmation_id');
+    } catch (err) {
+      console.error('Activity Log export could not be proposed:', err);
+      this.notify('Could not request confirmation for the export. Nothing was exported.', 'error');
+      return;
+    }
+
+    this.notify('Export awaiting your confirmation in the Confirmation Gate.', 'info');
+
+    // Stage 2 — wait for the commander decision, then consume it once.
+    let exportId = null;
+    try {
+      exportId = await this._awaitExportAuthorization(authorizeUrl, confirmationId, entryCount);
+    } catch (err) {
+      console.error('Activity Log export was not authorized:', err);
+      this.notify(err?.commanderMessage || 'The export was not authorized. No file was written.', 'error');
+      return;
+    }
+    if (!exportId) return;
+
+    // Stage 2 — build and hand the file to the browser, then report honestly.
+    let filename = null;
+    try {
+      const json = JSON.stringify(
+        {
+          total: snapshot.length,
+          entries: snapshot,
+          exported_at: new Date().toISOString(),
+        },
+        null,
+        2
+      );
+
+      const blob = new Blob([json], { type: "application/json" });
+      const blobUrl = URL.createObjectURL(blob);
+      filename = `omnicovas-activity-log-${new Date().toISOString().slice(0, 10)}.json`;
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error('Activity Log export failed before a file was written:', err);
+      await this._reportExportResult(resultUrl, exportId, 'failed');
+      this.notify('Failed to prepare the export. No file was written.', 'error');
+      await this._loadAndRender();
+      return;
+    }
+
+    // The download is away. Whether that fact reached the audit log is a
+    // separate question, and the commander is told which one actually holds.
+    const recorded = await this._reportExportResult(resultUrl, exportId, 'download_initiated');
+    if (recorded.ok) {
+      this.notify(`Activity Log export started — download initiated as ${filename}`, 'success');
+    } else {
+      this.notify(
+        `Download initiated as ${filename}, but OmniCOVAS could not record the audit result.`,
+        'warning',
+      );
+    }
+    // Surface the new export proof events in this same view.
+    await this._loadAndRender();
   }
 
-  showClearConfirm() {
-    document.getElementById("log-clear-modal").style.display = "flex";
+  /**
+   * Poll for the commander decision on an export proposal.
+   *
+   * Returns an export id only when the backend consumed a genuine confirmed
+   * decision. A decline, an expiry, or an unknown confirmation throws with a
+   * commander-facing message; nothing here can authorize on its own.
+   */
+  async _awaitExportAuthorization(authorizeUrl, confirmationId, entryCount) {
+    const intervalMs = 1000;
+    const maxAttempts = 300; // bounded wait; matches the proposal TTL
+    // The shared gate owns the confirmation surface and its timers. Without it
+    // there is nowhere for the commander to decide, so waiting is pointless.
+    const gate = window.OmniConfirmationGate;
+    if (!gate?.delay) {
+      const unavailable = new Error('shared Confirmation Gate unavailable');
+      unavailable.commanderMessage =
+        'The Confirmation Gate is unavailable, so the export cannot be confirmed.';
+      throw unavailable;
+    }
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      const res = await fetch(authorizeUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation_id: confirmationId, entry_count: entryCount }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.authorized && data?.export_id) return data.export_id;
+        // Still pending: the commander has not answered yet.
+        await gate.delay(intervalMs);
+        continue;
+      }
+
+      const error = new Error(`HTTP ${res.status}`);
+      let detail = '';
+      try {
+        detail = (await res.json())?.detail || '';
+      } catch { /* non-JSON error body */ }
+      error.commanderMessage = /declin/i.test(detail)
+        ? 'Export declined. Nothing was exported.'
+        : /expired/i.test(detail)
+          ? 'The export confirmation expired. Nothing was exported.'
+          : 'The export was not authorized. No file was written.';
+      throw error;
+    }
+
+    const timeout = new Error('confirmation wait exceeded');
+    timeout.commanderMessage = 'The export confirmation timed out. Nothing was exported.';
+    throw timeout;
+  }
+
+  /**
+   * Report a staged export outcome.
+   *
+   * Returns {ok} describing whether the audit result was actually recorded, so
+   * the caller never shows a plain success message for an unrecorded outcome.
+   * Retries once on a network error or a 5xx, since the backend keeps the
+   * ticket alive until a proof entry is appended.
+   */
+  async _reportExportResult(resultUrl, exportId, outcome) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const res = await fetch(resultUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ export_id: exportId, outcome }),
+        });
+        if (res.ok) return { ok: true, status: res.status };
+        // 4xx is terminal: the ticket is gone or the request is malformed.
+        if (res.status < 500) {
+          console.error(`Export outcome was rejected: HTTP ${res.status}`);
+          return { ok: false, status: res.status };
+        }
+        console.error(`Export outcome could not be recorded: HTTP ${res.status}`);
+      } catch (err) {
+        console.error('Failed to record the export outcome:', err);
+      }
+    }
+    return { ok: false, status: null };
+  }
+
+  async showClearConfirm() {
+    const gate = window.OmniConfirmationGate;
+    if (!gate?.confirmLocalAction) {
+      console.error('[ActivityLog] Shared Confirmation Gate is unavailable.');
+      return;
+    }
+    const confirmed = await gate.confirmLocalAction({
+      title: 'Clear Activity Log display?',
+      message: 'This clears only the current display. Stored history is not deleted.',
+      confirmLabel: 'Clear display',
+      danger: true,
+    });
+    if (confirmed) await this.clearLog();
   }
 
   async clearLog() {
@@ -1276,17 +1820,57 @@ class ActivityLogController {
       this.filteredEntries = [];
       this.currentPage = 0;
 
-      document.getElementById("log-clear-modal").style.display = "none";
       this.renderPage();
-      alert("Activity log cleared!");
+      window.OmniConfirmationGate?.announce?.(
+        'Activity Log display cleared. Stored history was not deleted.',
+        { kind: 'success' },
+      );
     } catch (err) {
       console.error("Failed to clear log:", err);
-      alert("Failed to clear log. See console for details.");
+      window.OmniConfirmationGate?.announce?.(
+        'Failed to clear Activity Log display. See console for details.',
+        { kind: 'error' },
+      );
     }
   }
 }
 
-globalThis.__activityLogExports = { ActivityLogController };
+/* Module-scope handoff listener. The shell can apply the visible arrival banner
+ * and clear its intent before an already-mounted Activity Log controller gets a
+ * render turn. Capture the intent from the event itself and apply the filter on
+ * the next microtask; unlike requestAnimationFrame this also runs while the
+ * window is hidden or minimised. If the first fetch is still pending, the
+ * intent stays queued for `_loadAndRender` instead.
+ *
+ * An already-mounted controller holds entries from its last fetch, and proof
+ * rows written after that fetch (e.g. a Memory export completed on Privacy
+ * moments ago) do not exist in that snapshot. Arrival promises current proof,
+ * so this path must re-fetch before it filters. */
+window.OmniEvents = window.OmniEvents || new EventTarget();
+if (!window.__omniActivityLogTransferListener) {
+  window.__omniActivityLogTransferListener = true;
+  window.OmniEvents.addEventListener('route-transfer-started', (event) => {
+    const intent = event?.detail?.intent;
+    if (intent?.targetRoute !== '/activity-log') return;
+    pendingActivityLogIntent = intent;
+    queueMicrotask(async () => {
+      const controller = activeActivityLogController;
+      if (!controller || controller._loadedOnce !== true || pendingActivityLogIntent !== intent) return;
+      await controller.loadActivityLog();
+      if (activeActivityLogController !== controller || pendingActivityLogIntent !== intent) return;
+      await controller.renderRouteHero();
+      await controller.applyRouteTransferFilters(intent);
+      controller.markFirstRouteTransferMatch();
+      pendingActivityLogIntent = null;
+    }, 0);
+  });
+}
+
+globalThis.__activityLogExports = {
+  ActivityLogController,
+  __setActiveControllerForTest(controller) { activeActivityLogController = controller; },
+  __resetTransferState() { pendingActivityLogIntent = null; },
+};
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {

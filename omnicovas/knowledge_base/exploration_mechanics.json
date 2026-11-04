@@ -16,7 +16,7 @@
     {
       "id": "jump_range_source",
       "topic": "Jump Range Data Source",
-      "content": "The maximum jump range of a ship at its current load is provided in the Loadout journal event as the field MaxJumpRange, measured in light-years. This value accounts for current fuel load, cargo mass, and fitted FSD. OmniCOVAS reads jump_range_ly directly from this field and does NOT recompute it from first principles. First-principles jump range calculation (using mass, FSD rating, boost) is reserved for the Exploration pillar (Pillar 3, Phase 5).",
+      "content": "The Loadout journal event provides MaxJumpRange in light-years. Frontier documents it as based on zero cargo and just enough fuel for one jump. OmniCOVAS reads jump_range_ly directly from this field and does NOT recompute it from first principles. First-principles jump range calculation requires independently verified FSD constants and mass inputs.",
       "patch_verified": "4.0",
       "source": "Elite Dangerous journal documentation, Loadout event schema",
       "last_updated": "2026-04-19",
@@ -34,6 +34,17 @@
       "confidence": "medium",
       "needs_review": true,
       "_justification": "Week 7. Reference for sanity-checking jump_range_ly values in tests and debugging. Medium confidence because these are approximate community values, not Frontier-published specs. Needs review against current game version."
+    },
+    {
+      "id": "scan_value_classes",
+      "topic": "Exploration Scan Value by Body Class (reference, community-derived)",
+      "content": "Exploration payouts vary by orders of magnitude with body class, and are further modified by terraform state, whether the Commander was the first to discover the body, and whether it was surface-mapped with a Detailed Surface Scanner. Approximate base ranges, before bonuses: icy and rocky bodies are negligible, in the hundreds of credits; gas giants of most classes are low, roughly one to five thousand; high metal content bodies are moderate, roughly nine to fifteen thousand; metal-rich bodies roughly twenty to thirty thousand; ammonia worlds and water worlds are high, roughly ninety thousand to one hundred and twenty thousand; Earth-like worlds are very high, in the region of a quarter of a million. Stars are generally low, one to three thousand, except neutron stars and black holes which are roughly twenty thousand. Terraformable candidates carry a substantial premium over their non-terraformable equivalents. First discovery and surface mapping each multiply the figure significantly, and mapping a body the Commander also discovered first pays the most. These are approximate community-derived bands for expectation-setting only. They are NOT Frontier-published, they change with balance patches, and the exact per-body figure depends on mass and other terms this reference deliberately does not model. Actual credits received are reported by the journal in SellExplorationData and MultiSellExplorationData and must always take precedence.",
+      "patch_verified": "unknown",
+      "source": "community value tables and in-game observation; not Frontier-published",
+      "last_updated": "2026-08-16",
+      "confidence": "medium",
+      "needs_review": true,
+      "_justification": "Phase 13 exploration value slice. Entered as class bands rather than a formula on purpose: the real payout depends on mass and other terms, so a precise figure would be confidently wrong. Consumers must present a value CLASS and range, never a single credit number, and must never add the estimate to observed earnings."
     },
     {
       "id": "neutron_boost_mechanics",

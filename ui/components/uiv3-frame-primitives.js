@@ -109,6 +109,87 @@
     return el;
   }
 
+  function tabItems(tabList, selector) {
+    return Array.from(tabList?.querySelectorAll(selector || '[role="tab"]') || [])
+      .filter((tab) => !tab.disabled && tab.getAttribute('aria-disabled') !== 'true');
+  }
+
+  function setUiv3TabSelection(tabList, value, options = {}) {
+    const selector = options.selector || '[role="tab"]';
+    const valueAttribute = options.valueAttribute || 'data-tab';
+    const tabs = tabItems(tabList, selector);
+    if (tabs.length === 0) return null;
+
+    const requested = String(value ?? '');
+    const selected = tabs.find((tab) => tab.getAttribute(valueAttribute) === requested)
+      || tabs.find((tab) => tab.getAttribute('aria-selected') === 'true')
+      || tabs[0];
+
+    tabs.forEach((tab) => {
+      const active = tab === selected;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      tab.setAttribute('tabindex', active ? '0' : '-1');
+      tab.classList.toggle('is-active', active);
+      tab.removeAttribute('aria-current');
+    });
+    return selected;
+  }
+
+  /* Shared horizontal-tab behavior for route-owned subnavigation. It owns
+     roving focus and ARIA selection; each route still owns its panel swap. */
+  function bindUiv3TabList(tabList, options = {}) {
+    if (!tabList) return null;
+    const selector = options.selector || '[role="tab"]';
+    const valueAttribute = options.valueAttribute || 'data-tab';
+    const onActivate = typeof options.onActivate === 'function'
+      ? options.onActivate
+      : null;
+
+    tabList.setAttribute('role', 'tablist');
+    tabList.setAttribute('aria-orientation', 'horizontal');
+
+    const activate = (tab, source, moveFocus) => {
+      if (!tab) return;
+      const value = tab.getAttribute(valueAttribute);
+      const selected = setUiv3TabSelection(tabList, value, { selector, valueAttribute });
+      if (moveFocus && typeof selected?.focus === 'function') selected.focus();
+      if (onActivate) onActivate(value, selected, { source });
+    };
+
+    const tabs = tabItems(tabList, selector);
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activate(tab, 'click', false));
+    });
+
+    tabList.addEventListener('keydown', (event) => {
+      const currentTabs = tabItems(tabList, selector);
+      const current = currentTabs.indexOf(document.activeElement);
+      if (current < 0) return;
+      let next = null;
+      if (event.key === 'ArrowRight') next = (current + 1) % currentTabs.length;
+      if (event.key === 'ArrowLeft') next = (current - 1 + currentTabs.length) % currentTabs.length;
+      if (event.key === 'Home') next = 0;
+      if (event.key === 'End') next = currentTabs.length - 1;
+      if (next === null) return;
+      event.preventDefault();
+      activate(currentTabs[next], 'keyboard', true);
+    });
+
+    const initial = setUiv3TabSelection(tabList, options.activeValue, {
+      selector,
+      valueAttribute,
+    });
+    return {
+      select(value, selectOptions = {}) {
+        const selected = setUiv3TabSelection(tabList, value, { selector, valueAttribute });
+        if (selectOptions.focus && typeof selected?.focus === 'function') selected.focus();
+        return selected;
+      },
+      selected: initial,
+    };
+  }
+
   function createUiv3StatusDot(kind, label) {
     const safeKind = ['ok', 'warn', 'alert', 'info'].includes(kind) ? kind : 'info';
     const dot = makeEl('span', `uiv3-dot uiv3-dot--${safeKind}`);
@@ -170,6 +251,8 @@
     createUiv3CornerBracketFrame,
     createUiv3Icon,
     mountUiv3Icons,
+    bindUiv3TabList,
+    setUiv3TabSelection,
     icons: {
       has(name) {
         return Boolean(ICON_DATA[name]);

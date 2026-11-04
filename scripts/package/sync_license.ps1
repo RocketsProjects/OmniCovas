@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 Sync root LICENSE.md into the UI asset bundle.
 

@@ -1,4 +1,4 @@
-/* ui/styles/overlay.css — HUD Projection Styling (PB05-10)
+/* ui/styles/overlay.css — HUD Projection Styling (PB05-10, NHI-03/04)
    Preserves transparent window behavior and hidden-by-default intent. */
 
 * {
@@ -23,11 +23,12 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: var(--space-3);
+  padding: 8px;
   pointer-events: none;
 }
 
-/* Anchor classes control banner placement within the overlay window */
+/* Anchor classes control banner placement within the overlay window.
+   Native placement on the monitor uses the same anchor (present_overlay). */
 #overlay-container.anchor-center {
   align-items: center;
   justify-content: center;
@@ -39,6 +40,10 @@ body {
 #overlay-container.anchor-top-right {
   align-items: flex-start;
   justify-content: flex-end;
+}
+#overlay-container.anchor-top-center {
+  align-items: flex-start;
+  justify-content: center;
 }
 #overlay-container.anchor-bottom-left {
   align-items: flex-end;
@@ -59,20 +64,17 @@ body {
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-panel);
   pointer-events: auto;
-  backdrop-filter: blur(8px);
-  animation: slideIn 0.3s ease-out;
+  animation: fadeIn 120ms ease-out;
   min-width: 240px;
+  /* Natural size even while the native window is still parked: the window is
+     fitted to this measurement afterwards. */
+  flex-shrink: 0;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Opacity only: no travel and no continuous animation while an alert is up. */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .banner.critical {
@@ -82,15 +84,6 @@ body {
 
 .banner.warning {
   border-color: var(--color-warn);
-}
-
-.banner.critical .banner-icon {
-  animation: pulse 0.8s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }
 
 .banner-source {
@@ -126,9 +119,6 @@ body {
 .status-dot {
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
-  position: fixed;
-  bottom: var(--space-4);
-  right: var(--space-4);
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-ok);
   color: var(--color-fg);
@@ -150,8 +140,93 @@ body {
   100% { opacity: 0; }
 }
 
+/* Director attention card (NHI-03/04).
+   One message on an opaque blue-black surface with off-white text. Critical
+   uses a pale red edge and the word "Critical", warning a pale amber edge and
+   "Warning": colour never carries meaning alone. Sizes are logical px scaled by
+   the Commander's text size; the native window is fitted around the card, so
+   text wraps instead of clipping at 200%. */
+:root {
+  --ocv-alert-scale: 1;
+}
+
+.ocv-alert {
+  pointer-events: auto;
+  width: calc(352px * var(--ocv-alert-scale));
+  /* No viewport cap: it is measured while the window may still be parked, and
+     the native window is then fitted around it (clamped to the monitor). */
+  flex-shrink: 0;
+  min-height: calc(80px * var(--ocv-alert-scale));
+  padding: calc(12px * var(--ocv-alert-scale)) calc(16px * var(--ocv-alert-scale));
+  background: #0b1020;
+  color: #f2f4f8;
+  border: 1px solid #3fb6c9;
+  border-left-width: 4px;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-family-ui);
+  animation: fadeIn 120ms ease-out;
+  overflow-wrap: anywhere;
+}
+
+.ocv-alert--critical,
+.ocv-alert--warning {
+  width: calc(392px * var(--ocv-alert-scale));
+  min-height: calc(100px * var(--ocv-alert-scale));
+}
+
+.ocv-alert--critical { border-color: #ff8a8a; }
+.ocv-alert--warning { border-color: #ffd166; }
+
+.ocv-alert-label {
+  font-size: calc(12px * var(--ocv-alert-scale));
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b8c2d6;
+}
+
+.ocv-alert--critical .ocv-alert-label { color: #ffb3b3; }
+.ocv-alert--warning .ocv-alert-label { color: #ffe08a; }
+
+.ocv-alert-heading {
+  margin-top: calc(4px * var(--ocv-alert-scale));
+  font-size: calc(18px * var(--ocv-alert-scale));
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ocv-alert-body {
+  margin-top: calc(2px * var(--ocv-alert-scale));
+  font-size: calc(16px * var(--ocv-alert-scale));
+  line-height: 1.35;
+}
+
+.ocv-alert-dismiss {
+  margin-top: calc(8px * var(--ocv-alert-scale));
+  padding: calc(4px * var(--ocv-alert-scale)) calc(12px * var(--ocv-alert-scale));
+  font: inherit;
+  font-size: calc(14px * var(--ocv-alert-scale));
+  color: #f2f4f8;
+  background: #1c2540;
+  border: 1px solid #8a96b0;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.ocv-alert-dismiss:focus-visible {
+  outline: 2px solid #f2f4f8;
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .banner, .banner-icon, .status-dot {
+  .banner, .banner-icon, .status-dot, .ocv-alert {
     animation: none;
   }
+}
+
+:root[data-reduced-motion="reduce"] .banner,
+:root[data-reduced-motion="reduce"] .status-dot,
+:root[data-reduced-motion="reduce"] .ocv-alert {
+  animation: none;
 }

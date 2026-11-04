@@ -6,7 +6,7 @@ authors = ["RocketsProjects"]
 license = "LicenseRef-OmniCOVAS-Free-To-Use-Source-Available-Proprietary"
 repository = "https://github.com/RocketsProjects/omnicovas"
 edition = "2021"
-rust-version = "1.77.2"
+rust-version = "1.88"
 
 [lib]
 name = "omnicovas_lib"

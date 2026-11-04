@@ -160,149 +160,6 @@
   line-height: 1.5;
 }
 
-.operations-combat-shell {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 88rem;
-}
-
-.operations-combat-header {
-  max-width: 72rem;
-}
-
-.operations-combat-index {
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-card);
-  background: var(--color-bg-panel);
-  padding: var(--space-4);
-}
-
-.operations-combat-index-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.operations-combat-index-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.25rem;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--color-nav-text);
-  cursor: pointer;
-  font: inherit;
-  padding: var(--space-1) var(--space-3);
-  text-align: left;
-  text-decoration: none;
-}
-
-.operations-combat-index-link:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-
-.operations-combat-index-link--active,
-.operations-combat-index-link[aria-current="true"] {
-  border-color: var(--color-nav-active-border);
-  background: var(--color-nav-active);
-  color: var(--color-nav-active-text);
-}
-
-.operations-combat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-  gap: var(--space-3);
-}
-
-.operations-combat-card {
-  display: grid;
-  align-content: start;
-  gap: var(--space-2);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-card);
-  background: var(--color-bg-panel);
-  padding: var(--space-4);
-  scroll-margin-top: var(--space-4);
-}
-
-.operations-combat-card--active {
-  border-color: var(--color-border-active);
-  box-shadow: inset 0 0 0 1px var(--color-border-active);
-}
-
-.operations-combat-card-title {
-  margin: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-}
-
-.operations-combat-state {
-  margin-block: var(--space-1);
-}
-
-.operations-combat-caption {
-  margin: 0;
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
-}
-
-.operations-combat-card--target-threat {
-  grid-column: span 2;
-}
-
-.operations-target-threat {
-  display: grid;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
-}
-
-.operations-target-threat-group {
-  display: grid;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.operations-target-threat-group-title {
-  margin: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.operations-target-threat-list {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.operations-target-threat-row {
-  display: grid;
-  grid-template-columns: minmax(7rem, 0.75fr) minmax(0, 1fr);
-  gap: var(--space-2);
-  align-items: start;
-  min-width: 0;
-  border-block-start: 1px solid var(--color-border-subtle);
-  padding-block-start: var(--space-2);
-}
-
-.operations-target-threat-label {
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-sm);
-}
-
-.operations-target-threat-value {
-  min-width: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-sm);
-  overflow-wrap: anywhere;
-}
-
 .operations-provenance-chip {
   justify-self: start;
   min-width: 0;
@@ -318,139 +175,16 @@
   white-space: normal;
 }
 
-.operations-target-threat-row .operations-provenance-chip {
-  grid-column: 2 / -1;
-}
-
-.operations-combat-card--interdiction-escape {
-  grid-column: span 2;
-}
-
-.operations-interdiction-escape {
-  display: grid;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
-.operations-interdiction-escape-list {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.operations-interdiction-escape-row {
-  display: grid;
-  grid-template-columns: minmax(7rem, 0.75fr) minmax(0, 1fr);
-  gap: var(--space-2);
-  align-items: start;
-  min-width: 0;
-  border-block-start: 1px solid var(--color-border-subtle);
-  padding-block-start: var(--space-2);
-}
-
-.operations-interdiction-escape-label {
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-sm);
-}
-
-.operations-interdiction-escape-value {
-  min-width: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-sm);
-  overflow-wrap: anywhere;
-}
-
-.operations-interdiction-escape-row .operations-provenance-chip {
-  grid-column: 2 / -1;
-}
-
-.operations-combat-card--cz-missions,
-.operations-combat-card--rewards-rank,
-.operations-combat-card--loadout-munitions,
-.operations-combat-card--debrief {
-  grid-column: span 2;
-}
-
-.operations-cz-section,
-.operations-loadout-blockers,
-.operations-loadout-munitions,
-.operations-loadout-modules {
-  display: grid;
-  gap: var(--space-3);
-  min-width: 0;
-  border-block-start: 1px solid var(--color-border-subtle);
-  padding-block-start: var(--space-3);
-}
-
-.operations-cz-section:first-child,
-.operations-loadout-blockers:first-child,
-.operations-loadout-munitions:first-child,
-.operations-loadout-modules:first-child {
-  border-block-start: 0;
-  padding-block-start: 0;
-}
-
-.operations-cz-section-title {
-  margin: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.operations-cz-list,
-.operations-rewards-rank-list {
-  display: grid;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.operations-cz-row {
-  display: grid;
-  grid-template-columns: minmax(8rem, 0.75fr) minmax(0, 1fr);
-  gap: var(--space-1) var(--space-3);
-  align-items: start;
-  min-width: 0;
-  border-block-start: 1px solid var(--color-border-subtle);
-  padding-block-start: var(--space-2);
-}
-
-.operations-cz-row:first-child {
-  border-block-start: 0;
-  padding-block-start: 0;
-}
-
-.operations-cz-label,
 .operations-summary-label {
   color: var(--color-fg-muted);
   font-size: var(--font-size-sm);
 }
 
-.operations-cz-value,
 .operations-summary-value {
   min-width: 0;
   color: var(--color-fg);
   font-size: var(--font-size-sm);
   overflow-wrap: anywhere;
-}
-
-.operations-cz-row .operations-provenance-chip {
-  grid-column: 2 / -1;
-}
-
-.operations-cz-status,
-.operations-loadout-status,
-.operations-rewards-caveat,
-.operations-loadout-caveat {
-  margin: 0;
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
-}
-
-.operations-loadout-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: var(--space-2);
-  min-width: 0;
 }
 
 .operations-summary-row {
@@ -465,78 +199,6 @@
 
 .operations-summary-value {
   font-weight: var(--font-weight-semibold);
-}
-
-.operations-cz-mission-list,
-.operations-cz-unsupported-list,
-.operations-loadout-blocker-list,
-.operations-loadout-module-list {
-  display: grid;
-  gap: var(--space-2);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}
-
-.operations-cz-mission-item,
-.operations-loadout-blocker-item,
-.operations-loadout-module-item {
-  display: grid;
-  gap: var(--space-1) var(--space-3);
-  min-width: 0;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-card);
-  background: var(--color-bg-surface);
-  padding: var(--space-3);
-}
-
-.operations-cz-mission-name,
-.operations-loadout-blocker-label,
-.operations-loadout-module-item-name {
-  min-width: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  overflow-wrap: anywhere;
-}
-
-.operations-cz-mission-id,
-.operations-cz-mission-faction,
-.operations-cz-mission-destination,
-.operations-cz-mission-status,
-.operations-loadout-blocker-slot,
-.operations-loadout-module-slot,
-.operations-loadout-module-health,
-.operations-loadout-module-on,
-.operations-cz-unsupported-item {
-  min-width: 0;
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-xs);
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-
-.operations-loadout-module-details {
-  min-width: 0;
-}
-
-.operations-loadout-module-summary {
-  color: var(--color-fg);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.operations-loadout-module-summary:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-
-.operations-loadout-module-details[open] .operations-loadout-module-list {
-  max-height: 18rem;
-  overflow-y: auto;
-  padding-right: var(--space-2);
 }
 
 .operations-nav-handoff {
@@ -576,258 +238,6 @@
 .operations-nav-handoff-btn:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
-}
-
-@media (max-width: 720px) {
-  .operations-combat-card--target-threat {
-    grid-column: auto;
-  }
-
-  .operations-combat-card--interdiction-escape {
-    grid-column: auto;
-  }
-
-  .operations-combat-card--cz-missions,
-  .operations-combat-card--rewards-rank,
-  .operations-combat-card--loadout-munitions,
-  .operations-combat-card--debrief {
-    grid-column: auto;
-  }
-
-  .operations-target-threat-row,
-  .operations-interdiction-escape-row,
-  .operations-cz-row {
-    grid-template-columns: 1fr;
-  }
-
-  .operations-target-threat-row .operations-provenance-chip,
-  .operations-interdiction-escape-row .operations-provenance-chip,
-  .operations-cz-row .operations-provenance-chip {
-    grid-column: auto;
-  }
-}
-
-.operations-pvp-container {
-  display: grid;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.operations-pvp-form {
-  display: grid;
-  gap: var(--space-3);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-card);
-  background: var(--color-bg-surface);
-  padding: var(--space-4);
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.operations-pvp-form-title {
-  margin: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.operations-pvp-form-fields {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.operations-pvp-form-group {
-  display: grid;
-  gap: var(--space-1);
-}
-
-.operations-pvp-form-label {
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-}
-
-.operations-pvp-form-input,
-.operations-pvp-form-textarea {
-  width: 100%;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-base);
-  background: var(--color-bg-panel);
-  color: var(--color-fg);
-  font: inherit;
-  font-size: var(--font-size-sm);
-  padding: var(--space-2);
-  box-sizing: border-box;
-}
-
-.operations-pvp-form-textarea {
-  min-height: 5rem;
-  resize: vertical;
-}
-
-.operations-pvp-form-input:focus-visible,
-.operations-pvp-form-textarea:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: -1px;
-}
-
-.operations-pvp-form-submit {
-  justify-self: start;
-  min-height: 2.25rem;
-  border: 1px solid var(--color-border-interactive);
-  border-radius: var(--radius-pill);
-  background: var(--color-bg-interactive);
-  color: var(--color-fg-on-interactive);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  padding: var(--space-1) var(--space-4);
-}
-
-.operations-pvp-form-submit:hover:not(:disabled) {
-  filter: brightness(1.1);
-}
-
-.operations-pvp-form-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.operations-pvp-form-status {
-  margin: 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-fg-muted);
-  font-style: italic;
-}
-
-.operations-pvp-list {
-  display: grid;
-  gap: var(--space-3);
-  max-height: 40rem;
-  overflow-y: auto;
-  padding-right: var(--space-2);
-  min-width: 0;
-  max-width: 100%;
-}
-
-.operations-pvp-status {
-  margin: 0;
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-sm);
-  font-style: italic;
-}
-
-.operations-pvp-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
-  align-items: start;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-card);
-  background: var(--color-bg-surface);
-  padding: var(--space-3);
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.operations-pvp-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-  max-width: 100%;
-}
-
-.operations-pvp-timestamp {
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-xs);
-}
-
-.operations-pvp-source {
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-xs);
-  font-style: italic;
-}
-
-.operations-pvp-identity {
-  display: grid;
-  gap: var(--space-1);
-  min-width: 0;
-  max-width: 100%;
-}
-
-.operations-pvp-commander {
-  color: var(--color-fg);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.operations-pvp-system {
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-xs);
-}
-
-.operations-pvp-content {
-  display: grid;
-  gap: var(--space-2);
-  min-width: 0;
-  max-width: 100%;
-}
-
-.operations-pvp-note {
-  margin: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
-.operations-pvp-risk {
-  margin: 0;
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-sm);
-  font-style: italic;
-}
-
-.operations-pvp-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-1);
-  min-width: 0;
-  max-width: 100%;
-}
-
-.operations-pvp-delete-btn {
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--color-fg-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--font-size-xs);
-  padding: var(--space-1) var(--space-2);
-}
-
-.operations-pvp-delete-btn:hover:not(:disabled) {
-  border-color: var(--color-border-destructive);
-  color: var(--color-fg-destructive);
-}
-
-.operations-pvp-delete-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .operations-trade-mining-shell {
@@ -1039,7 +449,7 @@
 
 .operations-trade-mining-intel-link {
   justify-self: start;
-  color: var(--color-accent);
+  color: var(--color-fg);
   font-size: var(--font-size-sm);
 }
 
@@ -1099,7 +509,7 @@
 
 .operations-squadron-handoff-link {
   justify-self: start;
-  color: var(--color-accent);
+  color: var(--color-fg);
   font-size: var(--font-size-sm);
 }
 
@@ -1155,6 +565,19 @@
   font-size: var(--font-size-sm, 0.875rem);
   max-width: 68ch;
   line-height: 1.5;
+}
+
+.ops-v3-confidence-pill {
+  border: 1px solid var(--uiv3-border, rgba(140,160,180,0.14));
+  border-radius: 4px;
+  color: var(--uiv3-text-dim, #5a6478);
+  flex-shrink: 0;
+  font-family: var(--uiv3-font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 3px 8px;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .ops-v3-alert-pill {
@@ -1412,8 +835,6 @@
   gap: var(--space-3);
 }
 
-.ops-v3-cargo-card,
-.ops-v3-next-actions-card,
 .ops-v3-recent-activity-card {
   background: var(--uiv3-panel, rgba(20,24,36,0.55));
   border: 1px solid var(--uiv3-border, rgba(140,160,180,0.14));
@@ -1459,44 +880,6 @@
 }
 
 .ops-v3-card-link:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-
-/* Next actions card rows */
-.ops-v3-next-action-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--uiv3-border, rgba(140,160,180,0.14));
-}
-
-.ops-v3-next-action-row:last-child {
-  border-bottom: none;
-}
-
-.ops-v3-next-action-label {
-  font-size: var(--font-size-sm, 0.875rem);
-  color: var(--uiv3-text-primary, #e6e8ef);
-  text-decoration: none;
-}
-
-.ops-v3-route-chip {
-  border: 1px solid var(--uiv3-border, rgba(140,160,180,0.14));
-  border-radius: 3px;
-  font-family: var(--uiv3-font-mono, monospace);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  padding: 2px 6px;
-  text-transform: uppercase;
-  color: var(--uiv3-text-muted, #8a92a8);
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.ops-v3-route-chip:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
@@ -1554,4 +937,1569 @@
 .ops-v3-card-footer-link:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+/* --- Operation readiness card (PB14-02 first slice; LNA-028) ------------- */
+
+.operations-readiness-card {
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+}
+
+.operations-readiness-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.operations-readiness-title {
+  margin: 0;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.operations-readiness-summary {
+  font-size: 0.82em;
+  opacity: 0.8;
+}
+
+.operations-readiness-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 6px 14px;
+}
+
+.operations-readiness-check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  align-items: baseline;
+}
+
+.operations-readiness-label {
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+.operations-readiness-value {
+  font-weight: 600;
+  text-align: right;
+}
+
+.operations-readiness-check--attention .operations-readiness-value {
+  color: var(--ocv-warn, #e0a437);
+}
+
+.operations-readiness-check--unknown .operations-readiness-value {
+  opacity: 0.6;
+  font-weight: 400;
+}
+
+.operations-readiness-note {
+  grid-column: 1 / -1;
+  font-size: 0.75em;
+  opacity: 0.65;
+}
+
+.operations-readiness-caveat {
+  margin: 8px 0 0;
+  font-size: 0.75em;
+  opacity: 0.65;
+}
+
+/* --- Goals & Blockers workflow card (PB14-02 first slice) ----------------- */
+
+.operations-outlook-card {
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+}
+
+.operations-outlook-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.operations-outlook-title {
+  margin: 0;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.operations-outlook-goal-kind {
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0 6px;
+  opacity: 0.75;
+}
+
+.operations-outlook-goal {
+  margin: 6px 0 8px;
+  font-weight: 600;
+  max-width: 70ch;
+  overflow-wrap: anywhere;
+}
+
+.operations-outlook-subtitle {
+  margin: 8px 0 4px;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.operations-outlook-none {
+  margin: 0;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+.operations-outlook-blockers,
+.operations-outlook-actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.operations-outlook-blocker {
+  display: grid;
+  gap: 1px;
+}
+
+.operations-outlook-blocker-label {
+  font-weight: 600;
+  color: var(--ocv-warn, #e0a437);
+  font-size: 0.88em;
+}
+
+.operations-outlook-blocker-detail {
+  font-size: 0.82em;
+}
+
+.operations-outlook-blocker-source {
+  font-size: 0.72em;
+  opacity: 0.6;
+}
+
+.operations-outlook-action {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.operations-outlook-action-why {
+  font-size: 0.78em;
+  opacity: 0.7;
+}
+
+/* --- Exploration workflow card (Phase 14 R1-2) ---------------------------
+   Consumes the PB05-08 /operations/exploration/snapshot backend. Deliberately
+   shaped like the readiness and outlook cards so Exploration reads as one more
+   workflow surface rather than a fact browser: Intel keeps the system and
+   biology facts, Navigation keeps the hop table. */
+
+.operations-exploration-card {
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+}
+
+.operations-exploration-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.operations-exploration-title {
+  margin: 0;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.operations-exploration-status {
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0 6px;
+  opacity: 0.75;
+}
+
+.operations-exploration-route {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 6px 0 0;
+}
+
+.operations-exploration-route-label {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.operations-exploration-route-value {
+  font-weight: 600;
+}
+
+.operations-exploration-subtitle {
+  margin: 8px 0 4px;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.operations-exploration-note,
+.operations-exploration-none {
+  margin: 0;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+.operations-exploration-objectives,
+.operations-exploration-blockers,
+.operations-exploration-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.operations-exploration-objective,
+.operations-exploration-checklist-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  align-items: baseline;
+}
+
+.operations-exploration-objective-label {
+  font-weight: 600;
+  font-size: 0.88em;
+}
+
+.operations-exploration-checklist-label {
+  font-size: 0.85em;
+}
+
+.operations-exploration-objective-note {
+  grid-column: 1 / -1;
+  font-size: 0.75em;
+  opacity: 0.65;
+}
+
+/* State is carried by the text itself, never by colour alone (ADR 0004). */
+.operations-exploration-objective-state,
+.operations-exploration-checklist-state {
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+  text-align: right;
+}
+
+.operations-exploration-objective-state--blocked {
+  color: var(--ocv-warn, #e0a437);
+  opacity: 1;
+}
+
+.operations-exploration-objective-state--unknown,
+.operations-exploration-checklist-state--unknown {
+  opacity: 0.55;
+}
+
+.operations-exploration-blocker {
+  display: grid;
+  gap: 1px;
+}
+
+.operations-exploration-blocker-label {
+  font-weight: 600;
+  color: var(--ocv-warn, #e0a437);
+  font-size: 0.88em;
+}
+
+.operations-exploration-blocker-source {
+  font-size: 0.72em;
+  opacity: 0.6;
+}
+
+.operations-exploration-handoffs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* --- Phase 14 R2: Operations information architecture -------------------- */
+
+/* Supporting context band. Subordinate to the workflow band by position and by
+   weight — it must never read as the primary thing on the screen (R2-8). */
+.ops-v3-supporting-context {
+  margin-top: var(--space-4, 16px);
+  padding-top: var(--space-3, 12px);
+  border-top: 1px solid var(--uiv3-border, rgba(140, 160, 180, 0.14));
+}
+
+.ops-v3-supporting-context .ops-v3-station-card,
+.ops-v3-supporting-context .ops-v3-recent-activity-card {
+  font-size: 0.95em;
+}
+
+/* Default Operations surface (R2-2). Deliberately compact: a state band, any
+   real attention, and one honest empty-state line. */
+.ops-v3-default-briefing {
+  margin-top: var(--space-4, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+
+.ops-v3-default-heading {
+  font-family: var(--uiv3-font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--uiv3-text-dim, #5a6478);
+  margin: 0;
+}
+
+.ops-v3-default-note {
+  margin: 0;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--uiv3-text-muted, #8a92a8);
+  max-width: 60ch;
+}
+
+/* One canonical action surface (R2-3). Support tools sit in the same list and
+   read lighter than state-derived workflow actions — weight, not a separate
+   surface and not a visible taxonomy. */
+.operations-outlook-action--support_tool .operations-outlook-action-link {
+  opacity: 0.85;
+}
+
+/* The Commander objective band (R4-1 / P14-T02).
+
+   R2 created the slot, R3 filled it, R4 gives it rank: it sits directly under
+   the current-state strip and above the primary action and readiness. It is
+   weighted with a left rule and a slightly larger line rather than a banner —
+   the audit's warning was that the objective was invisible, not that it needed
+   to shout. Safety (the watch strip) still renders above it, and readiness
+   still renders in full below it. */
+.operations-objective-band {
+  border-left: 3px solid var(--uiv3-accent, #c8a15a);
+  padding: var(--space-2, 8px) 0 var(--space-2, 8px) var(--space-3, 12px);
+  margin: var(--space-3, 12px) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 4px);
+}
+
+.operations-objective-band .operations-outlook-goal {
+  font-size: 1.05em;
+  margin: 2px 0 4px;
+}
+
+/* Conditions that need attention but do not block this operation (R4-2).
+   Subordinate by weight and collapsed by default, so the Blockers slot means
+   what it says without the information being thrown away. */
+.operations-outlook-nonblocking {
+  margin-top: var(--space-2, 8px);
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+.operations-outlook-nonblocking-summary {
+  cursor: pointer;
+  color: var(--uiv3-text-muted, #8a92a8);
+}
+
+.operations-outlook-nonblocking-list {
+  list-style: none;
+  margin: var(--space-1, 4px) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.operations-outlook-nonblocking-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+/* Role fit inside the readiness card (P14-D05). */
+.operations-role-fit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2, 8px);
+  margin-top: var(--space-2, 8px);
+  padding-top: var(--space-2, 8px);
+  border-top: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.12));
+  font-size: 0.85em;
+}
+
+.operations-role-fit-label {
+  font-family: var(--uiv3-font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--uiv3-text-dim, #5a6478);
+}
+
+.operations-role-fit-note {
+  flex: 1 0 100%;
+  color: var(--uiv3-text-muted, #8a92a8);
+  max-width: 70ch;
+}
+
+/* The objective slot (R2-1), now filled by the PB14-R1 lifecycle (R3). It is
+   still one line in one card: the Commander objective is weighted above the
+   blockers and next actions below it, and never given a surface of its own. */
+.operations-outlook-goal--unset {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* A completed objective must not read as an active one. Status is carried by
+   the kind chip and this label as well as the strike, never by colour alone. */
+.operations-outlook-goal--completed {
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.operations-objective-lifecycle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+  margin: 0 0 var(--space-2, 8px);
+}
+
+.operations-objective-note {
+  margin: 0;
+  font-size: 0.85em;
+  color: var(--uiv3-text-muted, #8a92a8);
+  max-width: 60ch;
+}
+
+.operations-objective-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+.operations-objective-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 4px);
+}
+
+.operations-objective-label {
+  font-family: var(--uiv3-font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--uiv3-text-dim, #5a6478);
+}
+
+/* Commander-authored text of any length must stay readable and must never push
+   the cockpit sideways. */
+.operations-objective-input {
+  width: 100%;
+  max-width: 60ch;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.18));
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.operations-objective-input:focus-visible,
+.operations-objective-button:focus-visible {
+  outline: 2px solid var(--uiv3-focus, #7fb2ff);
+  outline-offset: 2px;
+}
+
+.operations-objective-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+/* Status is announced as well as shown; the prefix keeps it legible without
+   relying on colour. */
+.operations-objective-status {
+  margin: 0;
+  font-size: 0.85em;
+  max-width: 60ch;
+}
+
+.operations-objective-status--error {
+  color: var(--uiv3-danger, #ff8a8a);
+}
+
+.operations-objective-status--warning {
+  color: var(--uiv3-warning, #ffcc66);
+}
+
+.operations-objective-status--success {
+  color: var(--uiv3-ok, #8fe3a4);
+}
+
+/* Standing objectives on the default surface (R3): stated, not offered as
+   controls. Long authored text wraps rather than overflowing. */
+.ops-v3-default-subheading {
+  font-family: var(--uiv3-font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--uiv3-text-dim, #5a6478);
+  margin: var(--space-2, 8px) 0 0;
+}
+
+.ops-v3-default-objective-list {
+  list-style: none;
+  margin: var(--space-1, 4px) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 4px);
+}
+
+.ops-v3-default-objective {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2, 8px);
+  max-width: 80ch;
+}
+
+.ops-v3-default-objective-mode {
+  font-family: var(--uiv3-font-mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--uiv3-text-dim, #5a6478);
+  flex: 0 0 auto;
+}
+
+.ops-v3-default-objective-text {
+  overflow-wrap: anywhere;
+}
+
+.ops-v3-default-objective--completed .ops-v3-default-objective-text {
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.ops-v3-default-objective-state {
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0 6px;
+  opacity: 0.75;
+}
+
+/* Market context in Operations (R2-4): provenance and cargo lookup handoffs,
+   no search input and no results table — Intel owns those. */
+.local-market-context .local-market-context-rows {
+  margin: 4px 0 0;
+  font-size: 0.9em;
+}
+
+.local-market-context .local-market-cargo-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.local-market-context .local-market-cargo-label {
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+/* One action list, two weights (R2-3 / R2-8). A state-derived action takes its
+   own row because it carries a rationale; support tools wrap inline so a long
+   tool set never out-sizes the workflow it supports. */
+.operations-outlook-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.operations-outlook-action--workflow,
+.operations-outlook-action--handoff {
+  flex: 1 0 100%;
+}
+
+.operations-outlook-action--support_tool {
+  flex: 0 0 auto;
+}
+
+/* ── Phase 14 R5 — exploration workflow depth ──────────────────────────────
+   Three visual rules do the honesty work here, and they are the reason these
+   classes exist at all rather than being folded into the generic fact row:
+
+     1. an observed fact and a prediction never share a treatment;
+     2. credits received and an estimate never share a treatment;
+     3. proven work and an opportunity never share a treatment.
+
+   Each pair is legible at a glance without reading the label, because a
+   Commander skimming the card is exactly who a blurred distinction misleads. */
+
+.operations-exploration-fact {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 4px 0 0;
+}
+
+.operations-exploration-fact-label {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+  min-width: 12ch;
+}
+
+.operations-exploration-fact-value {
+  font-weight: 600;
+}
+
+/* A fact the journal recorded. */
+.operations-exploration-fact--observed .operations-exploration-fact-value {
+  color: var(--uiv3-text, inherit);
+}
+
+/* A prediction or a reference estimate. Lighter weight and lower contrast, so
+   it cannot be mistaken for the row above it at a glance. */
+.operations-exploration-fact--candidate .operations-exploration-fact-value,
+.operations-exploration-fact--estimate .operations-exploration-fact-value {
+  font-weight: 400;
+  font-style: italic;
+  opacity: 0.78;
+}
+
+/* Credits actually received. The one row in the value block that is money. */
+.operations-exploration-fact--earned .operations-exploration-fact-value {
+  font-weight: 700;
+}
+
+.operations-exploration-stage-detail {
+  margin: 4px 0 0;
+  opacity: 0.85;
+}
+
+.operations-exploration-step {
+  margin: 2px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--uiv3-border, rgba(255, 255, 255, 0.18));
+}
+
+.operations-exploration-step-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.operations-exploration-step-owner {
+  margin: 2px 0 0;
+  font-size: 0.78em;
+  opacity: 0.65;
+}
+
+.operations-exploration-progress,
+.operations-exploration-biology,
+.operations-exploration-value {
+  margin: 4px 0 0;
+}
+
+.operations-exploration-work {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.operations-exploration-work-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  align-items: baseline;
+}
+
+.operations-exploration-work-kind {
+  grid-row: span 2;
+  font-size: 0.68em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+  min-width: 9ch;
+}
+
+.operations-exploration-work-item--work .operations-exploration-work-kind {
+  opacity: 0.9;
+}
+
+.operations-exploration-work-label {
+  font-weight: 600;
+}
+
+/* An opportunity rests on an estimate or a prediction; it is stated, but never
+   with the weight of proven outstanding work. */
+.operations-exploration-work-item--opportunity .operations-exploration-work-label,
+.operations-exploration-work-item--unknown .operations-exploration-work-label {
+  font-weight: 400;
+  opacity: 0.82;
+}
+
+.operations-exploration-work-detail {
+  font-size: 0.82em;
+  opacity: 0.7;
+}
+
+.operations-exploration-completion {
+  display: grid;
+  gap: 1px;
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: var(--uiv3-surface-2, rgba(255, 255, 255, 0.04));
+}
+
+.operations-exploration-completion-label {
+  font-weight: 600;
+}
+
+.operations-exploration-completion-reason {
+  font-size: 0.82em;
+  opacity: 0.72;
+}
+
+.operations-exploration-completion--unknown_coverage .operations-exploration-completion-label {
+  opacity: 0.8;
+}
+
+.operations-exploration-checklist-details {
+  margin: 8px 0 0;
+}
+
+.operations-exploration-checklist-summary {
+  cursor: pointer;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.operations-exploration-checklist-item {
+  grid-template-columns: 1fr auto;
+}
+
+.operations-exploration-checklist-evidence {
+  grid-column: 1 / -1;
+  font-size: 0.78em;
+  opacity: 0.65;
+}
+
+.operations-exploration-checklist-state--complete {
+  color: var(--ocv-ok, #4caf7d);
+  opacity: 1;
+}
+
+.operations-exploration-checklist-state--active {
+  opacity: 0.85;
+}
+
+/* ── Phase 14 R6 — trade and mining workflow depth ─────────────────────────
+   Three visual distinctions do the honesty work, and they are the reason these
+   classes exist rather than one generic row:
+
+     1. a current market snapshot never looks like a historical one;
+     2. credits received never look like a value estimated from a snapshot;
+     3. equipment seen fitted never looks like equipment merely not observed.
+
+   Each pair must be separable at a glance, because a Commander skimming the
+   card is exactly who a blurred distinction misleads. */
+
+.operations-economy-card {
+  display: block;
+}
+
+.operations-economy-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.operations-economy-title {
+  margin: 0;
+  font-size: 0.95em;
+}
+
+.operations-economy-status {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+}
+
+.operations-economy-stage-detail {
+  margin: 4px 0 0;
+  opacity: 0.85;
+}
+
+.operations-economy-subtitle {
+  margin: 10px 0 4px;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+
+.operations-economy-note,
+.operations-economy-none {
+  margin: 4px 0 0;
+  opacity: 0.72;
+}
+
+.operations-economy-fact {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 4px 0 0;
+}
+
+.operations-economy-fact-label {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+  min-width: 14ch;
+}
+
+.operations-economy-fact-value {
+  font-weight: 600;
+}
+
+/* A fact this machine observed. */
+.operations-economy-fact--observed .operations-economy-fact-value,
+.operations-economy-fact--current .operations-economy-fact-value {
+  font-weight: 600;
+}
+
+/* Credits that actually arrived. The one figure in the card that is money. */
+.operations-economy-fact--earned .operations-economy-fact-value {
+  font-weight: 700;
+}
+
+/* A snapshot from somewhere else or some time ago, and any value derived from
+   one. Lighter and italic so it cannot be skimmed as current pricing. */
+.operations-economy-fact--historical .operations-economy-fact-value,
+.operations-economy-fact--estimate .operations-economy-fact-value {
+  font-weight: 400;
+  font-style: italic;
+  opacity: 0.78;
+}
+
+.operations-economy-fact--absent .operations-economy-fact-value,
+.operations-economy-fact--unknown .operations-economy-fact-value {
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.operations-economy-step {
+  margin: 2px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--uiv3-border, rgba(255, 255, 255, 0.18));
+}
+
+.operations-economy-step-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.operations-economy-step-owner {
+  margin: 2px 0 0;
+  font-size: 0.78em;
+  opacity: 0.65;
+}
+
+.operations-economy-matches {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.operations-economy-match {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.operations-economy-match-name {
+  font-weight: 600;
+}
+
+.operations-economy-match-verdict {
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+.operations-economy-work {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.operations-economy-work-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  align-items: baseline;
+}
+
+.operations-economy-work-kind {
+  grid-row: span 2;
+  font-size: 0.68em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+  min-width: 9ch;
+}
+
+.operations-economy-work-item--work .operations-economy-work-kind {
+  opacity: 0.9;
+}
+
+.operations-economy-work-label {
+  font-weight: 600;
+}
+
+.operations-economy-work-item--opportunity .operations-economy-work-label,
+.operations-economy-work-item--unknown .operations-economy-work-label {
+  font-weight: 400;
+  opacity: 0.82;
+}
+
+.operations-economy-work-detail {
+  font-size: 0.82em;
+  opacity: 0.7;
+}
+
+.operations-economy-completion {
+  display: grid;
+  gap: 1px;
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: var(--uiv3-surface-2, rgba(255, 255, 255, 0.04));
+}
+
+.operations-economy-completion-label {
+  font-weight: 600;
+}
+
+.operations-economy-completion-reason {
+  font-size: 0.82em;
+  opacity: 0.72;
+}
+
+.operations-economy-completion--unknown_coverage .operations-economy-completion-label {
+  opacity: 0.8;
+}
+
+.operations-economy-handoffs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+/* ── Mining equipment and fill ─────────────────────────────────────────── */
+
+.operations-mining-equipment {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.operations-mining-capability {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.operations-mining-capability-label {
+  font-weight: 600;
+}
+
+.operations-mining-capability-state {
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.operations-mining-capability--fitted .operations-mining-capability-state {
+  color: var(--ocv-ok, #4caf7d);
+}
+
+/* Not seen in an observed loadout. A weaker claim than absent, and it must
+   read as one — never as a failure. */
+.operations-mining-capability--not_observed .operations-mining-capability-state {
+  color: var(--ocv-warn, #e0a437);
+  opacity: 0.9;
+}
+
+/* No loadout observed at all. The lightest treatment of the three. */
+.operations-mining-capability--unknown .operations-mining-capability-label,
+.operations-mining-capability--unknown .operations-mining-capability-state {
+  opacity: 0.55;
+}
+
+.operations-mining-target {
+  margin: 4px 0 0;
+}
+
+.operations-mining-fill {
+  margin-top: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--uiv3-surface-2, rgba(255, 255, 255, 0.08));
+  overflow: hidden;
+}
+
+.operations-mining-fill-bar {
+  height: 100%;
+  background: var(--uiv3-accent, #4a9eff);
+}
+
+.operations-objective-target {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--uiv3-border, rgba(255, 255, 255, 0.12));
+}
+
+.operations-objective-target-note {
+  margin: 0 0 6px;
+  font-size: 0.8em;
+  opacity: 0.68;
+}
+
+.operations-objective-quantity {
+  max-width: 12ch;
+}
+
+/* ───────────────────────── Phase 14 R7 — combat workflow depth ─────────────────────────
+
+   Phase 4 shipped a seven-card Combat shell; the Phase 7.5 v2 rebuild removed
+   every renderer and left ~590 lines of stylesheet behind, styling elements
+   nothing emitted. Those rules are gone. What replaces them is one workflow
+   card that reuses the R6 economy card chassis, plus the few pieces Combat
+   needs that no other mode does.
+
+   ADR 0004: every state below is carried by TEXT first. The colour and weight
+   changes are reinforcement only, so a Commander who cannot distinguish them
+   still reads "Attention", "Unknown" or "OK" in the row itself. */
+
+.operations-combat-workflow-card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* Readiness facts. Three states, three treatments, and a word in every row. */
+.operations-combat-readiness {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.operations-combat-fact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.operations-combat-fact-label {
+  min-width: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.operations-combat-fact-value {
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The word that carries the meaning. Never removed, never colour-only. */
+.operations-combat-fact-state {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-chip, 999px);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.operations-combat-fact--good .operations-combat-fact-value {
+  font-weight: 600;
+}
+
+.operations-combat-fact--problem .operations-combat-fact-value,
+.operations-combat-fact--problem .operations-combat-fact-state {
+  font-weight: 700;
+}
+
+/* Unknown is not a failure and must not look like one: lighter, never alarmed. */
+.operations-combat-fact--unknown .operations-combat-fact-value,
+.operations-combat-fact--unknown .operations-combat-fact-state {
+  font-weight: 400;
+  font-style: italic;
+  opacity: 0.78;
+}
+
+/* Local PvP record. A bounded summary, never a table — three rows and a
+   pointer to the Activity Log for the rest. */
+.operations-combat-pvp {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.operations-combat-pvp-entry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.operations-combat-pvp-kind {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.operations-combat-pvp-name {
+  min-width: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.operations-combat-pvp-where {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+/* Session facts behind disclosure, so the card stays a cockpit. */
+.operations-combat-session {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.operations-combat-session > summary {
+  cursor: pointer;
+}
+
+.operations-combat-session > summary:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+
+  .operations-combat-fact,
+  .operations-combat-pvp-entry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ───────────────────────── Phase 14 R8 — campaign, handoff and engineering bridge ─────────────────────────
+
+   R7 found a stylesheet with no markup. Phase 9 was the mirror image: the
+   campaign renderers were live and reachable, emitting 41 distinct classes, and
+   NOT ONE had a rule anywhere in the codebase. The workspace rendered
+   completely unstyled, which is why `P14-K07` could not simply be closed by
+   adding it to the selector — making an unstyled surface reachable is not
+   making it usable.
+
+   ADR 0004: every state below is carried by TEXT first. The campaign state pill
+   and the AI-draft chip both set their own textContent, so a Commander who
+   cannot distinguish the colours still reads "blocked" or "AI DRAFT".
+   ADR 0003: all of it is rendered through `safeEl`; nothing here assumes
+   sanitised markup, and faction and campaign names render literally. */
+
+.ops-phase9-campaign-body {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  max-width: 72rem;
+}
+
+.ops-phase9-question {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+
+.ops-phase9-campaign-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-lg);
+  /* Commander-authored, and may be long or hostile. It must wrap rather than
+     push the workspace sideways. */
+  overflow-wrap: anywhere;
+}
+
+/* The state word IS the state. Colour only reinforces it. */
+.ops-phase9-state-pill {
+  justify-self: start;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-chip, 999px);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.ops-phase9-state-pill--active {
+  font-weight: 700;
+}
+
+.ops-phase9-state-pill--blocked {
+  font-weight: 700;
+  border-color: var(--color-border, currentColor);
+}
+
+.ops-phase9-state-pill--completed,
+.ops-phase9-state-pill--archived {
+  opacity: 0.72;
+}
+
+.ops-phase9-state-pill--proposed,
+.ops-phase9-state-pill--unknown {
+  font-style: italic;
+  opacity: 0.78;
+}
+
+.ops-phase9-target-subject,
+.ops-phase9-target-system {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.ops-phase9-section-head {
+  margin: var(--space-2) 0 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ops-phase9-blockers-list,
+.ops-phase9-next-actions-list,
+.ops-phase9-linked-facts-list,
+.ops-phase9-linked-circuits-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.ops-phase9-blocker-item,
+.ops-phase9-action-item {
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+/* Weak references: ids, deliberately not resolved into facts here. Intel owns
+   the fact, so these read as handles rather than as claims. */
+.ops-phase9-fact-id,
+.ops-phase9-circuit-id {
+  color: var(--color-fg-muted);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-xs);
+  overflow-wrap: anywhere;
+}
+
+.ops-phase9-bridge-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.ops-phase9-bridge-btn {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control, 4px);
+  background: transparent;
+  color: var(--color-fg);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.ops-phase9-bridge-btn:hover {
+  border-color: var(--color-border, currentColor);
+}
+
+.ops-phase9-bridge-btn:focus-visible,
+.ops-phase9-activity-log-link:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.ops-phase9-activity-log-link {
+  justify-self: start;
+}
+
+/* AI draft. It must never be mistakable for observed fact or for authored
+   campaign state, so it sits in its own bordered block and leads with a chip
+   that says so in words. */
+.ops-phase9-ai-draft-card {
+  display: grid;
+  gap: var(--space-2);
+  border: 1px dashed var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+  min-width: 0;
+}
+
+.ops-phase9-is-fact-chip {
+  justify-self: start;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-chip, 999px);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.ops-phase9-draft-text,
+.ops-phase9-draft-response {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  /* Generated text, so it is untrusted length AND untrusted content. */
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.ops-phase9-draft-timestamp,
+.ops-phase9-confidence,
+.ops-phase9-nullprovider-msg,
+.ops-phase9-validation-failed {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+}
+
+.ops-phase9-draft-source-chain,
+.ops-phase9-draft-kb-refs {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ops-phase9-draft-sc-head,
+.ops-phase9-draft-kb-refs-head {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ops-phase9-draft-sc-item,
+.ops-phase9-draft-kb-ref {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  overflow-wrap: anywhere;
+}
+
+.ops-phase9-draft-kb-file,
+.ops-phase9-draft-kb-entry {
+  font-family: var(--font-mono, monospace);
+}
+
+/* Knowledge still under review may not be presented as settled fact. */
+.ops-phase9-draft-kb-needs-review {
+  font-weight: 700;
+  font-style: italic;
+}
+
+.ops-phase9-loading,
+.ops-phase9-idle-copy {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Campaign lifecycle. The two protected transitions the Commander can reach.
+   Each announces that it needs confirmation BEFORE it is pressed, so a gate is
+   never a surprise, and the announcement is text rather than an icon. */
+
+.ops-phase9-lifecycle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.ops-phase9-lifecycle-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.ops-phase9-lifecycle-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ops-phase9-lifecycle-note {
+  margin: 0;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* Outcome of a protected action. Tone is reinforcement; the sentence carries
+   the meaning, including when nothing changed. */
+.ops-phase9-campaign-status {
+  margin: 0;
+  border-inline-start: 2px solid var(--color-border-subtle);
+  padding-inline-start: var(--space-2);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.ops-phase9-campaign-status--error,
+.ops-phase9-campaign-status--warning {
+  font-weight: 700;
+}
+
+.ops-phase9-campaign-status--success {
+  font-weight: 600;
+}
+
+/* ───────────────────────── Active engineering task (`P14-J01`) ───────────────────────── */
+
+.operations-engineering-task-card {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.operations-engineering-task-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.operations-engineering-task {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.operations-engineering-task-title {
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.operations-engineering-task-materials {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+
+  .operations-engineering-task {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ops-phase9-bridge-links {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

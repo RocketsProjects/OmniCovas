@@ -32,6 +32,8 @@ import {
 } from '../view-models/commander-context.js';
 
 import { deriveLocalContext } from '../view-models/local-context.js';
+import { formatActivityEventType } from '../utils/display-names.js';
+import { describeFreshness } from '../utils/freshness.js';
 
 /* ── Utility helpers ── */
 const fmt = {
@@ -352,11 +354,24 @@ function renderModules(summary) {
   set('dash-mod-warning', summary.warning);
   set('dash-mod-critical', summary.critical);
   set('dash-mod-total', summary.total);
+  /* Loadout is not observed until the commander's first loadout event, so
+     these counts are null until then. `null > 0` is false, which would have
+     painted the critical row green and the card healthy — colour-coded
+     reassurance derived from a source that was never read. Unknown is styled
+     as unknown. */
+  const known = summary.critical != null && summary.warning != null;
   const critEl = el('dash-mod-critical');
-  if (critEl) critEl.className = 'field-value' + (summary.critical > 0 ? ' critical' : ' ok');
+  if (critEl) {
+    critEl.className = 'field-value'
+      + (!known ? ' unknown' : (summary.critical > 0 ? ' critical' : ' ok'));
+  }
   const warnEl = el('dash-mod-warning');
-  if (warnEl) warnEl.className = 'field-value' + (summary.warning > 0 ? ' warn' : '');
-  if (summary.critical > 0) setCardState('dash-panel-modules', 'critical');
+  if (warnEl) {
+    warnEl.className = 'field-value'
+      + (!known ? ' unknown' : (summary.warning > 0 ? ' warn' : ''));
+  }
+  if (!known) setCardState('dash-panel-modules', null);
+  else if (summary.critical > 0) setCardState('dash-panel-modules', 'critical');
   else if (summary.warning > 0) setCardState('dash-panel-modules', 'warn');
   else setCardState('dash-panel-modules', null);
 }
@@ -658,7 +673,7 @@ function sourceFreshnessSummary(rawLocalContext, sourceSnap) {
     }).length;
     return {
       label: `${loaded}/${total} detailed checks`,
-      posture: loaded === total ? 'Fresh' : (loaded > 0 ? 'Partial' : 'Not loaded'),
+      posture: loaded === total ? 'Current' : (loaded > 0 ? 'Partial' : 'Not checked'),
       kind: loaded === total ? 'ok' : (loaded > 0 ? 'warn' : 'info'),
     };
   }
@@ -669,31 +684,12 @@ function sourceFreshnessSummary(rawLocalContext, sourceSnap) {
       .length;
     return {
       label: `${loaded}/${DASHBOARD_SOURCE_NODES.length} local`,
-      posture: loaded > 0 ? 'Last-known' : 'Not Loaded',
+      posture: loaded > 0 ? 'Last seen' : 'Not checked',
       kind: loaded > 0 ? 'info' : 'warn',
     };
   }
 
-  return { label: 'Local data waiting', posture: 'Not Loaded', kind: 'warn' };
-}
-
-function hasNavigationRoute(navSnap) {
-  const route = navSnap?.active_route || null;
-  return Boolean(route?.destination);
-}
-
-function combatActive(combat) {
-  if (!combat || typeof combat !== 'object') return false;
-  const threat = combat.threat_level ?? combat.threatLevel;
-  return Boolean(
-    combat.active
-    || combat.in_combat
-    || combat.combat_active
-    || combat.hostile
-    || (Number.isFinite(combat.hostile_count) && combat.hostile_count > 0)
-    || (Array.isArray(combat.contacts) && combat.contacts.length > 0)
-    || (typeof threat === 'string' && !/^none|unknown|clear$/i.test(threat))
-  );
+  return { label: 'Local data waiting', posture: 'Not checked', kind: 'warn' };
 }
 
 function deriveDashboardOperation(input, ctx) {
@@ -702,40 +698,45 @@ function deriveDashboardOperation(input, ctx) {
   const location = ctx?.location || null;
   const route = input.navSnap?.active_route || null;
 
-  let operation = null;
-  let source = 'unknown';
-  if (_manualOperation && PRIMARY_OPERATIONS.includes(_manualOperation)) {
-    operation = _manualOperation;
-    source = 'active workspace';
-  } else if (station?.available && (
-    station.isDocked === true
-    || location?.dockingState === 'docked'
-    || location?.dockingState === 'last_known_docked'
-    || location?.dockingState === 'partial'
-  )) {
-    operation = 'station';
-    source = station.isDocked === true || location?.dockingState === 'docked'
-      ? 'local docked context'
-      : 'last-known station context';
-  } else if (hasNavigationRoute(input.navSnap)) {
-    operation = 'travel';
-    source = 'navigation snapshot';
-  } else if (combatActive(input.combat)) {
-    operation = 'combat';
-    source = 'combat snapshot';
-  }
+  const confidenceValues = new Set(['observed', 'suggested', 'manual', 'unknown']);
+  const confidence = confidenceValues.has(ctx?.operationConfidence)
+    ? ctx.operationConfidence
+    : 'unknown';
+  const contextualOperation = PRIMARY_OPERATIONS.includes(ctx?.primaryOperation)
+    ? ctx.primaryOperation
+    : null;
+  const confidenceEligible = confidence === 'manual'
+    || confidence === 'observed'
+    || (confidence === 'suggested' && ctx?.telemetryActive === true);
+  const operation = contextualOperation && contextualOperation !== 'idle' && confidenceEligible
+    ? contextualOperation
+    : null;
+  const displayedConfidence = operation ? confidence : 'unknown';
+  const source = operation
+    ? cleanText(ctx?.operationEvidence, 'local context')
+    : 'unknown';
 
-  const label = operation ? operationLabel(operation) : 'Unknown';
-  const badge = operation ? label.toUpperCase() : 'OP UNKNOWN';
+  const label = operation ? operationLabel(operation) : 'None selected';
+  const confidenceSuffix = displayedConfidence === 'manual'
+    ? ' · SELECTED'
+    : displayedConfidence === 'suggested'
+      ? ' · SUGGESTED'
+      : '';
+  const badge = operation ? `OP ${label.toUpperCase()}${confidenceSuffix}` : 'OP UNKNOWN';
   const destination = cleanText(route?.destination, null);
   const stationName = cleanText(station?.stationName || location?.stationName, null);
   const systemName = cleanText(station?.systemName || location?.systemName, null);
-  const stationPrefix = location?.dockingState === 'last_known_docked' ? 'Last known docked at' : 'Docked at';
 
-  let title = 'No current operation selected.';
-  let description = 'No current operation state is loaded from local context yet.';
-  if (operation === 'station') {
-    title = stationName ? `${stationPrefix} ${stationName}.` : 'Station operation context loaded.';
+  let title = 'What are you doing?';
+  let description = 'Choose an activity to focus the command deck.';
+  if (operation && displayedConfidence === 'manual') {
+    title = `${label} workspace selected.`;
+    description = 'Commander-selected workspace. Facts inside it remain limited to available local sources.';
+  } else if (operation && displayedConfidence === 'suggested') {
+    title = `${label} workspace suggested.`;
+    description = `Suggested from ${source}; this is not asserted as an active operation.`;
+  } else if (operation === 'station') {
+    title = stationName ? `Docked at ${stationName}.` : 'Docked context observed.';
     const parts = [];
     if (systemName) parts.push(`System ${systemName}`);
     if (station?.economySummary && station.economySummary !== 'Unknown') parts.push(`${station.economySummary} economy`);
@@ -747,17 +748,106 @@ function deriveDashboardOperation(input, ctx) {
     title = destination ? `Route plotted to ${destination}.` : 'Travel operation context loaded.';
     description = 'Navigation snapshot reports an active route. Open Navigation for route detail and actions.';
   } else if (operation === 'combat') {
-    title = 'Combat context active.';
-    description = 'Combat state is present in the local snapshot. Expand Operations for the active combat workspace.';
-  } else if (operation === 'idle') {
-    title = 'Idle operations standing by.';
-    description = 'No route, station task, or combat context is active in the current operation state.';
+    title = 'Combat context observed.';
+    description = 'Current-session local combat telemetry is present. Open Operations for the combat workspace.';
   } else if (operation) {
-    title = `${label} operation selected.`;
-    description = 'Operation state is present locally. Expand Operations for workflow detail.';
+    title = `${label} context observed.`;
+    description = 'Current-session local evidence supports this workspace.';
   }
 
-  return { operation, label, badge, source, title, description };
+  return {
+    operation,
+    label,
+    badge,
+    source,
+    confidence: displayedConfidence,
+    title,
+    description,
+  };
+}
+
+/* PB10-R4 (Phase 10 reconciliation): the Dashboard is the Live Command Surface,
+   so it must answer "where am I?" even when local data is only last-known.
+
+   The prior surface suppressed location entirely whenever the station snapshot
+   could not be promoted to current — correct as anti-overclaim, useless as a
+   command surface, and inconsistent with Navigation/Intel, which render the same
+   fact labelled "last known". This reuses the authoritative
+   `deriveCommanderLocationState` result (no parallel derivation) and renders it
+   as a self-contained visual unit with an explicit freshness marker, per the
+   Runtime UI Repair Doctrine rule against label/value detachment for
+   current-system/station facts.
+
+   The anti-overclaim guard is preserved: a station is shown only when the
+   authoritative derivation already judged it coherent (no system mismatch, not
+   stale, not contradicted by live undocked telemetry), and it is never
+   presented as live unless the Elite session is Active. */
+function deriveDashboardLocation(ctx, sessionState) {
+  const loc = ctx?.location || null;
+  const systemName = cleanText(loc?.systemName, null);
+
+  if (!systemName) {
+    return {
+      systemName: null,
+      stationName: null,
+      freshnessLabel: 'Not checked',
+      freshnessKey: 'not_checked',
+      freshnessKind: 'warn',
+      note: 'Location not checked this session.',
+      isLive: false,
+    };
+  }
+
+  const isLive = /active/i.test(String(sessionState || '')) && loc?.isStale !== true;
+  return {
+    systemName,
+    /* Already mismatch-guarded and staleness-guarded upstream. */
+    stationName: cleanText(loc?.stationName, null),
+    dockingValue: cleanText(loc?.flightValue, null),
+    freshnessLabel: isLive ? 'In game' : 'Last seen',
+    freshnessKey: isLive ? 'live_now' : 'last_seen',
+    freshnessKind: isLive ? 'ok' : 'info',
+    note: isLive
+      ? null
+      : 'Last seen in your Journal history.',
+    isLive,
+  };
+}
+
+function createLocationUnit(location) {
+  const unit = safeEl('div', 'dashboard-uiv3-location');
+  unit.setAttribute('data-dashboard-zone', 'current-location');
+  unit.setAttribute('data-location-freshness', location.freshnessKey || 'unknown');
+
+  const head = safeEl('div', 'dashboard-uiv3-location-head');
+  head.append(safeEl('span', 'dashboard-uiv3-location-label', location.isLive ? 'CURRENT LOCATION' : 'LAST KNOWN LOCATION'));
+  const pill = safeEl(
+    'span',
+    `dashboard-uiv3-location-pill dashboard-uiv3-location-pill--${location.freshnessKind}`,
+    location.freshnessLabel,
+  );
+  head.appendChild(pill);
+  unit.appendChild(head);
+
+  if (location.systemName) {
+    unit.appendChild(safeEl('p', 'dashboard-uiv3-location-system', location.systemName));
+    if (location.stationName) {
+      unit.appendChild(
+        safeEl('p', 'dashboard-uiv3-location-station', `Station · ${location.stationName}`),
+      );
+    }
+    if (location.dockingValue) {
+      unit.appendChild(
+        safeEl('p', 'dashboard-uiv3-location-docking', location.dockingValue),
+      );
+    }
+  }
+
+  if (location.note) {
+    unit.appendChild(safeEl('p', 'dashboard-uiv3-location-note', location.note));
+  }
+
+  return unit;
 }
 
 function detailRowValue(rows, label, fallback = '—') {
@@ -777,8 +867,14 @@ function cargoSummary(input, fallback = '—') {
   if (localCargo?.used != null && localCargo?.capacity != null) {
     return `${localCargo.used}/${localCargo.capacity} t`;
   }
-  if (localCargo?.usedLabel && localCargo?.capacityLabel) {
+  /* An unobserved capacity is not a denominator. Rendering "9 t/Unknown"
+     dressed a missing fact as part of a ratio; the tonnage carried stands on
+     its own until a Loadout supplies the hold size. */
+  if (localCargo?.usedLabel && localCargo?.capacity != null) {
     return `${localCargo.usedLabel}/${localCargo.capacityLabel}`;
+  }
+  if (localCargo?.usedLabel && localCargo?.hasCargo) {
+    return localCargo.usedLabel;
   }
   const inventory = Array.isArray(input.cargo?.inventory) ? input.cargo.inventory : [];
   if (inventory.length > 0) return `${inventory.length} types`;
@@ -791,7 +887,13 @@ function hullSummary(state) {
 
 function shieldsSummary(input) {
   const state = input.state || {};
-  const fitted = shieldGeneratorFitted(input.localContext?.rawLoaded ? _lastLocalContextSnap : (_lastLocalContextSnap || input.mods));
+  /* R0-3: prefer the served answer. The local-context derivation below is
+     correct but depends on a snapshot that is not always loaded, and when it
+     was absent this fell through to "DOWN" for a ship with no generator. */
+  if (state.shield_generator_fitted === false) return 'None fitted';
+  const fitted = state.shield_generator_fitted === true
+    ? true
+    : shieldGeneratorFitted(input.localContext?.rawLoaded ? _lastLocalContextSnap : (_lastLocalContextSnap || input.mods));
   if (fitted === false) return 'None fitted';
   if (state.shield_up === true) return 'UP';
   if (state.shield_up === false) return 'DOWN';
@@ -799,7 +901,15 @@ function shieldsSummary(input) {
 }
 
 function fuelSummary(state) {
-  return state?.fuel_pct != null ? `${Math.round(state.fuel_pct)}%` : '—';
+  /* Capacity comes from Loadout and is unknown until one is observed, so a
+     percentage cannot always be computed. Reporting nothing in that window
+     hid tonnage the app already had. Show what is known; never invent a
+     denominator. */
+  const pct = state?.fuel_pct;
+  const main = state?.fuel_main;
+  const tons = Number.isFinite(main) ? `${Math.round(main * 10) / 10} t` : null;
+  if (pct != null) return tons ? `${tons} (${Math.round(pct)}%)` : `${Math.round(pct)}%`;
+  return tons || '—';
 }
 
 function heatSummary(heat) {
@@ -808,7 +918,20 @@ function heatSummary(heat) {
 
 function walletField(field, fallback = '—') {
   const wallet = _lastLocalContextSnap?.wallet_snapshot || null;
-  return fmt.credits(wallet?.[field] ?? null) || fallback;
+  const entry = wallet?.[field] ?? null;
+  /* Wallet fields are provenance objects ({value, source, freshness, ...});
+     format the source-backed value, never the envelope object. */
+  const value = entry && typeof entry === 'object' ? (entry.value ?? null) : entry;
+  return value == null ? fallback : fmt.credits(value);
+}
+
+/* FU-014 observed session change: arithmetic over source-backed balance
+   observations only — explicitly not a transaction record. */
+function walletSessionChange(fallback = '—') {
+  const change = _lastLocalContextSnap?.wallet_snapshot?.observed_session_change;
+  if (!change || typeof change !== 'object' || change.value == null) return fallback;
+  const sign = change.value > 0 ? '+' : change.value < 0 ? '−' : '±';
+  return `${sign}${fmt.credits(Math.abs(change.value))}`;
 }
 
 function jumpRangeValue(state) {
@@ -852,7 +975,7 @@ function activityLogText(value, fallback = '') {
 }
 
 function activityLogType(entry) {
-  return activityLogText(entry?.event_type || entry?.event, 'Event');
+  return formatActivityEventType(activityLogText(entry?.event_type || entry?.event, 'Event'));
 }
 
 function activityLogSummary(entry) {
@@ -863,6 +986,26 @@ function activityLogTimestamp(entry) {
   return activityLogText(entry?.timestamp || entry?.created_at, 'Time not recorded');
 }
 
+function latestLocalObservationTimestamp(rawLocalContext) {
+  if (!rawLocalContext || typeof rawLocalContext !== 'object') return null;
+  const candidates = [
+    rawLocalContext.session_activity?.last_game_activity_at,
+    rawLocalContext.session_activity?.event_timestamp,
+    rawLocalContext.station_context?.event_timestamp,
+    rawLocalContext.system_context?.event_timestamp,
+    rawLocalContext.market_snapshot?.event_timestamp,
+    rawLocalContext.outfitting_snapshot?.event_timestamp,
+    rawLocalContext.shipyard_snapshot?.event_timestamp,
+    rawLocalContext.cargo_hold?.event_timestamp,
+    rawLocalContext.module_loadout?.event_timestamp,
+  ].filter(Boolean);
+  return candidates.reduce((latest, candidate) => {
+    const time = Date.parse(candidate);
+    if (!Number.isFinite(time)) return latest;
+    return !latest || time > latest.time ? { value: candidate, time } : latest;
+  }, null)?.value || null;
+}
+
 function buildDashboardModel(input, ctx) {
   const sourceSummary = sourceFreshnessSummary(_lastLocalContextSnap, input.sourceSnap);
   const operation = deriveDashboardOperation(input, ctx);
@@ -870,8 +1013,11 @@ function buildDashboardModel(input, ctx) {
   const entries = activityEntries(input.activityLog).slice(0, 3);
   const station = input.localContext?.stationBrief || null;
   const interrupts = Array.isArray(ctx?.interrupts) ? ctx.interrupts : [];
-  const attention = ctx?.interrupts ? interrupts.length : null;
-  const sessionState = cleanText(input.sessionState || window.Shell?.eliteSessionState, 'Not Loaded');
+  const telemetryActive = ctx?.telemetryActive === true;
+  const attention = ctx?.interrupts
+    ? (telemetryActive ? interrupts.length : null)
+    : null;
+  const sessionState = cleanText(input.sessionState || window.Shell?.eliteSessionState, 'Waiting');
   const hasSourceData = Boolean(_lastLocalContextSnap || input.sourceSnap);
 
   /* DASHBOARD_STATUS_CLARITY_01: derive a human reason for the watch/alert
@@ -888,80 +1034,95 @@ function buildDashboardModel(input, ctx) {
     `${count} active alert${count === 1 ? '' : 's'}${reasonSummary ? `: ${reasonSummary}` : ''}. Open Activity Log for detail.`;
 
   const watchState = attention === null
-    ? { label: 'Unknown', kind: 'info',
-        title: 'Watch state unknown — local telemetry not loaded yet.' }
+    ? { label: 'Not checked', kind: 'info',
+        title: 'Ship watch has not been checked from current game data.' }
     : attention > 0
       ? { label: primaryReason || 'Action needed', kind: 'warn', title: alertCountTitle(attention) }
-      : { label: hasSourceData ? 'Nominal' : 'Unknown',
+      : { label: hasSourceData ? 'Nominal' : 'Not checked',
           kind: hasSourceData ? 'ok' : 'info',
           title: hasSourceData
             ? 'All monitored vitals nominal.'
-            : 'Watch state unknown — local telemetry not loaded yet.' };
+            : 'Ship watch has not been checked from current game data.' };
 
-  const diagnosticsNotLoaded = /not\s*loaded/i.test(sourceSummary.posture);
+  /* A ship always has modules, so a count of 0 is never a no-data state — it
+     is a claim that the hull is stripped. The loadout view model reports
+     `moduleCount: modules.length`, which is 0 for an unobserved Loadout
+     (backend `modules: null` -> empty list), while carrying the honest
+     `loadoutAvailable` flag alongside it. Read the flag, not the length.
+     The /pillar1/modules/summary fallback now reports null rather than 0 for
+     the same window, so both sources agree on unknown. */
+  const moduleCountValue = (input) => {
+    const search = input.localContext?.moduleSearch;
+    if (search?.loadoutAvailable === true && search.moduleCount != null) {
+      return String(search.moduleCount);
+    }
+    return _lastMods?.total != null ? String(_lastMods.total) : '—';
+  };
+
+  const diagnosticsNotLoaded = /not\s*(?:loaded|checked)/i.test(sourceSummary.posture);
   const diagnostics = {
-    value: diagnosticsNotLoaded ? 'Not loaded' : sourceSummary.label,
+    value: diagnosticsNotLoaded ? 'Not checked' : sourceSummary.label,
     kind: sourceSummary.kind,
     title: diagnosticsNotLoaded
-      ? 'Detailed source checks are not loaded yet. Open Sources & Diagnostics.'
+      ? 'Game-data checks are still starting. Open connection details.'
       : `Source diagnostics: ${sourceSummary.label} (${sourceSummary.posture}). Open Sources & Diagnostics.`,
     href: '#/sources',
   };
 
   const alerts = {
-    value: attention === null ? 'Unknown' : attention === 0 ? 'None' : `${attention} active`,
+    value: attention === null ? 'Not checked' : attention === 0 ? 'None' : `${attention} active`,
     kind: attention && attention > 0 ? 'warn' : (attention === null ? 'info' : 'ok'),
     title: attention === null
-      ? 'Alert state unknown — local telemetry not loaded yet.'
+      ? 'Alerts have not been checked from current game data.'
       : attention === 0
         ? 'No active alerts.'
         : alertCountTitle(attention),
     href: attention && attention > 0 ? '#/activity-log' : null,
   };
 
-  const dataPosture = /active/i.test(sessionState)
-    ? 'LOCAL · LIVE'
-    : /last/i.test(sessionState)
-      ? 'LOCAL · LAST-KNOWN'
-      : 'LOCAL · NOT LOADED';
+  const dataFreshness = describeFreshness(
+    /active/i.test(sessionState) ? 'live_now' : (/last/i.test(sessionState) ? 'remembered' : 'not_loaded'),
+  );
+  const dataPosture = `LOCAL · ${dataFreshness.label.toUpperCase()}`;
 
   return {
     operation,
     sourceSummary,
     route,
+    familiarity: _lastMemoryFamiliarity,
     activityEntries: entries,
     alertLabel: attention === null
-      ? 'ALERTS UNKNOWN'
+      ? 'ALERTS NOT CHECKED'
       : attention === 0
         ? '0 ALERTS · NOTHING URGENT'
         : `${attention} ALERT${attention === 1 ? '' : 'S'} · ${(primaryReason || 'ATTENTION').toUpperCase()}`,
-    alertKind: attention && attention > 0 ? 'warn' : 'ok',
+    alertKind: attention && attention > 0 ? 'warn' : (attention === null ? 'info' : 'ok'),
     watch: {
       watchState,
-      opLabel: operation.operation ? `OP ${operation.label.toUpperCase()}` : 'OP UNKNOWN',
+      opLabel: operation.operation ? `ACTIVITY ${operation.label.toUpperCase()}` : 'NO ACTIVITY SELECTED',
       opKind: operation.operation ? 'ok' : 'warn',
       diagnostics,
       alerts,
       dataPosture,
     },
+    location: deriveDashboardLocation(ctx, sessionState),
     facts: [
       ['Type', operation.operation === 'station' ? cleanKnown(station?.stationType, 'Unknown') : 'Unknown'],
       ['Distance from Star', operation.operation === 'station' ? detailRowValue(station?.detailRows, 'Distance from star') : '—'],
       ['Economy', operation.operation === 'station' ? cleanKnown(station?.economySummary, 'Unknown') : 'Unknown'],
       ['Docking', cleanText(ctx?.location?.flightValue || station?.dockedLabel, 'Unknown')],
     ],
-    snapshot: cleanText(input.localContext?.generatedAt || _lastLocalContextSnap?.generated_at, '—'),
+    snapshot: cleanText(latestLocalObservationTimestamp(_lastLocalContextSnap), '—'),
     vitals: {
       hull: hullSummary(input.state),
       shields: shieldsSummary(input),
       fuel: fuelSummary(input.state),
       heat: heatSummary(input.heat),
       cargo: cargoSummary(input),
-      modules: input.localContext?.moduleSearch?.moduleCount != null
-        ? String(input.localContext.moduleSearch.moduleCount)
-        : (_lastMods?.total != null ? String(_lastMods.total) : '—'),
+      modules: moduleCountValue(input),
       credits: walletField('credits'),
       rebuy: walletField('rebuy'),
+      sessionChange: walletSessionChange(),
       jump: jumpRangeValue(input.state),
       fuelTank: input.state?.fuel_capacity != null ? fmt.t(input.state.fuel_capacity) : '—',
       route: route.destination,
@@ -980,7 +1141,7 @@ function getDashboardRoot() {
 }
 
 function createDashboardTitle() {
-  const title = safeEl('h1', 'dashboard-uiv3-route-title', 'Dashboard');
+  const title = safeEl('h1', 'route-header-title dashboard-uiv3-route-title', 'Command');
   title.id = 'dashboard-title';
   return title;
 }
@@ -1010,7 +1171,7 @@ function createMeter(label, value, percent) {
   return item;
 }
 
-function createActionLink(label, href, className = 'uiv3-command-button') {
+function createActionLink(label, href, className = 'uiv3-command-button cmd-btn cmd-btn--quiet') {
   const link = safeEl('a', className, label);
   link.setAttribute('href', href);
   return link;
@@ -1026,10 +1187,11 @@ function createDisabledAction(label, reason) {
 }
 
 function createHero(model) {
-  const header = safeEl('header', 'dashboard-uiv3-hero dashboard-uiv3-hero--compact');
+  const header = safeEl('header', 'dashboard-uiv3-hero dashboard-uiv3-hero--compact route-header');
   const copy = safeEl('div', 'dashboard-uiv3-hero-copy');
   copy.append(
-    createDashboardBreadcrumb()
+    createDashboardTitle(),
+    safeEl('p', 'route-header-status', 'Your current activity, ship watch, route, and next action.'),
   );
   const alert = safeEl('span', `dashboard-uiv3-alert-pill dashboard-uiv3-alert-pill--${model.alertKind}`);
   alert.append(statusDot(model.alertKind === 'warn' ? 'warn' : 'ok'), document.createTextNode(model.alertLabel));
@@ -1040,32 +1202,37 @@ function createHero(model) {
 function createCurrentOperationCard(model) {
   const card = safeEl('article', 'dashboard-uiv3-card dashboard-uiv3-card--primary uiv3-corner-frame');
   card.setAttribute('data-dashboard-zone', 'current-operation');
+  card.setAttribute('data-operation-confidence', model.operation.confidence);
   const inner = safeEl('div', 'uiv3-corner-frame-inner dashboard-uiv3-card-inner');
   inner.append(
-    safeEl('p', 'dashboard-uiv3-eyebrow', `CURRENT OPERATION · ${uppercaseValue(model.operation.label)}`),
+    safeEl('p', 'dashboard-uiv3-eyebrow', 'CURRENT ACTIVITY'),
     safeEl('h2', 'dashboard-uiv3-card-title', model.operation.title),
     safeEl('p', 'dashboard-uiv3-card-copy', model.operation.description),
   );
 
+  /* PB10-R4: location is its own self-contained unit above the metric grid so
+     the Commander can always answer "where am I?" from the Dashboard. */
+  if (model.location) {
+    inner.appendChild(createLocationUnit(model.location));
+  }
+
+  const details = safeEl('details', 'dashboard-uiv3-details');
+  details.appendChild(safeEl('summary', 'dashboard-uiv3-card-action cmd-btn cmd-btn--quiet', 'Activity details'));
   const meta = safeEl('div', 'dashboard-uiv3-card-meta');
   meta.append(
-    createMetricRow('Snapshot', model.snapshot),
-    createMetricRow('Operation timer', '—'),
-    createMetricRow('Source', model.operation.source),
+    createMetricRow('Last updated', model.snapshot),
+    createMetricRow('Entered by', model.operation.confidence === 'manual' ? 'You' : 'Game data'),
   );
-  inner.appendChild(meta);
-
   const facts = safeEl('dl', 'dashboard-uiv3-fact-row');
-  model.facts.forEach(([label, value]) => {
+  model.facts.filter(([, value]) => value !== 'Unknown' && value !== '—').forEach(([label, value]) => {
     facts.append(safeEl('dt', 'dashboard-uiv3-fact-label', label), safeEl('dd', 'dashboard-uiv3-fact-value', value));
   });
-  inner.appendChild(facts);
+  details.append(meta, facts);
+  inner.appendChild(details);
 
   const actions = safeEl('div', 'dashboard-uiv3-actions');
   actions.append(
-    createActionLink('EXPAND OPERATION', '#/operations'),
-    createDisabledAction('CHANGE OPERATION', 'Change operation is owned by Operations.'),
-    createDisabledAction('PAUSE', 'No local operation timer is available.'),
+    createActionLink(model.operation.operation ? 'Open activity' : 'Choose activity', '#/operations', 'uiv3-command-button cmd-btn cmd-btn--primary'),
   );
   inner.appendChild(actions);
   card.appendChild(inner);
@@ -1076,11 +1243,12 @@ function createRouteCard(model) {
   const card = safeEl('article', 'dashboard-uiv3-card');
   card.setAttribute('data-dashboard-zone', 'route-destination');
   card.append(
-    safeEl('p', 'dashboard-uiv3-eyebrow', 'ROUTE & DESTINATION'),
+    safeEl('p', 'dashboard-uiv3-eyebrow', 'ROUTE'),
     safeEl('h2', 'dashboard-uiv3-card-title', model.route.title),
-    safeEl('p', 'dashboard-uiv3-card-copy', model.route.summary),
-    createMetricRow('Destination', model.route.destination),
-    createActionLink(model.route.action, '#/navigation', 'dashboard-uiv3-card-action'),
+    model.route.destination === 'No route plotted'
+      ? safeEl('p', 'dashboard-uiv3-card-copy', 'Plot a route in Elite Dangerous or review saved routes.')
+      : safeEl('p', 'dashboard-uiv3-card-copy', model.route.summary),
+    createActionLink(model.route.action, '#/navigation', 'dashboard-uiv3-card-action cmd-btn cmd-btn--quiet'),
   );
   return card;
 }
@@ -1104,27 +1272,147 @@ function createActivityCard(model) {
     });
     card.appendChild(list);
   }
-  card.appendChild(createActionLink('OPEN LOG', '#/activity-log', 'dashboard-uiv3-card-action'));
+  card.appendChild(createActionLink('Open Log', '#/activity-log', 'dashboard-uiv3-card-action cmd-btn cmd-btn--quiet'));
+  return card;
+}
+
+function familiarityVisits(memory) {
+  if (memory.visit_count === null) {
+    const seen = memory.observation_count ?? 0;
+    return `${seen} observation${seen === 1 ? '' : 's'}, visits not established`;
+  }
+  const visits = memory.visit_count ?? 0;
+  return `${visits} recorded visit${visits === 1 ? '' : 's'}`;
+}
+
+function createFamiliarityCard(model) {
+  if (!model.familiarity) return null;
+  const memory = model.familiarity;
+  const card = safeEl('article', 'dashboard-uiv3-card');
+  card.setAttribute('data-dashboard-zone', 'local-familiarity');
+  card.append(
+    safeEl('p', 'dashboard-uiv3-eyebrow', 'LOCAL FAMILIARITY'),
+    safeEl('h2', 'dashboard-uiv3-card-title', memory.display_name || 'Observed system'),
+    safeEl('p', 'dashboard-uiv3-card-copy',
+      `${memory.familiarity || 'Remembered'} · ${familiarityVisits(memory)}.`),
+    createMetricRow('Freshness', describeFreshness(memory).label),
+  );
+
+  const link = createActionLink(
+    'Open Observed Galaxy',
+    '#/intel',
+    'dashboard-uiv3-card-action cmd-btn cmd-btn--quiet',
+  );
+  link.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (typeof window.Shell?.startRouteTransfer !== 'function') return;
+    event.preventDefault();
+    window.Shell.startRouteTransfer({
+      originRoute: '/dashboard',
+      originPackage: 'Dashboard',
+      originSectionId: 'dashboard-root',
+      targetRoute: '/intel',
+      targetSectionId: 'intel-domain-memory',
+      targetEntityId: memory.display_name || '',
+      targetLabel: 'Intel Observed Galaxy',
+      reason: 'Opening remembered local familiarity from the Dashboard.',
+      returnLabel: 'Return to Dashboard',
+      returnTarget: { route: '/dashboard' },
+    });
+  });
+  card.appendChild(link);
   return card;
 }
 
 /* Quick Links: honest navigation shortcuts. Not commander-configurable pins —
    real pinning does not exist yet, so this is labelled "Quick Links", not
-   "Pinned Tools" (PB-PHASE10-SUPER-03, Commander-reported issue #3). */
+   "Pinned Tools" (PB-PHASE10-SUPER-03, Commander-reported issue #3).
+
+   PB10-R5 (Phase 10 reconciliation): these were previously bare hash links.
+   "Commodity Search" and "Module Search" were byte-identical `#/intel` links
+   that both landed on the Intel System brief — the destination was a valid
+   route, so route-walk smoke passed while the Commander never reached a
+   search. Each link now carries a RouteTransferIntent naming the destination
+   workspace (and, for search, the search mode), which also gives the arrival
+   banner and the return path to Dashboard. */
+const DASHBOARD_QUICK_LINKS = [
+  {
+    label: 'Commodity Search',
+    href: '#/intel',
+    targetRoute: '/intel',
+    targetSectionId: 'intel-domain-search',
+    targetEntityId: 'commodity',
+    targetLabel: 'Intel commodity search',
+    reason: 'Opening commodity search from the Dashboard.',
+  },
+  {
+    label: 'Module Search',
+    href: '#/intel',
+    targetRoute: '/intel',
+    targetSectionId: 'intel-domain-search',
+    targetEntityId: 'module',
+    targetLabel: 'Intel module search',
+    reason: 'Opening module search from the Dashboard.',
+  },
+  {
+    label: 'Engineering plans',
+    href: '#/engineering',
+    targetRoute: '/engineering',
+    targetSectionId: 'engineering-stage-plans',
+    targetEntityId: '',
+    targetLabel: 'Engineering plans',
+    reason: 'Opening engineering plans from the Dashboard.',
+  },
+];
+
+function startQuickLinkTransfer(entry) {
+  if (typeof window.Shell?.startRouteTransfer !== 'function') {
+    window.location.hash = entry.href;
+    return;
+  }
+
+  const started = window.Shell.startRouteTransfer({
+    originRoute: '/dashboard',
+    originPackage: 'Dashboard',
+    originSectionId: 'dashboard-root',
+    targetRoute: entry.targetRoute,
+    targetSectionId: entry.targetSectionId,
+    targetEntityId: entry.targetEntityId,
+    targetLabel: entry.targetLabel,
+    reason: entry.reason,
+    returnLabel: 'Return to Dashboard',
+    returnTarget: { route: '/dashboard' },
+  });
+
+  /* startRouteTransfer returns null for an unknown target route; fall back to
+     plain navigation rather than stranding the Commander. */
+  if (!started) {
+    window.location.hash = entry.href;
+  }
+}
+
 function createQuickLinksCard() {
   const card = safeEl('article', 'dashboard-uiv3-card');
   card.setAttribute('data-dashboard-zone', 'quick-links');
   card.append(safeEl('p', 'dashboard-uiv3-eyebrow', 'QUICK LINKS'), safeEl('h2', 'dashboard-uiv3-card-title', 'Quick Links'));
   const list = safeEl('div', 'dashboard-uiv3-tool-list');
-  [
-    ['Commodity Search', 'Intel-owned market lookup', '#/intel'],
-    ['Module Search', 'Intel-owned outfitting lookup', '#/intel'],
-    ['Engineering plans', 'Engineering goals and material planning', '#/engineering'],
-    ['Sources & Diagnostics', 'Existing source diagnostics surface', '#/sources'],
-  ].forEach(([label, summary, href]) => {
-    const link = safeEl('a', 'dashboard-uiv3-tool-link');
-    link.setAttribute('href', href);
-    link.append(safeEl('span', 'dashboard-uiv3-tool-label', label), safeEl('span', 'dashboard-uiv3-tool-summary', summary));
+  DASHBOARD_QUICK_LINKS.forEach((entry) => {
+    const link = safeEl('a', 'dashboard-uiv3-tool-link cmd-btn cmd-btn--quiet');
+    /* Keep the href so the control stays a real link: middle-click, copy-link
+       and keyboard activation all keep working, and it degrades to plain
+       navigation if the handoff grammar is unavailable. */
+    link.setAttribute('href', entry.href);
+    link.setAttribute('data-quick-link', entry.targetEntityId
+      ? `${entry.targetRoute}:${entry.targetEntityId}`
+      : entry.targetRoute);
+    link.append(safeEl('span', 'dashboard-uiv3-tool-label', entry.label));
+    link.addEventListener('click', (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+      event.preventDefault();
+      startQuickLinkTransfer(entry);
+    });
     list.appendChild(link);
   });
   card.appendChild(list);
@@ -1196,9 +1484,12 @@ function renderUiv3DashboardSurface(model) {
   if (!root) return;
   const primary = createCurrentOperationCard(model);
   const support = safeEl('section', 'dashboard-uiv3-support-grid');
-  support.append(createRouteCard(model), createActivityCard(model), createQuickLinksCard());
+  support.append(createRouteCard(model), createActivityCard(model));
+  const familiarity = createFamiliarityCard(model);
+  if (familiarity) support.appendChild(familiarity);
+  support.appendChild(createQuickLinksCard());
   const phase9Pins = createPhase9PinsSection();
-  const children = [createDashboardTitle(), createHero(model), primary, support];
+  const children = [createHero(model), primary, support];
   if (phase9Pins) children.push(phase9Pins);
   root.replaceChildren(...children);
 }
@@ -1240,7 +1531,7 @@ function renderDashboardLeftRail(model) {
   const rail = el('uiv3-left-rail');
   if (!rail) return;
   const header = safeEl('div', 'uiv3-left-rail-header dashboard-uiv3-rail-header');
-  header.append(safeEl('span', 'uiv3-label', 'SHIP STATE'), createActionLink('DETAILS', '#/activity-log', 'uiv3-data-label dashboard-uiv3-rail-link'));
+  header.append(safeEl('span', 'uiv3-label', 'SHIP STATE'), createActionLink('Details', '#/activity-log', 'uiv3-data-label dashboard-uiv3-rail-link cmd-btn cmd-btn--quiet'));
 
   const shipType = _lastShipState?.ship_type || _lastShipState?.current_ship_type || null;
   const shipLabel = shipType ? displayShipName(shipType).toUpperCase() : 'UNKNOWN';
@@ -1284,10 +1575,15 @@ function renderDashboardLeftRail(model) {
 
   const walletPanel = safeEl('section', 'uiv3-left-rail-panel dashboard-uiv3-rail-panel');
   walletPanel.setAttribute('aria-label', 'Wallet');
+  const sessionChangeRow = createMetricRow('Session Δ', model.vitals.sessionChange);
+  sessionChangeRow.title =
+    'Observed balance change across source-backed balance observations '
+    + 'this app session. Not a transaction record.';
   walletPanel.append(
     safeEl('p', 'dashboard-uiv3-eyebrow', 'WALLET'),
     createMetricRow('Credits', model.vitals.credits),
     createMetricRow('Rebuy', model.vitals.rebuy),
+    sessionChangeRow,
   );
 
   replaceDashboardOwnedSlot(rail, [header, reticlePanel, vitalsPanel, walletPanel]);
@@ -1319,7 +1615,9 @@ function renderDashboardBottomSpine(model) {
     item.append(safeEl('span', null, label), safeEl('span', 'uiv3-spine-value', value));
     vitals.appendChild(item);
   });
-  const note = safeEl('span', 'uiv3-spine-note', `${model.sourceSummary.posture} diagnostics · resumes on next event`);
+  const note = safeEl('span', 'uiv3-spine-note', model.sourceSummary.posture === 'Not checked'
+    ? 'Waiting for new game data'
+    : 'Last seen game data');
   replaceDashboardOwnedSlot(spine, [anchor, vitals, note]);
 }
 
@@ -1345,6 +1643,7 @@ let _lastLocalContextSnap = null;
 let _lastSourceSnap = null;
 let _lastActivityLog = null;
 let _lastEngineeringSnap = null;
+let _lastMemoryFamiliarity = null;
 /* PB09-08 Phase 9 summary pin data */
 let _lastPhase9Campaigns = null;
 let _lastPhase9BgsFacts = null;
@@ -1449,6 +1748,15 @@ async function loadDashboard() {
   _lastPhase9BgsFacts = phase9BgsFacts;
   _lastPhase9PowerplayFacts = phase9PowerplayFacts;
   _lastLocalContextSnap = await fetchJSON('/intel/local-context/snapshot');
+  const currentSystem = cleanText(_lastLocalContextSnap?.system_context?.star_system, null);
+  if (currentSystem) {
+    const memory = await fetchJSON(`/memory/observed?category=systems&q=${encodeURIComponent(currentSystem)}&limit=10&offset=0`);
+    _lastMemoryFamiliarity = Array.isArray(memory?.records)
+      ? memory.records.find((record) => String(record?.display_name || '').toLowerCase() === currentSystem.toLowerCase()) || null
+      : null;
+  } else {
+    _lastMemoryFamiliarity = null;
+  }
   updateEliteSessionState(_lastLocalContextSnap);
   renderWallet(_lastLocalContextSnap?.wallet_snapshot || null);
   renderHullShields(_lastShipState || ship || {}, _lastLocalContextSnap || _lastMods);
@@ -1632,6 +1940,9 @@ if (typeof globalThis.__dashboardExports === 'undefined') {
     renderShipState,
     renderWallet,
     renderCargo,
+    /* B10: exposed so the unobserved-loadout styling is protected by tests
+       rather than only by inspection. */
+    renderModules,
     renderShipSchematic,
     renderHeat,
     initializeDashboardPanelToggles,
@@ -1640,6 +1951,10 @@ if (typeof globalThis.__dashboardExports === 'undefined') {
     hideAllDashboardPanels,
     ensureDashboardResetControl,
     shieldGeneratorFitted,
+    /* LNA-027: exposed so the partial-capacity vitals behaviour is protected
+       by tests rather than only by inspection. */
+    fuelSummary,
+    cargoSummary,
     resolveSchematicMode,
     updateEliteSessionState,
     __resetSchematicCache: () => { _lastMountedSchematicKey = undefined; },
@@ -1659,6 +1974,7 @@ if (typeof globalThis.__dashboardExports === 'undefined') {
       _lastSourceSnap = inputs?.sourceSnap ?? _lastSourceSnap;
       _lastActivityLog = inputs?.activityLog ?? _lastActivityLog;
       _lastEngineeringSnap = inputs?.engineeringSnap ?? _lastEngineeringSnap;
+      _lastMemoryFamiliarity = inputs?.memoryFamiliarity ?? _lastMemoryFamiliarity;
     },
     __setManualOperation: (op) => { _manualOperation = op; },
     __resetSurface: () => {
@@ -1666,6 +1982,7 @@ if (typeof globalThis.__dashboardExports === 'undefined') {
       _lastCargo = null; _lastNavSnap = null; _lastCombat = null;
       _lastIntelSnap = null; _lastEconomicSnap = null; _lastLocalContextSnap = null; _lastSourceSnap = null;
       _lastActivityLog = null; _lastEngineeringSnap = null;
+      _lastMemoryFamiliarity = null;
       _lastPhase9Campaigns = null; _lastPhase9BgsFacts = null; _lastPhase9PowerplayFacts = null;
       _manualOperation = null;
     },

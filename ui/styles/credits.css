@@ -24,7 +24,7 @@
 
 .registry-title {
   font-size: var(--font-size-xl);
-  color: var(--color-accent);
+  color: var(--color-fg);
   font-weight: var(--font-weight-bold);
   text-transform: none;
   letter-spacing: 0;

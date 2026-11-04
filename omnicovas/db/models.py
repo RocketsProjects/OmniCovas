@@ -21,7 +21,20 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
+from sqlalchemy import (
+    text as sa_text,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -29,6 +42,26 @@ class Base(DeclarativeBase):  # type: ignore[misc,unused-ignore]
     """Base class for all SQLAlchemy models."""
 
     pass
+
+
+class NotificationShadowDecision(Base):
+    """Local redacted diagnostic evidence, bounded independently of Activity Log."""
+
+    __tablename__ = "notification_shadow_decisions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    commander: Mapped[str | None] = mapped_column(String(64), index=True)
+    candidate_id: Mapped[str] = mapped_column(String(160), nullable=False)
+    evaluated_at: Mapped[float] = mapped_column(Float, nullable=False, index=True)
+    record_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class NotificationShadowCheckpoint(Base):
+    """Acknowledgement/high-water state only; never restores an active warning."""
+
+    __tablename__ = "notification_shadow_checkpoints"
+    commander: Mapped[str] = mapped_column(String(64), primary_key=True)
+    updated_at: Mapped[float] = mapped_column(Float, nullable=False)
+    state_json: Mapped[str] = mapped_column(Text, nullable=False)
 
 
 class Session(Base):
@@ -361,6 +394,30 @@ class EngineeringImportSourceStateRef(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 
+class EngineeringCatalogRef(Base):
+    """Commander-supplied, locally persisted Engineering reference pack.
+
+    The pack is reference data, never telemetry.  Its digest and declared
+    provenance are stored beside the normalized JSON so every build remains
+    explainable without an outbound lookup or a hidden global catalogue.
+    """
+
+    __tablename__ = "engineering_catalogs"
+
+    catalog_key: Mapped[str] = mapped_column(String(192), primary_key=True)
+    catalog_id: Mapped[str] = mapped_column(String(96), nullable=False, index=True)
+    version: Mapped[str] = mapped_column(String(64), nullable=False)
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    source_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    license_label: Mapped[str] = mapped_column(String(128), nullable=False)
+    rights_basis: Mapped[str] = mapped_column(String(256), nullable=False)
+    sha256: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    catalog_json: Mapped[str] = mapped_column(Text, nullable=False)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    imported_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
 class CampaignObjectiveRef(Base):
     """Phase 9 local commander-entered campaign objective (BGS or Powerplay).
 
@@ -528,4 +585,420 @@ class SquadronCampaignNote(Base):
         return (
             f"<SquadronCampaignNote note_id={self.note_id} "
             f"type={self.workflow_type} visibility={self.visibility!r}>"
+        )
+
+
+class CommanderMemorySettings(Base):
+    """Singleton local settings for the private Commander Memory service."""
+
+    __tablename__ = "commander_memory_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    paused: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    active_profile_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    last_rebuild_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class CommanderMemoryProfile(Base):
+    """Pseudonymous local profile boundary for Commander Memory observations.
+
+    A forgotten profile remains as a display-name-free tombstone so retained
+    Journal history cannot silently repopulate it during a later rebuild.
+    """
+
+    __tablename__ = "commander_memory_profiles"
+
+    profile_key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    display_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    paused: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    forgotten_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class CommanderMemoryRecord(Base):
+    """Latest local observed-memory aggregate for one profile/category/entity."""
+
+    __tablename__ = "commander_memory_records"
+    __table_args__ = (
+        UniqueConstraint(
+            "profile_key",
+            "category",
+            "entity_key",
+            name="uq_commander_memory_record_entity",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    profile_key: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("commander_memory_profiles.profile_key", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    category: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    entity_key: Mapped[str] = mapped_column(String(256), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
+    parent_key: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    parent_name: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    observation_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    visit_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_type: Mapped[str] = mapped_column(String(48), nullable=False)
+    source_event: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    source_file: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    freshness: Mapped[str] = mapped_column(String(24), nullable=False)
+    caveat: Mapped[str] = mapped_column(Text, nullable=False)
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False)
+    latest_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class CommanderMemoryObservation(Base):
+    """Deduplication ledger for deterministic live ingestion and rebuilds."""
+
+    __tablename__ = "commander_memory_observations"
+
+    fingerprint: Mapped[str] = mapped_column(String(64), primary_key=True)
+    profile_key: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("commander_memory_profiles.profile_key", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    category: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    entity_key: Mapped[str] = mapped_column(String(256), nullable=False)
+    observed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    source_event: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    source_file: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class GalacticIntelligenceEncounter(Base):
+    """When OmniCOVAS last briefed a Commander about one documented place (GKI-04).
+
+    An encounter is OmniCOVAS's own record of having briefed, never evidence that
+    the Commander visited anything: it backs the frequency and cooldown preferences.
+    Keyed by the Commander Memory profile so commanders never share history.
+    """
+
+    __tablename__ = "galactic_intelligence_encounters"
+    __table_args__ = (
+        UniqueConstraint(
+            "profile_key", "encounter_key", name="uq_galactic_intelligence_encounter"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    profile_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    encounter_key: Mapped[str] = mapped_column(String(160), nullable=False)
+    first_briefed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    last_briefed_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, index=True
+    )
+    briefing_count: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class GalacticIntelligenceBriefing(Base):
+    """One automatic briefing and its dismissal (GKI-04).
+
+    ``event_key`` identifies the Journal observation that produced it, so the same
+    event delivered twice (catch-up, reconnect, restart) never briefs twice.
+    """
+
+    __tablename__ = "galactic_intelligence_briefings"
+    __table_args__ = (
+        UniqueConstraint(
+            "profile_key", "event_key", name="uq_galactic_intelligence_briefing_event"
+        ),
+    )
+
+    briefing_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    profile_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    event_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    encounter_key: Mapped[str] = mapped_column(String(160), nullable=False)
+    observed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    dismissed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class Expedition(Base):
+    """A Commander's planned expedition (GKI-06).
+
+    Commander-authored and keyed by the Commander Memory profile, so commanders
+    never share expeditions; forgetting a commander deletes theirs.  ``story_json``
+    holds the chapters the Commander has read and ``history_json`` the structured,
+    Chronicle-ready record of what happened on the journey.
+    """
+
+    __tablename__ = "expeditions"
+
+    expedition_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    profile_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    entry: Mapped[str] = mapped_column(String(16), nullable=False)
+    theme_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    narrative_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    goal_scope: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    story_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    history_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class ExpeditionStop(Base):
+    """One canonical stop on an expedition, with every reason for going (GKI-06).
+
+    A documented place is one stop however many purposes it serves.  ``manual_state``
+    is what the Commander said; ``evidence_json`` is what the Journal showed, kept
+    apart so a skipped stop that was later reached still says both.
+    """
+
+    __tablename__ = "expedition_stops"
+    __table_args__ = (
+        UniqueConstraint("expedition_id", "stop_key", name="uq_expedition_stop_key"),
+    )
+
+    stop_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    expedition_id: Mapped[str] = mapped_column(
+        String(32),
+        ForeignKey("expeditions.expedition_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    profile_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    stop_key: Mapped[str] = mapped_column(String(160), nullable=False)
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    place_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    system_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    system_address: Mapped[int | None] = mapped_column(nullable=True)
+    purposes_json: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    manual_state: Mapped[str] = mapped_column(String(16), nullable=False)
+    manual_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    evidence_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class ChronicleEntry(Base):
+    """One entry in a Commander's Chronicle (GKI-07).
+
+    Holds only what no other store keeps: Journal evidence at documented sites,
+    bodies and stations that Commander Memory does not record (a landing, a body
+    reached, an approach), Codex registrations, and what the Commander said (a
+    confirmed visit, a saved story).  System and station visits are read from
+    Commander Memory and journey progress from the expeditions, never copied here.
+    ``fingerprint`` identifies the observation or the Commander's choice, so a
+    replayed Journal line is never recorded twice; ``evidence`` is ``observed``
+    (the Journal showed it) or ``commander`` (the Commander said so).
+    """
+
+    __tablename__ = "chronicle_entries"
+    __table_args__ = (
+        UniqueConstraint("profile_key", "fingerprint", name="uq_chronicle_entry"),
+    )
+
+    entry_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    profile_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(String(24), nullable=False)
+    evidence: Mapped[str] = mapped_column(String(16), nullable=False)
+    subject_id: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    observed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    source_event: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    replayed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+
+
+class CommanderSystemNote(Base):
+    """A Commander-authored note about a star system (LNA-004).
+
+    Deliberately its own table rather than a field on a Commander Memory
+    record: Memory is derived and a rebuild deletes and re-derives every
+    record, which would destroy anything the Commander wrote by hand. This is
+    authored data, so it outlives rebuilds and is owned by the Commander.
+
+    One note per system, edited in place. The system name is the identity —
+    notes are keyed by what the Commander sees, not by an address that a
+    renamed or unresolved system could lose.
+    """
+
+    __tablename__ = "commander_system_notes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    star_system: Mapped[str] = mapped_column(
+        String(128), nullable=False, unique=True, index=True
+    )
+    note: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<CommanderSystemNote system={self.star_system!r}>"
+
+
+class ExobiologyRuleEvidence(Base):
+    """One species observation weighed against the occurrence rules (Rule Sentinel).
+
+    A confirmed ScanOrganic proves the species was present under the conditions the
+    journal recorded for that body. Where the rules said that was impossible, the rule
+    is wrong or incomplete, and this table is where that proof is kept.
+
+    Deliberately its own table rather than a field on the journal event: the flight
+    recorder holds what happened, unaltered, and must stay that way. This holds a
+    judgement about what happened, made against a ruleset version that will change.
+    Both are needed, and mixing them would let a rule update silently rewrite history.
+
+    Identity is the species plus the body plus the predicate that was contradicted, so
+    re-scanning the same colony increments a count rather than filing the same finding
+    again. `ruleset_version` and `ruleset_sha256` pin which rules produced the verdict,
+    so evidence recorded under an older ruleset is never reinterpreted as though the
+    current rules had existed at observation time.
+    """
+
+    __tablename__ = "exobiology_rule_evidence"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    #: SUPPORTING_OBSERVATION | NEW_EMPIRICAL_EVIDENCE | RULE_CONTRADICTION
+    classification: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    #: OPEN | CORROBORATED | CANONICAL_UPDATE_PROPOSED | REJECTED_BAD_EVIDENCE
+    #: | RESOLVED
+    review_state: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+
+    species_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    species_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    genus: Mapped[str] = mapped_column(String(64), nullable=False)
+    variant: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+    star_system: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    system_address: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    body_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    body_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+
+    #: Verdict the rules returned for this species at this body, before the
+    #: observation was taken into account.
+    evaluation_before_observation: Mapped[str] = mapped_column(
+        String(16), nullable=False
+    )
+    contradicted_branch: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    contradicted_predicate: Mapped[str | None] = mapped_column(
+        String(64), nullable=True
+    )
+
+    #: The body facts the journal recorded, as JSON. Local scan values only.
+    observed_facts: Mapped[str] = mapped_column(Text, nullable=False)
+
+    ruleset_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    ruleset_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+
+    #: Always the local journal. Present so a future import path cannot be mistaken
+    #: for first-hand telemetry.
+    source: Mapped[str] = mapped_column(String(32), nullable=False)
+
+    first_seen: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    observation_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "species_id",
+            "body_name",
+            "contradicted_predicate",
+            "ruleset_sha256",
+            name="uq_exobiology_rule_evidence_identity",
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<ExobiologyRuleEvidence {self.classification} "
+            f"species={self.species_id!r} body={self.body_name!r}>"
+        )
+
+
+class OperationsObjectiveRef(Base):
+    """A Commander-entered objective for one Operations mode (PB14-R1).
+
+    Answers "what am I trying to accomplish?" — Commander intent, never
+    telemetry. The mode answers "what workflow am I viewing?" and readiness
+    answers "am I ready?"; those are derived and live elsewhere. Nothing in
+    this table is ever promoted to a fact.
+
+    Deliberately its own table rather than a Commander Memory record: Memory
+    is derived, and a rebuild deletes and re-derives every record, which would
+    silently destroy authored intent during a maintenance action the Commander
+    is told is safe. The same reasoning already governs
+    :class:`CommanderSystemNote`.
+
+    Identity is created once and never regenerated. Changing the text edits
+    this row, because a restated goal is the same goal — closing and replacing
+    it would manufacture a completion the Commander never declared.
+
+    ``state`` reuses the Phase 9 campaign vocabulary rather than forking a
+    second lifecycle language. Only three of its five values arise here:
+    ``active``, ``completed`` and ``archived``. There is no proposal step, and
+    an objective never becomes ``blocked`` — blockers are derived from
+    readiness and an objective is not a blocker.
+
+    At most one non-archived row exists per operation, enforced by a partial
+    unique index: that row is the mode's current objective. Cleared objectives
+    are archived, not deleted, so the Activity Log proof of what happened keeps
+    the row it points at.
+    """
+
+    __tablename__ = "operations_objectives"
+
+    objective_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    #: Operations mode key — the vocabulary in `readiness.OPERATION_PROFILES`.
+    operation: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    #: Commander-authored free text. Private local state; never logged raw.
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    #: "active" | "completed" | "archived" (Phase 9 campaign vocabulary).
+    state: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    #: Always "commander_entered". Stored so a read cannot infer the class.
+    source: Mapped[str] = mapped_column(String(32), nullable=False)
+    #: Phase 14 R6 / `P14-H02`: the Commander's explicitly SELECTED target for
+    #: this operation, held as structured columns beside the free text rather
+    #: than parsed out of it. Mining needs to know "which commodity, how many
+    #: tonnes" to report fill progress; reading that out of a sentence would
+    #: mean guessing at Commander intent, which PB14-R1 forbids. Both are
+    #: nullable because a Commander may state a goal without one.
+    target_commodity: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    target_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_activity_log_event_id: Mapped[str | None] = mapped_column(
+        String(64), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    __table_args__ = (
+        # One current objective per mode. Archived rows are history and are
+        # deliberately outside the constraint so clearing never blocks the
+        # next objective.
+        Index(
+            "uq_operations_objectives_current",
+            "operation",
+            unique=True,
+            sqlite_where=sa_text("state != 'archived'"),
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<OperationsObjectiveRef operation={self.operation!r} "
+            f"state={self.state!r}>"
         )

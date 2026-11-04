@@ -67,7 +67,7 @@
   font-size: var(--font-size-base);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-accent);
+  color: var(--color-fg);
 }
 .log-section-hint {
   margin: 0;
@@ -114,7 +114,7 @@
 }
 .log-proof-card-title {
   margin: 0;
-  color: var(--color-accent);
+  color: var(--color-fg);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
 }
@@ -202,6 +202,38 @@
   letter-spacing: 0;
 }
 
+#log-persistence-note {
+  margin: var(--space-3) 0;
+  max-width: 80ch;
+}
+
+.log-entity-index-details {
+  margin-top: var(--space-3);
+}
+
+[data-route-handoff-match="true"] {
+  border-color: var(--color-info);
+  box-shadow: 0 0 0 2px var(--color-info-bg);
+}
+
+@media (max-width: 760px) {
+  #view-activity-log #log-controls {
+    align-items: stretch;
+  }
+
+  #view-activity-log .log-sort-label {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (forced-colors: active) {
+  [data-route-handoff-match="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
 #view-activity-log .ocv-recorder-timeline {
   display: grid;
   gap: var(--space-1);
@@ -246,13 +278,64 @@
 /* ── Filter bar ─────────────────────────────────────────────────────────── */
 
 .log-filter-group {
-  border: none;
+  border: 0;
   padding: 0;
   margin: 0;
-  display: flex;
-  align-items: center;
+  display: grid;
   gap: var(--space-3);
+}
+
+.log-more-filters {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 0;
+}
+
+.log-more-filters-summary {
+  cursor: pointer;
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  padding: var(--space-3) var(--space-4);
+  text-transform: uppercase;
+}
+
+.log-more-filters-summary:hover,
+.log-more-filters-summary:focus-visible {
+  color: var(--color-fg);
+}
+
+.log-more-filters-summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.log-more-filters[open] > .log-more-filters-summary {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.log-more-filters-body {
+  padding: var(--space-4);
+}
+
+.log-filter-subgroup {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  display: flex;
   flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+  padding: var(--space-3);
+}
+
+.log-filter-subgroup legend {
+  color: var(--color-telemetry-label);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  padding: 0 var(--space-1);
+  text-transform: uppercase;
 }
 
 .log-filter-label {
@@ -329,11 +412,12 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
+  color: var(--color-fg-muted);
 }
 
 .log-event-type.critical { color: var(--color-critical); }
 .log-event-type.extended  { color: var(--color-telemetry-label); }
-.log-event-type.ai        { color: var(--color-accent); }
+.log-event-type.ai        { color: var(--color-fg-muted); }
 .log-event-type.telemetry { color: var(--color-fg-muted); }
 
 .log-source {
@@ -345,6 +429,11 @@
 .log-summary {
   color: var(--color-fg);
   line-height: var(--line-height);
+}
+
+.log-summary-text {
+  display: block;
+  margin-bottom: var(--space-1);
 }
 
 /* waiting/empty state cell (colSpan 5) */

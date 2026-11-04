@@ -15,6 +15,7 @@
 const SETTINGS_TABS = [
   'appearance',
   'command-center',
+  'galactic-intelligence',
   'overlay',
   'ai',
   'controls',
@@ -34,6 +35,19 @@ const KNOWN_BANNER_TYPES = [
   'HEAT_DAMAGE',
   'OMNICOVAS_TEST',
 ];
+
+/* Commander-facing names for the critical alert switches (stored keys keep
+   their existing event names). */
+const OVERLAY_EVENT_LABELS = {
+  HULL_CRITICAL_10: 'Hull critical (below 10%)',
+  HULL_CRITICAL_25: 'Hull low (below 25%)',
+  SHIELDS_DOWN: 'Shields offline',
+  FUEL_CRITICAL: 'Fuel critical (below 10%)',
+  FUEL_LOW: 'Fuel low (below 25%)',
+  MODULE_CRITICAL: 'Module critically damaged',
+  HEAT_DAMAGE: 'Overheating damage',
+  HEAT_WARNING: 'Heat high',
+};
 
 class SettingsController {
   constructor() {
@@ -62,6 +76,23 @@ class SettingsController {
   apiUrl(path) {
     const base = this.apiBase;
     return base ? `${base}${path}` : null;
+  }
+
+  async confirmProtectedAction(options) {
+    const gate = window.OmniConfirmationGate;
+    if (!gate?.confirmLocalAction) {
+      console.error('[Settings] Shared Confirmation Gate is unavailable.');
+      return false;
+    }
+    return gate.confirmLocalAction(options);
+  }
+
+  notify(message, kind = 'info') {
+    if (window.OmniConfirmationGate?.announce) {
+      window.OmniConfirmationGate.announce(message, { kind });
+    } else {
+      console.info(`[Settings] ${message}`);
+    }
   }
 
   async init() {
@@ -107,11 +138,114 @@ class SettingsController {
     });
 
     if (tabId === 'overlay') {
+      this._loadNotificationSettings();
       this._loadOverlaySettings();
+    }
+    if (tabId === 'developer') {
+      this._loadPresentationOwner();
+    }
+    if (tabId === 'galactic-intelligence') {
+      this._loadGalacticIntelligence();
     }
     /* Sources tab removed in correction #12 — Sources & Diagnostics is
        a real Systems surface now. Source health lookup still available
        for legacy consumers but no Settings tab triggers it. */
+  }
+
+  // ── Notifications (NHI-03/04) ─────────────────────
+
+  _bridgeRequest() {
+    return async (method, path, body) => {
+      const url = this.apiUrl(path);
+      if (!url) throw new Error('Bridge not ready');
+      const res = await fetch(url, body === undefined
+        ? { method }
+        : { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    };
+  }
+
+  async _notificationModule() {
+    if (!this._notificationModulePromise) {
+      this._notificationModulePromise = import('../components/notification-settings.js').catch((e) => {
+        console.error('[Settings] Failed to load notification settings:', e);
+        this._notificationModulePromise = null;
+        return null;
+      });
+    }
+    return this._notificationModulePromise;
+  }
+
+  /* Attention choices live per commander behind /notifications/preferences;
+     this tab hosts the component above the existing overlay controls. */
+  async _loadNotificationSettings() {
+    const host = document.getElementById('notification-settings-root');
+    if (!host) return;
+    if (!this._notificationSettings) {
+      const module = await this._notificationModule();
+      if (!module) return;
+      const request = this._bridgeRequest();
+      this._notificationSettings = module.createNotificationSettings({
+        fetchJson: (path) => request('GET', path),
+        sendJson: request,
+        openTab: (tab) => {
+          this._activateTab(tab);
+          document.getElementById(`tab-${tab}`)?.focus();
+        },
+      });
+      host.replaceChildren(this._notificationSettings.element);
+    }
+    await this._notificationSettings.load();
+  }
+
+  async _loadPresentationOwner() {
+    const host = document.getElementById('notification-owner-root');
+    if (!host) return;
+    if (!this._presentationOwner) {
+      const module = await this._notificationModule();
+      if (!module) return;
+      const request = this._bridgeRequest();
+      this._presentationOwner = module.createPresentationOwnerControl({
+        fetchJson: (path) => request('GET', path),
+        sendJson: request,
+      });
+      host.replaceChildren(this._presentationOwner.element);
+    }
+    await this._presentationOwner.load();
+  }
+
+  // ── Galactic Intelligence (GKI-04) ───────────────
+
+  /* Preferences live per commander behind /knowledge/intelligence; this tab
+     only hosts the component and passes it the bridge. */
+  async _loadGalacticIntelligence() {
+    const host = document.getElementById('galactic-intelligence-settings-root');
+    if (!host) return;
+    if (!this._galacticIntelligence) {
+      let module = null;
+      try {
+        module = await import('../components/galactic-intelligence.js');
+      } catch (e) {
+        console.error('[Settings] Failed to load Galactic Intelligence settings:', e);
+        return;
+      }
+      const request = async (method, path, body) => {
+        const url = this.apiUrl(path);
+        if (!url) throw new Error('Bridge not ready');
+        const res = await fetch(url, body === undefined
+          ? { method }
+          : { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      };
+      this._galacticIntelligence = module.createIntelligenceSettings({
+        fetchJson: (path) => request('GET', path),
+        sendJson: request,
+      });
+      host.replaceChildren(this._galacticIntelligence.element);
+    }
+    await this._galacticIntelligence.load();
   }
 
   // ── Source health registry ───────────────────────
@@ -367,11 +501,11 @@ class SettingsController {
       checkbox.id = id;
       checkbox.name = id;
       checkbox.checked = Boolean(enabled);
-      checkbox.setAttribute('aria-label', `Toggle ${eventType} event`);
+      checkbox.setAttribute('aria-label', OVERLAY_EVENT_LABELS[eventType] || `Toggle ${eventType} event`);
       checkbox.dataset.eventType = eventType;
 
       const nameSpan = document.createElement('span');
-      nameSpan.textContent = eventType;
+      nameSpan.textContent = OVERLAY_EVENT_LABELS[eventType] || eventType;
 
       item.appendChild(checkbox);
       item.appendChild(nameSpan);
@@ -508,8 +642,9 @@ class SettingsController {
     const container = document.getElementById('view-settings');
     if (!container) return;
 
-    // Remove existing hero if any
+    // Remove existing route headers so Settings keeps one header surface.
     container.querySelector('.route-hero')?.remove();
+    container.querySelector('.page-header')?.remove();
 
     const hero = Primitives.createRouteHero({
       title: 'Settings',
@@ -589,7 +724,7 @@ class SettingsController {
           name: pillarLabels[key],
           badge: 'reserved',
           onInspect: () => {
-             alert(`This capability is reserved and not active in this build.`);
+             this.notify('This capability is reserved and not active in this build.');
           }
         });
         container.appendChild(row);
@@ -613,7 +748,7 @@ class SettingsController {
       checkbox.setAttribute(
         'aria-label',
         isCombatPhase4
-          ? `${pillarLabels[key]} is current`
+          ? `${pillarLabels[key]} capability is available and locked on`
           : `Toggle ${pillarLabels[key]}`,
       );
 
@@ -682,6 +817,27 @@ class SettingsController {
     document.getElementById('btc-test-all-btn')?.addEventListener('click', () => this._testAllBanners());
     document.getElementById('rerun-setup-btn')?.addEventListener('click', () => this.resetSetup());
     document.getElementById('reset-license-btn')?.addEventListener('click', () => this.resetLicenseAck());
+    this._bindDensityMode();
+  }
+
+  /* FU-013b: interactive density mode. Applies the PB07.6-10 display-only
+     density classes through Shell (NRL-33: never hides blockers, the
+     Confirmation Gate, or proof access). Persisted locally; restored by the
+     shell on startup. */
+  _bindDensityMode() {
+    const select = document.getElementById('appearance-density');
+    if (!select) return;
+    let stored = null;
+    try {
+      stored = window.localStorage?.getItem('omnicovas.density-mode');
+    } catch { /* localStorage unavailable */ }
+    if (stored && Array.from(select.options).some((opt) => opt.value === stored)) {
+      select.value = stored;
+    }
+    select.addEventListener('change', () => {
+      const applied = window.Shell?.applyDensityMode?.(select.value);
+      if (applied && applied !== select.value) select.value = applied;
+    });
   }
 
   setPreset(preset) {
@@ -707,28 +863,38 @@ class SettingsController {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      alert('Settings saved!');
+      this.notify('Settings saved.', 'success');
       await this.loadSettings();
       this.renderUI();
     } catch (err) {
       console.error('Failed to save settings:', err);
-      alert('Failed to save settings. See console for details.');
+      this.notify('Failed to save settings. See console for details.', 'error');
     }
   }
 
   async resetSettings() {
-    if (!confirm('Reset all settings to defaults?')) return;
+    const confirmed = await this.confirmProtectedAction({
+      title: 'Reset settings?',
+      message: 'This restores all OmniCOVAS settings to their local defaults.',
+      confirmLabel: 'Reset settings',
+      danger: true,
+    });
+    if (!confirmed) return;
     const url = this.apiUrl('/week13/settings/reset');
     if (!url) return;
     try {
-      const res = await fetch(url, { method: 'POST' });
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmed: true }),
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await this.loadSettings();
       this.renderUI();
-      alert('Settings reset to defaults!');
+      this.notify('Settings reset to defaults.', 'success');
     } catch (err) {
       console.error('Failed to reset settings:', err);
-      alert('Failed to reset settings. See console for details.');
+      this.notify('Failed to reset settings. See console for details.', 'error');
     }
   }
 
@@ -751,35 +917,54 @@ class SettingsController {
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
       console.error('Failed to export settings:', err);
-      alert('Failed to export settings. See console for details.');
+      this.notify('Failed to export settings. See console for details.', 'error');
     }
   }
 
   async resetSetup() {
-    if (!confirm('Re-run the first-time setup wizard? This will re-show the setup wizard on next launch. Your license acknowledgement and settings are not affected.')) return;
+    const confirmed = await this.confirmProtectedAction({
+      title: 'Re-run first-time setup?',
+      message: 'The setup wizard will appear on next launch. License acknowledgement and settings are not affected.',
+      confirmLabel: 'Re-run setup',
+    });
+    if (!confirmed) return;
     const url = this.apiUrl('/week13/onboarding/reset');
     if (!url) return;
     try {
-      const res = await fetch(url, { method: 'POST' });
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmed: true }),
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      alert('Setup wizard will re-run on next launch.');
+      this.notify('Setup wizard will re-run on next launch.', 'success');
     } catch (err) {
       console.error('[Settings] Failed to reset setup:', err);
-      alert('Failed to reset setup. See console for details.');
+      this.notify('Failed to reset setup. See console for details.', 'error');
     }
   }
 
   async resetLicenseAck() {
-    if (!confirm('Reset your license acknowledgement? You will need to re-read and agree to the OmniCOVAS license before using the app again.')) return;
+    const confirmed = await this.confirmProtectedAction({
+      title: 'Reset license acknowledgement?',
+      message: 'The license screen will return on next launch and must be accepted before using the app.',
+      confirmLabel: 'Reset acknowledgement',
+      danger: true,
+    });
+    if (!confirmed) return;
     const url = this.apiUrl('/week13/license/reset');
     if (!url) return;
     try {
-      const res = await fetch(url, { method: 'POST' });
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmed: true }),
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      alert('License acknowledgement reset. The license screen will appear on next launch.');
+      this.notify('License acknowledgement reset. The license screen will appear on next launch.', 'success');
     } catch (err) {
       console.error('[Settings] Failed to reset license acknowledgement:', err);
-      alert('Failed to reset license acknowledgement. See console for details.');
+      this.notify('Failed to reset license acknowledgement. See console for details.', 'error');
     }
   }
 
@@ -795,21 +980,27 @@ class SettingsController {
       try {
         const text = await file.text();
         const data = JSON.parse(text);
-        if (!confirm('This will overwrite your current settings. Continue?')) return;
+        const confirmed = await this.confirmProtectedAction({
+          title: 'Import settings?',
+          message: 'The selected file will replace matching current settings.',
+          confirmLabel: 'Import settings',
+          danger: true,
+        });
+        if (!confirmed) return;
         const url = this.apiUrl('/week13/settings/import');
         if (!url) return;
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, confirmed: true }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         await this.loadSettings();
         this.renderUI();
-        alert('Settings imported!');
+        this.notify('Settings imported.', 'success');
       } catch (err) {
         console.error('Failed to import settings:', err);
-        alert('Failed to import settings. See console for details.');
+        this.notify('Failed to import settings. See console for details.', 'error');
       }
     });
     input.click();

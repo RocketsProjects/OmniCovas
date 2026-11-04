@@ -50,6 +50,64 @@ FUEL_LOW_THRESHOLD = 0.25
 HEAT_WARNING_THRESHOLD = 0.75
 
 
+def _sanitize_status(status: dict[str, Any]) -> dict[str, Any]:
+    """Drop fields whose type is not what Status.json is supposed to carry.
+
+    A corrupt or partially-written Status.json can hold a string where a
+    number belongs. Every consumer then does integer maths on it: the flag
+    comparisons raised on each poll, which killed live status detection
+    entirely — no fuel, heat, shield, or interdiction transitions — while
+    logging a traceback twice a second and telling the Commander nothing.
+
+    A field of the wrong type is dropped rather than coerced, so downstream
+    sees it as unreported. Unknown is already handled honestly everywhere;
+    a guessed value would not be.
+    """
+    if not isinstance(status, dict):
+        return {}
+
+    cleaned: dict[str, Any] = dict(status)
+
+    for key in ("Flags", "Flags2", "FireGroup", "GuiFocus"):
+        value = cleaned.get(key)
+        if key in cleaned and (isinstance(value, bool) or not isinstance(value, int)):
+            cleaned.pop(key)
+
+    for key in ("Heat", "Balance", "Cargo", "Latitude", "Longitude", "Altitude"):
+        value = cleaned.get(key)
+        if key in cleaned and (
+            isinstance(value, bool) or not isinstance(value, (int, float))
+        ):
+            cleaned.pop(key)
+
+    pips = cleaned.get("Pips")
+    if "Pips" in cleaned and (
+        not isinstance(pips, list)
+        or not all(
+            isinstance(pip, (int, float)) and not isinstance(pip, bool) for pip in pips
+        )
+    ):
+        cleaned.pop("Pips")
+
+    fuel = cleaned.get("Fuel")
+    if "Fuel" in cleaned:
+        if not isinstance(fuel, dict):
+            cleaned.pop("Fuel")
+        else:
+            cleaned["Fuel"] = {
+                name: amount
+                for name, amount in fuel.items()
+                if isinstance(amount, (int, float)) and not isinstance(amount, bool)
+            }
+
+    dropped = sorted(set(status) - set(cleaned))
+    if dropped:
+        logger.warning(
+            "Status.json fields ignored (unexpected type): %s", ", ".join(dropped)
+        )
+    return cleaned
+
+
 class StatusReader:
     """
     Polls Status.json and fires events when values change.
@@ -102,7 +160,7 @@ class StatusReader:
                 if not content:
                     return None
                 status: dict[str, Any] = json.loads(content)
-                return status
+                return _sanitize_status(status)
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Status.json read skipped: %s", e)
             return None
@@ -146,28 +204,36 @@ class StatusReader:
         if old_heat < HEAT_WARNING_THRESHOLD and new_heat >= HEAT_WARNING_THRESHOLD:
             sub_events.append("HeatWarning")
 
-        # Shields — Flags bit 3 is "Shields Up"
+        # Flag transitions need both readings. A dropped or malformed Flags
+        # field defaulted to 0, which read as every flag off and fabricated a
+        # ShieldDown alert out of a file the reader could not parse. A fact
+        # that was not reported is unknown, and unknown never becomes a
+        # finding about the ship.
         SHIELDS_UP_FLAG = 1 << 3
-        old_flags = old_state.get("Flags", 0)
-        new_flags = new_state.get("Flags", 0)
-        old_shields = bool(old_flags & SHIELDS_UP_FLAG)
-        new_shields = bool(new_flags & SHIELDS_UP_FLAG)
-        if old_shields and not new_shields:
-            sub_events.append("ShieldDown")
-
-        # Pips changed (any element different)
-        old_pips = old_state.get("Pips", [])
-        new_pips = new_state.get("Pips", [])
-        if old_pips != new_pips:
-            sub_events.append("PipsChanged")
-
-        # Interdiction — Flags bit 23, value 8388608 (0x00800000), "Being Interdicted"
-        # Rising edge only: fires once when interdiction starts, not every poll.
         BEING_INTERDICTED_FLAG = 1 << 23
-        if not (old_flags & BEING_INTERDICTED_FLAG) and (
-            new_flags & BEING_INTERDICTED_FLAG
+        old_flags = old_state.get("Flags")
+        new_flags = new_state.get("Flags")
+        if isinstance(old_flags, int) and isinstance(new_flags, int):
+            old_shields = bool(old_flags & SHIELDS_UP_FLAG)
+            new_shields = bool(new_flags & SHIELDS_UP_FLAG)
+            if old_shields and not new_shields:
+                sub_events.append("ShieldDown")
+
+            # Rising edge only: fires once when interdiction starts.
+            if not (old_flags & BEING_INTERDICTED_FLAG) and (
+                new_flags & BEING_INTERDICTED_FLAG
+            ):
+                sub_events.append("BeingInterdicted")
+
+        # Same rule for pips: an absent reading is not a change.
+        old_pips = old_state.get("Pips")
+        new_pips = new_state.get("Pips")
+        if (
+            isinstance(old_pips, list)
+            and isinstance(new_pips, list)
+            and old_pips != new_pips
         ):
-            sub_events.append("BeingInterdicted")
+            sub_events.append("PipsChanged")
 
         return sub_events
 
@@ -192,13 +258,21 @@ class StatusReader:
         status_event: dict[str, Any] = {
             "event": "Status",
             "timestamp": timestamp,
-            "Flags": new_state.get("Flags", 0),
             "SubEvents": sub_events,
         }
 
         # Law 7 (Telemetry Rigidity): Only include fields present in Status.json.
         # This prevents defaulting (e.g. 0.0 heat or empty pips) from overriding
         # valid state if Status.json happens to omit a field during a transition.
+        #
+        # Flags is held to the same rule. It used to default to 0 here, which
+        # undid the handler's own guard: a Flags the sanitiser had dropped
+        # arrived downstream as a positive claim that every flag was off, and
+        # the handler wrote shields-down and undocked from a file it could not
+        # parse (Law 5 — Zero Hallucination).
+        if "Flags" in new_state:
+            status_event["Flags"] = new_state["Flags"]
+
         if "Pips" in new_state:
             status_event["Pips"] = new_state["Pips"]
 

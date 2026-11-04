@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 from collections import deque
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Final
@@ -116,6 +116,11 @@ class ActivityLog:
 
     def __init__(self, maxlen: int = 100) -> None:
         self._entries: deque[ActivityEntry] = deque(maxlen=maxlen)
+        self._observers: list[Callable[[ActivityEntry], None]] = []
+
+    def observe(self, callback: Callable[[ActivityEntry], None]) -> None:
+        """Optional bounded diagnostic observer; never another log append."""
+        self._observers.append(callback)
 
     def append(self, entry: ActivityEntry) -> None:
         """Append *entry* to the log.
@@ -124,6 +129,11 @@ class ActivityLog:
         maxlen is reached.
         """
         self._entries.append(entry)
+        for observer in self._observers:
+            try:
+                observer(entry)
+            except Exception:
+                logger.warning("Activity diagnostic observer failed")
 
     def entries(self) -> list[ActivityEntry]:
         """Return a copy of all entries in order (oldest first)."""

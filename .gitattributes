@@ -1,0 +1,17 @@
+# Line-ending policy.
+#
+# Cargo and the Tauri CLI rewrite these files with LF whenever they run. With
+# Git's autocrlf checkout converting them to CRLF, every build left a phantom
+# working-tree modification whose `git diff` showed no content change at all —
+# enough to make a clean tree look dirty and to mask a real edit sitting beside
+# it. Pinning them to LF in the working tree matches what the tools write.
+*.toml text eol=lf
+*.lock text eol=lf
+
+# The exobiology ruleset ships as a byte-identical copy of its verified research
+# artifact, and a test asserts its SHA-256 against the file on disk. Under autocrlf
+# both copies are rewritten to CRLF at checkout, which makes that hash differ by
+# platform and breaks the drift guard the moment anyone checks out on Linux. Pinned
+# to LF so the shipped bytes are the bytes that were verified.
+omnicovas/data/exobiology_species_ruleset.json text eol=lf
+evidence/research/exobiology-ruleset-20260817/*.json text eol=lf

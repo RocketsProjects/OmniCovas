@@ -63,6 +63,21 @@ class FieldSource:
     source_file: str | None = None
 
 
+# Wallet hardening (FU-014): bounded ring of source-backed balance
+# observations. Arithmetic over observations is balance-change evidence,
+# never a transaction record.
+BALANCE_OBSERVATION_LIMIT = 32
+
+
+@dataclass
+class BalanceObservation:
+    """A single source-backed credit-balance observation."""
+
+    value: int
+    source: str  # TelemetrySource.name at observation time
+    timestamp: str | None = None
+
+
 @dataclass
 class ModuleInfo:
     """
@@ -86,7 +101,7 @@ class ModuleInfo:
     health: float
     power: float | None
     priority: int | None
-    on: bool
+    on: bool | None
     # Raw engineering block from journal -- parsed in Phase 8 (Pillar 6).
     # None when module has no engineering modifications.
     engineering: dict[str, Any] | None
@@ -586,6 +601,8 @@ class CargoHoldSnapshot:
     vessel: str | None = None
     capacity: int | None = None
     inventory: list[CargoItem] = field(default_factory=list)
+    total_count: int | None = None
+    inventory_complete: bool = False
     source: str = "Journal"
     source_event: str | None = None
     event_timestamp: str | None = None
@@ -628,6 +645,10 @@ class SessionState:
     fuel_capacity_reserve: float | None = None
     cargo_count: int | None = None
     cargo_capacity: int | None = None
+    # Ship mass excluding fuel and cargo, sourced from Loadout.UnladenMass.
+    # Kept separate from module-derived estimates: the Journal aggregate is
+    # the installed-ship truth and remains nullable when it was not observed.
+    unladen_mass: float | None = None
     target_cmdr: str | None = None
     target_ship: str | None = None
     commander_name: str | None = None
@@ -638,6 +659,10 @@ class SessionState:
     credit_balance: int | None = None
     loan: int | None = None
     rebuy_cost: int | None = None
+    # FU-014: bounded history of distinct source-backed balance observations
+    # this app session (oldest first). Observation arithmetic is evidence of
+    # observed change only — never a transaction ledger.
+    balance_observations: list[BalanceObservation] = field(default_factory=list)
 
     # --- Phase 2 -- Ship Identity (Feature 1: Live Ship State) ---------------
     # Populated from LoadGame, Loadout, and ShipyardSwap journal events.
@@ -662,8 +687,9 @@ class SessionState:
     # fuel_reservoir: the small supplemental tank that feeds the main tank.
     # Sourced from Status.json Fuel.FuelReservoir. Units: tons.
     fuel_reservoir: float | None = None
-    # jump_range_ly: maximum jump range at current load.
-    # Sourced from Loadout.MaxJumpRange -- NOT recomputed from physics.
+    # jump_range_ly: maximum jump range reported by Loadout. Per Frontier's
+    # Journal manual this assumes zero cargo and just enough fuel for one jump.
+    # It is NOT recomputed from physics.
     # Phase 5 (Exploration pillar) owns first-principles jump math.
     jump_range_ly: float | None = None
 
@@ -804,10 +830,14 @@ class StateManager:
         # (fuel and shield state) even if JOURNAL set a prior value.
         # Status.json bit 3 is the live shield truth; a journal ShieldsDown event
         # must not permanently block the next Status.json shield-up reading.
+        # FU-014: credit_balance joins this set — the Elite Local Data Surface
+        # Reference assigns the live Balance slice to Status.json; a login-time
+        # LoadGame.Credits value must not permanently block live Balance updates.
         is_fuel_update = source == TelemetrySource.STATUS_JSON and field_name in (
             "fuel_main",
             "fuel_reservoir",
             "shield_up",
+            "credit_balance",
         )
 
         existing = self._state._field_sources.get(field_name)
@@ -838,6 +868,8 @@ class StateManager:
         self._state._field_sources[field_name] = FieldSource(
             source=source, timestamp=timestamp, source_file=source_file
         )
+        if field_name == "credit_balance" and isinstance(value, int):
+            self._record_balance_observation(value, source, timestamp)
         logger.debug(
             "Updated %s = %r (source: %s)",
             field_name,
@@ -845,6 +877,26 @@ class StateManager:
             source.name,
         )
         return True
+
+    def _record_balance_observation(
+        self,
+        value: int,
+        source: TelemetrySource,
+        timestamp: str | None,
+    ) -> None:
+        """Append a distinct source-backed balance observation (FU-014).
+
+        Repeated observations of the same value are not re-recorded; the ring
+        is bounded so long sessions cannot grow state unboundedly.
+        """
+        observations = self._state.balance_observations
+        if observations and observations[-1].value == value:
+            return
+        observations.append(
+            BalanceObservation(value=value, source=source.name, timestamp=timestamp)
+        )
+        if len(observations) > BALANCE_OBSERVATION_LIMIT:
+            del observations[: len(observations) - BALANCE_OBSERVATION_LIMIT]
 
     def reset(self) -> None:
         """

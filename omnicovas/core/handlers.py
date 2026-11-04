@@ -339,12 +339,21 @@ def make_handlers(
         Mirrors the FSDJump local_system_context update without clearing station
         context (commander may remain docked aboard the carrier) and without
         setting is_in_supercruise (carrier transit is not normal supercruise).
+
+        FU-015 (E1): those two omissions are deliberate, but the rest of
+        FSDJump's arrival enrichment was missing too. A CarrierJump carries the
+        same system block Frontier puts on an FSDJump — SystemGovernment,
+        SystemAllegiance, Factions, Conflicts — so arriving somewhere aboard a
+        carrier is the same observation as arriving under your own drive. It
+        was recorded as neither a BGS projection nor a conflict sighting, so a
+        commander whose carrier jumped into a contested system saw nothing that
+        the identical FSD arrival would have shown them.
         """
         system = event.get("StarSystem")
         ts = event.get("timestamp")
         if system is not None:
             state.update_field("current_system", system, TelemetrySource.JOURNAL, ts)
-        state.update_field(
+        system_context_changed = state.update_field(
             "local_system_context",
             local_context_facts.build_local_system_context(
                 event, source_event="CarrierJump"
@@ -352,6 +361,10 @@ def make_handlers(
             TelemetrySource.JOURNAL,
             ts,
         )
+        if system_context_changed and _has_phase9_system_bgs_fields(event):
+            await _publish_phase9_bgs_projection(event)
+        # PB04-06 F1: read Conflicts[] only; do NOT touch system/station/BGS state
+        await _record_local_conflict_from_event(event, "CarrierJump")
         logger.info("[STATE] CarrierJump -> %s", system or "Unknown")
 
     async def handle_location(event: dict[str, Any]) -> None:
@@ -521,7 +534,7 @@ def make_handlers(
 
         Status.json provides fuel data mapped to our dual-field structure.
         """
-        flags = event.get("Flags", 0)
+        flags = event.get("Flags")
         fuel: dict[str, Any] | None = event.get("Fuel")
         pips = event.get("Pips")
         ts = event.get("timestamp")
@@ -552,17 +565,22 @@ def make_handlers(
                 "heat_level", float(heat), TelemetrySource.STATUS_JSON, ts
             )
 
-        # Flags bit 3 is "Shields Up"
-        SHIELDS_UP = 1 << 3
-        state.update_field(
-            "shield_up", bool(flags & SHIELDS_UP), TelemetrySource.STATUS_JSON, ts
-        )
+        # Flags drive shield and docking state, so an unreported or
+        # unparseable Flags value must leave both untouched. Defaulting to 0
+        # read as every flag off, which asserted shields down and undocked
+        # from a file that never said so (Law 5 — Zero Hallucination).
+        if isinstance(flags, int) and not isinstance(flags, bool):
+            # Flags bit 3 is "Shields Up"
+            SHIELDS_UP = 1 << 3
+            state.update_field(
+                "shield_up", bool(flags & SHIELDS_UP), TelemetrySource.STATUS_JSON, ts
+            )
 
-        # Flags bit 0 is "Docked"
-        DOCKED = 1 << 0
-        state.update_field(
-            "is_docked", bool(flags & DOCKED), TelemetrySource.STATUS_JSON, ts
-        )
+            # Flags bit 0 is "Docked"
+            DOCKED = 1 << 0
+            state.update_field(
+                "is_docked", bool(flags & DOCKED), TelemetrySource.STATUS_JSON, ts
+            )
 
         # Pips: [SYS, ENG, WEP] list. Absent when on-foot (Odyssey).
         # Only update if present and valid (Law 5 — Zero Hallucination).
@@ -584,8 +602,8 @@ def make_handlers(
 
         sub_events = event.get("SubEvents", [])
         logger.debug(
-            "[STATE] Status -> flags=0x%x heat=%s fuel=%s subs=%s",
-            flags,
+            "[STATE] Status -> flags=%s heat=%s fuel=%s subs=%s",
+            f"0x{flags:x}" if isinstance(flags, int) else "unreported",
             heat,
             state.snapshot.fuel_main,
             sub_events,
@@ -593,12 +611,12 @@ def make_handlers(
 
     async def handle_fuel_low(event: dict[str, Any]) -> None:
         """Handle FuelLow -- synthetic sub-event from Status.json."""
-        logger.warning("[STATE] FuelLow -> fuel dropped below 25%%")
+        logger.warning("[STATE] FuelLow -> fuel dropped below 25%")
         print("[EVENT] WARNING FuelLow -> fuel dropped below 25%")
 
     async def handle_heat_warning(event: dict[str, Any]) -> None:
         """Handle HeatWarning -- synthetic sub-event from Status.json."""
-        logger.warning("[STATE] HeatWarning -> heat rising above 75%%")
+        logger.warning("[STATE] HeatWarning -> heat rising above 75%")
         print("[EVENT] WARNING HeatWarning -> heat rising above 75%")
 
     async def handle_shield_down(event: dict[str, Any]) -> None:

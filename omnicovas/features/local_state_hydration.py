@@ -52,6 +52,12 @@ class HydrationScanResult:
     companion_activity_at: str | None = None
     companion_activity_file: str | None = None
     files_available: bool = False
+    # Whether the Elite directory OmniCOVAS reads actually exists. An absent
+    # directory and an empty one both yield zero files, but they are different
+    # facts: an empty directory means "Elite has not written yet", while an
+    # absent one means nothing will ever appear at the path being watched.
+    # None when no directory could be resolved at all.
+    journal_dir_present: bool | None = None
     caveat: str = (
         "No recent local Journal or companion snapshot was available for "
         "startup hydration."
@@ -71,6 +77,9 @@ def hydrate_local_state_if_needed(
     shipyard_path: Path | None = None,
     cargo_path: Path | None = None,
     modules_info_path: Path | None = None,
+    backpack_path: Path | None = None,
+    ship_locker_path: Path | None = None,
+    fc_materials_path: Path | None = None,
 ) -> HydrationScanResult:
     """Scan bounded local files and apply missing state fields.
 
@@ -85,6 +94,9 @@ def hydrate_local_state_if_needed(
         shipyard_path=shipyard_path,
         cargo_path=cargo_path,
         modules_info_path=modules_info_path,
+        backpack_path=backpack_path,
+        ship_locker_path=ship_locker_path,
+        fc_materials_path=fc_materials_path,
     )
     if state is not None:
         _apply_missing_values(state, result)
@@ -100,6 +112,9 @@ def scan_recent_local_state(
     shipyard_path: Path | None = None,
     cargo_path: Path | None = None,
     modules_info_path: Path | None = None,
+    backpack_path: Path | None = None,
+    ship_locker_path: Path | None = None,
+    fc_materials_path: Path | None = None,
 ) -> HydrationScanResult:
     """Return a cached bounded scan of recent local Elite files."""
     journal_dir = journal_dir_path or _default_elite_dir()
@@ -109,24 +124,48 @@ def scan_recent_local_state(
     shipyard = shipyard_path or _default_companion_path("Shipyard.json")
     cargo = cargo_path or _default_companion_path("Cargo.json")
     modules_info = modules_info_path or _default_companion_path("ModulesInfo.json")
+    backpack = backpack_path or _default_companion_path("Backpack.json")
+    ship_locker = ship_locker_path or _default_companion_path("ShipLocker.json")
+    fc_materials = fc_materials_path or _default_companion_path("FCMaterials.json")
 
     journal_files = _recent_journal_files(journal_dir)
     cache_key = _scan_cache_key(
-        journal_files, (status, market, outfitting, shipyard, cargo, modules_info)
+        journal_dir,
+        journal_files,
+        (
+            status,
+            market,
+            outfitting,
+            shipyard,
+            cargo,
+            modules_info,
+            backpack,
+            ship_locker,
+            fc_materials,
+        ),
     )
     cached = _SCAN_CACHE.get(cache_key)
     if cached is not None:
         return cached
 
     result = HydrationScanResult(
-        journal_files_scanned=tuple(path.name for path in journal_files)
+        journal_files_scanned=tuple(path.name for path in journal_files),
+        journal_dir_present=_directory_present(journal_dir),
     )
     for path in sorted(journal_files, key=_journal_sort_key):
         _scan_journal_file(path, result)
 
     _apply_status_snapshot(status, result)
     _record_companion_activity(
-        market, outfitting, shipyard, cargo, modules_info, result
+        market,
+        outfitting,
+        shipyard,
+        cargo,
+        modules_info,
+        backpack,
+        ship_locker,
+        fc_materials,
+        result,
     )
     result.files_available = (
         bool(journal_files) or result.companion_activity_at is not None
@@ -312,6 +351,7 @@ def _apply_loadout(
         "current_ship_ident": event.get("ShipIdent"),
         "hull_health": event.get("HullHealth"),
         "jump_range_ly": event.get("MaxJumpRange"),
+        "unladen_mass": event.get("UnladenMass"),
         "hull_value": event.get("HullValue"),
         "modules_value": event.get("ModulesValue"),
         "rebuy_cost": event.get("Rebuy"),
@@ -414,6 +454,9 @@ def _record_companion_activity(
     shipyard_path: Path | None,
     cargo_path: Path | None,
     modules_info_path: Path | None,
+    backpack_path: Path | None,
+    ship_locker_path: Path | None,
+    fc_materials_path: Path | None,
     result: HydrationScanResult,
 ) -> None:
     for path in (
@@ -422,6 +465,9 @@ def _record_companion_activity(
         shipyard_path,
         cargo_path,
         modules_info_path,
+        backpack_path,
+        ship_locker_path,
+        fc_materials_path,
     ):
         raw = _read_json_file(path)
         if raw is None:
@@ -556,6 +602,7 @@ def _set_if_present(
         "loan",
         "rebuy_cost",
         "cargo_capacity",
+        "unladen_mass",
         "hull_value",
         "modules_value",
     }:
@@ -576,6 +623,20 @@ def _set_if_present(
         _set(result, field_name, coerced_float, timestamp, source_file)
         return
     _set(result, field_name, str(value), timestamp, source_file)
+
+
+def _directory_present(journal_dir: Path | None) -> bool | None:
+    """Report whether the Elite directory being read exists.
+
+    None when no path could be resolved (no %USERPROFILE%), which is unknown
+    rather than absent — the two must not collapse (Law 5).
+    """
+    if journal_dir is None:
+        return None
+    try:
+        return journal_dir.is_dir()
+    except OSError:
+        return None
 
 
 def _recent_journal_files(journal_dir: Path | None) -> list[Path]:
@@ -613,12 +674,27 @@ def _parse_journal_filename_time(filename: str) -> datetime | None:
 
 
 def _scan_cache_key(
+    journal_dir: Path | None,
     journal_files: list[Path],
     companion_files: tuple[Path | None, ...],
 ) -> tuple[Any, ...]:
+    """Identify a scan by the directory read as well as the files found.
+
+    _file_signature is None for any path that does not exist, so a scan that
+    found nothing used to key on all-None — identical for every root. Two
+    different Elite directories with no readable files shared one cached
+    result, and the second caller received the first one's answer. That was
+    invisible while the result held only file-derived facts; it stopped being
+    invisible once the result also reported whether the directory itself
+    exists.
+    """
     journal_sig = tuple(_file_signature(path) for path in journal_files)
     companion_sig = tuple(_file_signature(path) for path in companion_files)
-    return (journal_sig, companion_sig)
+    dir_sig = (
+        str(journal_dir) if journal_dir is not None else None,
+        _directory_present(journal_dir),
+    )
+    return (dir_sig, journal_sig, companion_sig)
 
 
 def _file_signature(path: Path | None) -> tuple[str, str, int, int] | None:

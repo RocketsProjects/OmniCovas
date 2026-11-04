@@ -8,6 +8,16 @@
 (function () {
   'use strict';
 
+  /* Whether an inbound handoff carries a destination for the Plan workspace.
+     Shell owns the rule (Engineering plans and Galactic Atlas entries); without
+     it, only the original Engineering handoff qualifies. */
+  function isDestinationHandoff(intent) {
+    if (typeof window.Shell?.isDestinationHandoff === 'function') {
+      return window.Shell.isDestinationHandoff(intent) === true;
+    }
+    return intent?.targetRoute === '/navigation' && intent?.originRoute === '/engineering';
+  }
+
   /* Cached dynamic imports at module scope. */
   const primitivesPromise = import('../components/command-primitives.js').catch(err => {
     console.error('[navigation] Failed to load command primitives:', err);
@@ -49,6 +59,51 @@
     console.error('[navigation] Failed to load local context surfaces:', err);
     return null;
   });
+  /* GKI-06: the Expeditions workspace lives in Plan. One instance and one state
+     survive Navigation re-renders, so a re-render keeps the open expedition. */
+  let cachedExpeditionsVM = null;
+  const expeditionsVMPromise = import('../view-models/expeditions.js').then((mod) => {
+    cachedExpeditionsVM = mod;
+    return mod;
+  }).catch(err => {
+    console.error('[navigation] Failed to load expeditions VM:', err);
+    return null;
+  });
+  const expeditionsPromise = import('../components/expeditions.js').catch(err => {
+    console.error('[navigation] Failed to load expeditions:', err);
+    return null;
+  });
+  const expeditionState = {};
+  let expeditionWorkspace = null;
+
+  function bridgeUrl(path) {
+    const base = window.Shell?.httpBase;
+    return base ? base + path : null;
+  }
+
+  async function expeditionFetch(path) {
+    const url = bridgeUrl(path);
+    if (!url) throw new Error('Bridge not ready');
+    const response = await window.fetch(url);
+    if (!response || !response.ok) throw new Error(`HTTP ${response?.status}`);
+    return response.json();
+  }
+
+  async function expeditionSend(method, path, body) {
+    const url = bridgeUrl(path);
+    if (!url) throw new Error('Bridge not ready');
+    const response = await window.fetch(url, body === undefined
+      ? { method }
+      : { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!response || !response.ok) throw new Error(`HTTP ${response?.status}`);
+    return response.json();
+  }
+
+  /* Storytelling follows the Galactic Intelligence settings (GKI-04). */
+  function openStorytellingSettings() {
+    document.getElementById('tab-galactic-intelligence')?.click?.();
+    window.location.hash = '#/settings';
+  }
 
   class NavigationController {
     constructor(rootOverride = null) {
@@ -87,7 +142,12 @@
       }
       if (typeof window.addEventListener === 'function') {
         window.addEventListener('hashchange', () => {
-          if (!this._loaded && window.location && window.location.hash === '#/navigation') {
+          const arrivingIntent = window.Shell?.getRouteTransferIntent?.('/navigation');
+          if (
+            window.location
+            && window.location.hash === '#/navigation'
+            && (!this._loaded || arrivingIntent)
+          ) {
             this.fetchAndRender();
           }
         });
@@ -100,11 +160,12 @@
 
       /* NAV-01: guard every fetch so a single endpoint failure cannot reject
        * the whole batch and collapse the surface into a permanent error. */
-      const [snapshotResp, libraryResp, localContextResp, circuitsResp] = await Promise.all([
+      const [snapshotResp, libraryResp, localContextResp, circuitsResp, routeHistoryResp] = await Promise.all([
         window.fetch(base + '/navigation/snapshot').catch(() => null),
         window.fetch(base + '/navigation/library/snapshot').catch(() => null),
         window.fetch(base + '/intel/local-context/snapshot').catch(() => null),
         window.fetch(base + '/navigation/phase9/circuits').catch(() => null),
+        window.fetch(base + '/navigation/route-history?limit=25').catch(() => null),
       ]);
 
       /* The route snapshot is the only critical surface. A network failure
@@ -135,10 +196,13 @@
           : { bookmarks: [], saved_routes: [], unavailable: true };
         const localRaw = (localContextResp && localContextResp.ok) ? await localContextResp.json() : null;
         const circuitsRaw = (circuitsResp && circuitsResp.ok) ? await circuitsResp.json() : { circuits: [] };
+        const routeHistory = (routeHistoryResp && routeHistoryResp.ok)
+          ? await routeHistoryResp.json()
+          : null;
 
         const displayLibrary = library;
 
-        await Promise.all([localContextPromise, localSurfacesPromise, commanderVMPromise]);
+        await Promise.all([localContextPromise, localSurfacesPromise, commanderVMPromise, expeditionsVMPromise]);
         const localContext = cachedLocalContextVM?.deriveLocalContext(localRaw) || null;
 
         const primitives = await this._getPrimitives();
@@ -147,7 +211,7 @@
           return;
         }
 
-        this.render(primitives, snapshot, displayLibrary, localContext, circuitsRaw);
+        this.render(primitives, snapshot, displayLibrary, localContext, circuitsRaw, routeHistory);
         this._loaded = true;
       } catch (_err) {
         this._loaded = false;
@@ -167,7 +231,7 @@
       return this._sourceProof;
     }
 
-    async render(primitives, snapshot, library = { bookmarks: [], saved_routes: [] }, localContext = null, circuitsData = { circuits: [] }) {
+    async render(primitives, snapshot, library = { bookmarks: [], saved_routes: [] }, localContext = null, circuitsData = { circuits: [] }, routeHistory = null) {
       if (!this._root) return;
       const { createRouteHero } = primitives;
       const activeRoute = snapshot.active_route || {};
@@ -208,9 +272,11 @@
       currentPanel.appendChild(this._createGateProposalCard(primitives, activeRoute));
       grid.appendChild(currentPanel);
 
-      /* PLAN — reserved route/journey planner workspace + Spansh link-out. */
+      /* PLAN — GKI-06 Expeditions: journeys from a story, theme, Engineering
+         goal or a destination handed over from the Atlas or Materials. */
       const planPanel = this._createModePanel('plan');
-      planPanel.appendChild(this._createPlanReservedCard(primitives));
+      planPanel.appendChild(this._createIncomingEngineeringPlan(primitives));
+      planPanel.appendChild(this._createExpeditionsHost());
       const linkOut = this._createSpanshLinkOut(primitives, snapshot.spansh_url || null);
       if (linkOut) planPanel.appendChild(linkOut);
       grid.appendChild(planPanel);
@@ -223,9 +289,11 @@
       bookmarksPanel.appendChild(this._createCampaignCircuitsPanel(circuitsData.circuits || []));
       grid.appendChild(bookmarksPanel);
 
-      /* HISTORY — reserved local route-history workspace. */
+      /* HISTORY — commander-observed jump timeline from the local flight
+         recorder (PB15-02 slice; LNA-024). Read-only; after-action route
+         summaries remain deferred. */
       const historyPanel = this._createModePanel('history');
-      historyPanel.appendChild(this._createHistoryReservedCard(primitives));
+      historyPanel.appendChild(this._createRouteHistoryCard(primitives, routeHistory));
       grid.appendChild(historyPanel);
 
       container.appendChild(grid);
@@ -237,8 +305,10 @@
     _createModePanel(mode) {
       const panel = document.createElement('div');
       panel.className = `navigation-mode-panel navigation-mode-panel--${mode}`;
+      panel.id = `navigation-mode-panel-${mode}`;
       panel.setAttribute('data-nav-mode', mode);
       panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', `navigation-mode-tab-${mode}`);
       return panel;
     }
 
@@ -253,57 +323,302 @@
         panel.hidden = !match;
         panel.classList.toggle('is-active', match);
       });
-      this._root.querySelectorAll('.navigation-planner-mode').forEach((tab) => {
-        if (tab.getAttribute('data-planner-mode') === mode) tab.setAttribute('aria-current', 'true');
-        else tab.removeAttribute('aria-current');
+      const nav = this._root.querySelector('.navigation-planner-modes');
+      window.Uiv3Frame?.setUiv3TabSelection(nav, mode, {
+        selector: '.navigation-planner-mode',
+        valueAttribute: 'data-planner-mode',
       });
     }
 
-    /* Reserved Plan workspace — honest and compact. No fake plotting, no
-       autopilot, no game-action language. */
-    _createPlanReservedCard(primitives) {
+    /* GKI-06 Expeditions host. The workspace is created once and re-attached on
+       every Navigation render; plotting stays with the Commander in the game. */
+    _createExpeditionsHost() {
+      const host = document.createElement('div');
+      host.className = 'navigation-expeditions-host';
+      host.id = 'navigation-plan-modes';
+      this._expeditionsHost = host;
+      if (expeditionWorkspace) host.appendChild(expeditionWorkspace.element);
+      this._mountExpeditions();
+      return host;
+    }
+
+    async _mountExpeditions() {
+      const host = this._expeditionsHost;
+      if (!expeditionWorkspace) {
+        const module = await expeditionsPromise;
+        if (!module) {
+          if (host) {
+            const note = document.createElement('p');
+            note.className = 'navigation-reserved-note';
+            note.textContent = 'Expeditions are unavailable in this build.';
+            host.replaceChildren(note);
+          }
+          return null;
+        }
+        if (!expeditionWorkspace) {
+          expeditionWorkspace = module.createExpeditionWorkspace({
+            fetchJson: expeditionFetch,
+            sendJson: expeditionSend,
+            startTransfer: (intent) => window.Shell?.startRouteTransfer?.(intent),
+            openSettings: openStorytellingSettings,
+            state: expeditionState,
+          });
+        }
+      }
+      const current = this._expeditionsHost;
+      if (current && expeditionWorkspace.element.parentNode !== current) {
+        current.replaceChildren(expeditionWorkspace.element);
+      }
+      if (!expeditionState.loaded && !expeditionState.loading) {
+        expeditionState.loading = expeditionWorkspace.load()
+          .then(() => { expeditionState.loaded = true; })
+          .finally(() => { expeditionState.loading = null; });
+      }
+      return expeditionWorkspace;
+    }
+
+    _createIncomingEngineeringPlan(primitives) {
       const { createCommandCard, createEmptyState } = primitives;
-      const card = createCommandCard({ title: 'Route Planning Modes' });
-      card.id = 'navigation-plan-modes';
+      const intent = window.Shell?.routeTransferIntent;
+      const fromAtlas = intent?.originRoute === '/intel';
+      /* GKI-07: a documented place suggested by the Commander Chronicle. */
+      const fromChronicle = fromAtlas && intent?.originPackage === 'Commander Chronicle';
+      /* GKI-05: a documented acquisition place from Materials, not a saved plan. */
+      const fromMaterials = intent?.originRoute === '/engineering' && intent?.originPackage === 'Materials';
+      const card = createCommandCard({
+        title: fromChronicle ? 'Chronicle destination'
+          : fromAtlas ? 'Atlas destination' : fromMaterials ? 'Acquisition destination' : 'Engineering destination',
+      });
+      card.id = 'acquisition';
+      const isHandoff = isDestinationHandoff(intent);
+      const destination = isHandoff ? String(intent.targetDestination || '').trim() : '';
+      if (!isHandoff) {
+        card.hidden = true;
+        return card;
+      }
       const body = document.createElement('div');
-      body.className = 'navigation-reserved-body';
-      body.appendChild(createEmptyState({
-        status: 'Reserved — Phase 15',
-        reason: 'Multi-leg route proposal and journey planning are reserved for a future update. Local route context is available now under Current.',
-      }));
-      const note = document.createElement('p');
-      note.className = 'navigation-reserved-note';
-      note.textContent = 'Neutron, carrier, and long-range planners are dataset-gated and not yet enabled. OmniCOVAS never controls the game.';
-      body.appendChild(note);
+      body.className = 'navigation-engineering-handoff';
+      if (!destination) {
+        body.appendChild(createEmptyState({
+          status: 'Destination needed',
+          reason: 'The acquisition plan arrived, but no destination was selected. Choose one before planning travel.',
+        }));
+      } else {
+        const heading = document.createElement('p');
+        heading.className = 'navigation-engineering-destination';
+        heading.textContent = destination;
+        const context = document.createElement('p');
+        context.className = 'navigation-engineering-context';
+        context.textContent = String(intent.targetContext || (fromAtlas ? 'Galactic Atlas entry' : 'Engineering acquisition plan'));
+        const note = document.createElement('p');
+        note.className = 'navigation-reserved-note';
+        note.textContent = fromChronicle
+          ? 'A documented place from your Commander Chronicle, for review. No route or travel time is calculated; plotting remains Commander-controlled in Elite Dangerous.'
+          : fromAtlas
+          ? 'Destination from the Galactic Atlas, for review. No route or travel time is calculated; plotting remains Commander-controlled in Elite Dangerous.'
+          : fromMaterials
+            ? 'Documented acquisition place from Materials, for review. No route or travel time is calculated; plotting remains Commander-controlled in Elite Dangerous.'
+            : 'Destination consumed from the persisted Engineering plan. Plotting remains Commander-controlled in Elite Dangerous.';
+        body.append(heading, context, note);
+        body.appendChild(this._createIncomingExpeditionActions(intent));
+      }
       card.appendChild(body);
       return card;
     }
 
-    /* Reserved History workspace — honest and compact. */
-    _createHistoryReservedCard(primitives) {
+    /* GKI-06: a destination handed over can join an expedition. Captured now:
+       the Shell clears the handoff once its arrival is shown. */
+    _createIncomingExpeditionActions(intent) {
+      const actions = document.createElement('div');
+      actions.className = 'navigation-incoming-expedition';
+      const incoming = cachedExpeditionsVM?.incomingStop(intent) || null;
+      if (!incoming) return actions;
+      const status = document.createElement('p');
+      status.className = 'navigation-reserved-note';
+      status.setAttribute('role', 'status');
+      const add = (startNew) => async () => {
+        const workspace = await this._mountExpeditions();
+        if (!workspace) return;
+        if (expeditionState.loading) await expeditionState.loading;
+        const done = await workspace.addIncoming(incoming, { create: startNew || !expeditionState.selectedId });
+        status.textContent = done ? (startNew ? 'New expedition created below.' : 'Added to the expedition below.') : 'That stop could not be added.';
+      };
+      const button = (label, cls, onClick) => {
+        const element = document.createElement('button');
+        element.type = 'button';
+        element.className = `cmd-btn ${cls}`;
+        element.textContent = label;
+        element.addEventListener('click', onClick);
+        return element;
+      };
+      const current = expeditionState.detail?.expedition;
+      if (current) {
+        actions.appendChild(button(`Add to ${current.name}`, 'cmd-btn--secondary', add(false)));
+      }
+      actions.appendChild(button('Start a new expedition here', current ? 'cmd-btn--quiet' : 'cmd-btn--secondary', add(true)));
+      actions.appendChild(status);
+      return actions;
+    }
+
+    /* Route History workspace — commander-observed jump timeline from the
+       local flight recorder (PB15-02 slice; LNA-024). Recorded sessions on
+       this machine only; absence is never proof of non-travel. ADR 0003
+       Tier 1 rendering throughout. */
+    _createRouteHistoryCard(primitives, payload) {
       const { createCommandCard, createEmptyState } = primitives;
       const card = createCommandCard({ title: 'Route History' });
       card.id = 'navigation-history';
       const body = document.createElement('div');
-      body.className = 'navigation-reserved-body';
-      body.appendChild(createEmptyState({
-        status: 'Reserved — Phase 15',
-        reason: 'Local route history and journey replay are reserved for a future planner update.',
-      }));
+      body.className = 'navigation-history-body';
+
+      if (!payload || !Array.isArray(payload.jumps)) {
+        body.appendChild(createEmptyState({
+          status: 'Not Loaded',
+          reason: 'Local route history is unavailable.',
+        }));
+        card.appendChild(body);
+        return card;
+      }
+
+      if (payload.jumps.length === 0) {
+        body.appendChild(createEmptyState({
+          status: 'No jumps recorded',
+          reason: 'No FSDJump or CarrierJump events are recorded on this machine.',
+        }));
+        card.appendChild(body);
+        return card;
+      }
+
+      const meta = document.createElement('p');
+      meta.className = 'navigation-history-meta';
+      meta.textContent = `${payload.returned} recorded jump${payload.returned === 1 ? '' : 's'} · Commander-observed`;
+      body.appendChild(meta);
+
+      /* Totals cover only the jumps that recorded the field — CarrierJump
+         carries no distance — so the count behind a total is stated with it
+         rather than letting a partial figure read as a full travel total. */
+      const summary = payload.summary;
+      if (summary && summary.distance_ly_total !== null
+        && summary.distance_ly_total !== undefined) {
+        const totals = document.createElement('p');
+        totals.className = 'navigation-history-totals';
+        const parts = [
+          `${summary.distance_ly_total.toFixed(2)} ly across `
+          + `${summary.distance_observed_in} of ${summary.jumps_returned} jumps`,
+        ];
+        if (summary.longest_jump_ly !== null && summary.longest_jump_ly !== undefined) {
+          parts.push(`longest ${summary.longest_jump_ly.toFixed(2)} ly`);
+        }
+        if (summary.fuel_used_total !== null && summary.fuel_used_total !== undefined) {
+          parts.push(`${summary.fuel_used_total.toFixed(2)} t fuel used`);
+        }
+        parts.push(`${summary.distinct_systems} distinct system`
+          + `${summary.distinct_systems === 1 ? '' : 's'}`);
+        totals.textContent = parts.join(' · ');
+        body.appendChild(totals);
+      }
+
+      /* PB15-02 maturation: recent destinations at a glance — distinct
+         systems in newest-first order, pure arithmetic over the recorded
+         timeline (no proposals, no plotting). */
+      const seenSystems = new Set();
+      const recentSystems = [];
+      payload.jumps.forEach((jump) => {
+        const name = jump.star_system;
+        if (!name || seenSystems.has(name)) return;
+        seenSystems.add(name);
+        recentSystems.push(name);
+      });
+      if (recentSystems.length > 0) {
+        const recent = document.createElement('p');
+        recent.className = 'navigation-history-recent';
+        recent.textContent = `Recent destinations: ${recentSystems.slice(0, 5).join(' · ')}`;
+        body.appendChild(recent);
+      }
+
+      const groups = new Map();
+      payload.jumps.forEach((jump) => {
+        const key = this._historyDayKey(jump.timestamp);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(jump);
+      });
+      groups.forEach((jumps, day) => {
+        const group = document.createElement('section');
+        group.className = 'navigation-history-day';
+        const heading = document.createElement('h4');
+        heading.className = 'navigation-history-day-title';
+        heading.textContent = day;
+        group.appendChild(heading);
+        const list = document.createElement('ol');
+        list.className = 'navigation-history-list';
+        list.setAttribute('aria-label', `${day} recorded jump timeline`);
+        jumps.forEach((jump) => {
+          const item = document.createElement('li');
+          item.className = 'navigation-history-row';
+          const system = document.createElement('span');
+          system.className = 'navigation-history-system';
+          system.textContent = jump.star_system || 'Unknown';
+          item.appendChild(system);
+          if (jump.event_type === 'CarrierJump') {
+            const tag = document.createElement('span');
+            tag.className = 'navigation-history-tag';
+            tag.textContent = 'Carrier';
+            item.appendChild(tag);
+          }
+          /* LNA-003: a flight history says how far and at what cost, not just
+             where. Fields the event did not record stay absent rather than
+             rendering as zero. */
+          if (jump.jump_distance_ly !== null && jump.jump_distance_ly !== undefined) {
+            const distance = document.createElement('span');
+            distance.className = 'navigation-history-distance';
+            distance.textContent = `${jump.jump_distance_ly.toFixed(2)} ly`;
+            item.appendChild(distance);
+          }
+          if (jump.fuel_used !== null && jump.fuel_used !== undefined) {
+            const fuel = document.createElement('span');
+            fuel.className = 'navigation-history-fuel';
+            fuel.textContent = `${jump.fuel_used.toFixed(2)} t fuel`;
+            item.appendChild(fuel);
+          }
+          const time = document.createElement('span');
+          time.className = 'navigation-history-time';
+          time.textContent = jump.timestamp
+            ? String(jump.timestamp).replace('T', ' ').slice(0, 16)
+            : 'Unknown time';
+          item.appendChild(time);
+          list.appendChild(item);
+        });
+        group.appendChild(list);
+        body.appendChild(group);
+      });
+
+      if (payload.caveat) {
+        const caveat = document.createElement('p');
+        caveat.className = 'navigation-history-caveat';
+        caveat.textContent = payload.caveat;
+        body.appendChild(caveat);
+      }
+
       card.appendChild(body);
       return card;
     }
 
+    _historyDayKey(timestamp) {
+      if (!timestamp) return 'Unknown date';
+      const value = String(timestamp);
+      return value.length >= 10 ? value.slice(0, 10) : 'Unknown date';
+    }
+
     _createPlannerModeNav() {
       const nav = document.createElement('nav');
-      nav.className = 'navigation-planner-modes';
+      nav.className = 'navigation-planner-modes route-subnav';
       nav.setAttribute('role', 'tablist');
       nav.setAttribute('aria-label', 'Navigation planner modes');
       const MODES = [
         { id: 'current', label: 'Current' },
-        { id: 'plan', label: 'Plan', reserved: true },
+        { id: 'plan', label: 'Plan' },
         { id: 'bookmarks', label: 'Bookmarks' },
-        { id: 'history', label: 'History', reserved: true },
+        { id: 'history', label: 'History' },
       ];
       const active = this._activeMode || 'current';
       MODES.forEach((mode) => {
@@ -313,18 +628,23 @@
         tab.textContent = mode.label;
         tab.setAttribute('role', 'tab');
         tab.setAttribute('data-planner-mode', mode.id);
-        if (mode.id === active) tab.setAttribute('aria-current', 'true');
-        if (mode.reserved) {
-          /* Plan / History switch to honest reserved workspaces — clickable so
-             selection changes the workspace, with a Reserved badge so they read
-             as future modes, never dead buttons. */
+        tab.id = `navigation-mode-tab-${mode.id}`;
+        tab.setAttribute('aria-controls', `navigation-mode-panel-${mode.id}`);
+        if (mode.planned) {
           const badge = document.createElement('span');
           badge.className = 'navigation-planner-mode-badge';
-          badge.textContent = 'Reserved';
+          badge.textContent = 'Planned';
+          badge.setAttribute('aria-hidden', 'true');
           tab.appendChild(badge);
+          tab.setAttribute('aria-label', `${mode.label} (planned)`);
         }
-        tab.addEventListener('click', () => this._setPlannerMode(mode.id));
         nav.appendChild(tab);
+      });
+      window.Uiv3Frame.bindUiv3TabList(nav, {
+        selector: '.navigation-planner-mode',
+        valueAttribute: 'data-planner-mode',
+        activeValue: active,
+        onActivate: (mode) => this._setPlannerMode(mode),
       });
       return nav;
     }
@@ -471,7 +791,7 @@
       if (!this._hasActiveRoute(activeRoute)) {
         const empty = createEmptyState({
           status: 'No route plotted',
-          reason: activeRoute?.caveat || 'NavRoute.json is absent or empty. Elite removes or empties this file when no route exists; this is not an OmniCOVAS error.'
+          reason: activeRoute?.caveat || 'NavRoute.json is absent or empty.'
         });
         if (sourceProof && typeof sourceProof.createOmniStateBadge === 'function') {
           const badge = sourceProof.createOmniStateBadge('no_route_plotted');
@@ -479,44 +799,6 @@
           empty.insertBefore(badge, empty.firstChild);
         }
         card.appendChild(empty);
-
-        /* VD-08 — no-route state must not be a dead end; give a clear next action. */
-        const instruction = document.createElement('p');
-        instruction.className = 'navigation-no-route-instruction';
-        instruction.textContent = 'Plot a route in Elite Dangerous. OmniCOVAS will show it when NavRoute.json updates.';
-        card.appendChild(instruction);
-
-        /* PB-UIV3-HARMONY §4·4 — inviting planner shell. The empty state is not
-           a dead column: it leads to saved destinations and the reserved
-           planning modes so the no-route surface feels intentional. No fake
-           plotting and no game-action language. */
-        const prompt = document.createElement('div');
-        prompt.className = 'navigation-planner-prompt';
-        const promptTitle = document.createElement('p');
-        promptTitle.className = 'navigation-planner-prompt-title';
-        promptTitle.textContent = 'Plan your next move';
-        prompt.appendChild(promptTitle);
-
-        const promptActions = document.createElement('div');
-        promptActions.className = 'navigation-planner-prompt-actions';
-
-        const browseBtn = document.createElement('button');
-        browseBtn.type = 'button';
-        browseBtn.className = 'navigation-planner-prompt-btn';
-        browseBtn.textContent = 'Browse saved destinations';
-        browseBtn.addEventListener('click', () => this._setPlannerMode('bookmarks'));
-        promptActions.appendChild(browseBtn);
-
-        const planBtn = document.createElement('button');
-        planBtn.type = 'button';
-        planBtn.className = 'navigation-planner-prompt-btn';
-        planBtn.textContent = 'Open route planning modes';
-        planBtn.addEventListener('click', () => this._setPlannerMode('plan'));
-        promptActions.appendChild(planBtn);
-
-        prompt.appendChild(promptActions);
-        card.appendChild(prompt);
-
         return card;
       }
 
@@ -568,7 +850,14 @@
       const chipRow = document.createElement('div');
       chipRow.className = 'navigation-chip-row';
       chipRow.appendChild(this._createChip('Source', activeRoute.source_id));
-      chipRow.appendChild(this._createChip('Freshness', activeRoute.freshness_label));
+      chipRow.appendChild(this._createChip(
+        'Freshness',
+        primitives.freshnessLabel({
+          freshness: activeRoute.freshness_label,
+          source: activeRoute.source_id,
+          truthClass: activeRoute.truth_class,
+        }),
+      ));
       chipRow.appendChild(this._createChip('Truth', activeRoute.truth_class));
       proof.appendChild(chipRow);
 
@@ -585,7 +874,7 @@
         proof.appendChild(p);
       }
 
-      body.appendChild(createDetailDrawer({ summary: 'Source & proof', content: proof }));
+      body.appendChild(createDetailDrawer({ summary: 'Source', content: proof }));
       card.appendChild(body);
       return card;
     }
@@ -675,14 +964,15 @@
       body.className = 'navigation-gate-body';
 
       const btn = document.createElement('button');
-      btn.className = 'navigation-gate-btn';
+      btn.className = 'navigation-gate-btn cmd-btn cmd-btn--quiet';
       btn.type = 'button';
       if (this._hasActiveRoute(activeRoute)) {
         btn.textContent = 'Propose Route Activation';
         btn.addEventListener('click', () => this.proposeRouteActivation(activeRoute));
       } else {
-        btn.textContent = 'Route plotting proposal - future/deferred';
+        btn.textContent = 'Route activation unavailable';
         btn.disabled = true;
+        btn.setAttribute('aria-disabled', 'true');
       }
       body.appendChild(btn);
 
@@ -907,7 +1197,18 @@
 
     async deleteBookmark(id) {
       if (!window.Shell || !window.Shell.httpBase) return;
-      if (!window.confirm('Delete this bookmark?')) return;
+      const gate = window.OmniConfirmationGate;
+      if (!gate?.confirmLocalAction) {
+        console.error('[navigation] Shared Confirmation Gate is unavailable.');
+        return;
+      }
+      const confirmed = await gate.confirmLocalAction({
+        title: 'Delete bookmark?',
+        message: 'This removes the selected local bookmark and records the deletion in Activity Log.',
+        confirmLabel: 'Delete bookmark',
+        danger: true,
+      });
+      if (!confirmed) return;
 
       try {
         await window.fetch(window.Shell.httpBase + `/navigation/bookmarks/${id}`, {
@@ -921,7 +1222,18 @@
 
     async deleteSavedRoute(id) {
       if (!window.Shell || !window.Shell.httpBase) return;
-      if (!window.confirm('Delete this saved route?')) return;
+      const gate = window.OmniConfirmationGate;
+      if (!gate?.confirmLocalAction) {
+        console.error('[navigation] Shared Confirmation Gate is unavailable.');
+        return;
+      }
+      const confirmed = await gate.confirmLocalAction({
+        title: 'Delete saved route?',
+        message: 'This removes the selected local route and records the deletion in Activity Log.',
+        confirmLabel: 'Delete saved route',
+        danger: true,
+      });
+      if (!confirmed) return;
 
       try {
         await window.fetch(window.Shell.httpBase + `/navigation/saved-routes/${id}`, {
@@ -984,6 +1296,22 @@
     }
 
     _applyRouteTransferArrival() {
+      const intent = window.Shell?.routeTransferIntent;
+      /* GKI-06: a return from the Atlas or Materials to an expedition stop. The
+         arrival waits until the expedition and that stop are on screen. */
+      const back = cachedExpeditionsVM?.expeditionTarget(intent);
+      if (back) {
+        this._setPlannerMode('plan');
+        const root = this._root;
+        this._mountExpeditions()
+          .then((workspace) => workspace?.open(back.expeditionId, back.stopId))
+          .catch(() => null)
+          .finally(() => window.Shell?.applyRouteTransferArrival?.('/navigation', root));
+        return;
+      }
+      if (isDestinationHandoff(intent)) {
+        this._setPlannerMode('plan');
+      }
       window.Shell?.applyRouteTransferArrival?.('/navigation', this._root);
     }
 
@@ -1098,8 +1426,8 @@
         const proofBtn = document.createElement('button');
         proofBtn.type = 'button';
         proofBtn.id = 'nav-circuit-proof-link-' + circuit.circuit_id;
-        proofBtn.className = 'navigation-circuit-proof-link';
-        proofBtn.textContent = 'View Proof';
+        proofBtn.className = 'navigation-circuit-proof-link cmd-btn cmd-btn--quiet';
+        proofBtn.textContent = 'View in Log';
         proofBtn.onclick = () => {
           if (typeof window.Shell?.startRouteTransfer !== 'function') {
             window.location.hash = '#/activity-log';

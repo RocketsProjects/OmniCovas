@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
 from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
@@ -11,11 +13,28 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from omnicovas.core.activity_log import ActivityEntry, ActivityLog
-from omnicovas.core.event_types import ENGINEERING_SOURCE_ATTEMPT_BLOCKED
+from omnicovas.core.event_types import (
+    ENGINEERING_CATALOG_IMPORTED,
+    ENGINEERING_SOURCE_ATTEMPT_BLOCKED,
+    ENGINEERING_SOURCE_ATTEMPT_FAILED,
+)
 from omnicovas.core.state_manager import StateManager
-from omnicovas.features import engineering
+from omnicovas.db.models import JournalEvent
+from omnicovas.features import (
+    engineering,
+    engineering_catalog,
+    engineering_progression,
+    engineering_reference,
+    engineering_workbench,
+    ship_power,
+)
 
 router = APIRouter(prefix="/engineering", tags=["engineering"])
+
+_JOURNAL_INVENTORY_POSTURE = {
+    "verified_local": "verified_local_journal",
+    "partial_inconsistent": "journal_quantities_inconsistent",
+}
 
 _session_factory: async_sessionmaker[AsyncSession] | None = None
 _activity_log: ActivityLog | None = None
@@ -171,6 +190,89 @@ class ReadinessCreateRequest(BaseModel):
     target_grade: str = Field(default="manual", max_length=16)
     target_engineer_label: str | None = Field(default=None, max_length=128)
     target_module_label: str | None = Field(default=None, max_length=128)
+
+
+class ProgressionCommissionRequest(BaseModel):
+    """One outcome-first module target using locally observed recipes."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(min_length=1, max_length=128)
+    slot: str = Field(min_length=1, max_length=96)
+    module_label: str | None = Field(default=None, max_length=128)
+    blueprint_id: str = Field(min_length=1, max_length=128)
+    target_grade: int = Field(ge=1, le=5)
+    experimental_effect: str | None = Field(default=None, max_length=128)
+    priority: str = Field(default="normal", max_length=16)
+    acquisition_destination: str | None = Field(default=None, max_length=128)
+    notes: str | None = Field(default=None, max_length=4000)
+
+
+class WorkbenchModuleTargetRequest(BaseModel):
+    """One current-loadout slot in a whole-build Engineering design."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    slot: str = Field(min_length=1, max_length=96)
+    module_id: str | None = Field(default=None, max_length=128)
+    module_label: str | None = Field(default=None, max_length=128)
+    target_state: str = Field(
+        default="engineered", pattern="^(engineered|stock|empty)$"
+    )
+    blueprint_id: str | None = Field(default=None, max_length=128)
+    target_grade: int | None = Field(default=None, ge=1, le=5)
+    experimental_effect: str | None = Field(default=None, max_length=128)
+
+
+class WorkbenchBuildCommissionRequest(BaseModel):
+    """Persist a multi-module design rooted in the observed current ship."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(min_length=1, max_length=128)
+    baseline_build_id: str | None = Field(default=None, max_length=128)
+    baseline_observation_id: int | None = Field(default=None, gt=0)
+    preserve_cargo_capacity: bool = True
+    power_plan: dict[str, Any] | None = None
+    operating_conditions: dict[str, Any] | None = None
+    hull_id: str | None = Field(default=None, max_length=128)
+    module_targets: list[WorkbenchModuleTargetRequest] = Field(
+        default_factory=list, max_length=64
+    )
+    priority: str = Field(default="normal", max_length=16)
+    acquisition_destination: str | None = Field(default=None, max_length=128)
+    notes: str | None = Field(default=None, max_length=4000)
+
+
+class WorkbenchPreviewRequest(BaseModel):
+    """Validate and preview one canonical ship configuration."""
+
+    model_config = ConfigDict(extra="forbid")
+    hull_id: str | None = Field(default=None, max_length=128)
+    baseline_build_id: str | None = Field(default=None, max_length=128)
+    baseline_observation_id: int | None = Field(default=None, gt=0)
+    preserve_cargo_capacity: bool = True
+    priority: str = Field(default="normal", pattern="^(high|normal|unsorted|low)$")
+    power_plan: dict[str, Any] | None = None
+    operating_conditions: dict[str, Any] | None = None
+
+    module_targets: list[WorkbenchModuleTargetRequest] = Field(
+        default_factory=list, max_length=64
+    )
+
+
+class CatalogImportRequest(BaseModel):
+    """A local reference pack plus explicit Commander rights attestation."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    catalog: dict[str, Any]
+    rights_attested: bool
+
+
+class ReferenceDownloadRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    private_use_confirmed: bool
 
 
 class DeleteResponse(BaseModel):
@@ -383,6 +485,15 @@ def _http_422(exc: ValueError) -> HTTPException:
     )
 
 
+def _reject_unvalidated_module_targets(summary: dict[str, Any]) -> None:
+    """Keep canonical module configurations behind fit/compatibility validation."""
+    if "module_targets" in summary:
+        raise ValueError(
+            "Module configurations must be created through the Engineering "
+            "workbench so slot fit and blueprint compatibility are validated."
+        )
+
+
 def _record_disabled_source_attempt(source_label: str) -> str:
     event_id = str(uuid4())
     if _activity_log is not None:
@@ -431,6 +542,12 @@ async def get_overview() -> dict[str, Any]:
     acquisitions = await engineering.list_acquisition_plans(factory)
     readiness = await engineering.list_readiness_states(factory)
     imports = await engineering.list_import_source_states(factory)
+    progression = await engineering_progression.portfolio(
+        factory,
+        builds,
+        goals,
+        _state_manager.public_snapshot() if _state_manager is not None else {},
+    )
     overview["goals"] = [_goal_payload(record) for record in goals]
     overview["build_plans"] = [_build_payload(record) for record in builds]
     overview["material_gaps"] = [_gap_compat_payload(record) for record in gaps]
@@ -451,10 +568,33 @@ async def get_overview() -> dict[str, Any]:
         "imports": "Disabled in Settings",
     }
     overview["readiness"] = _readiness_groups(readiness)
+    overview["progression"] = progression
     source_posture = overview.setdefault("source_posture", {})
+    inventory_state = progression["inventory"]["state"]
     source_posture["materials"] = {
-        "current_inventory_state": "manual" if gaps else "No Verified Source",
+        "current_inventory_state": inventory_state,
         "missing_file_semantics": "Unknown, not zero",
+    }
+    overview["dashboard_pin"]["inventory"] = (
+        "Verified local Journal"
+        if inventory_state == "verified_local"
+        else "No Verified Source"
+    )
+    # The feature-level posture cannot see the Journal-backed inventory; keep
+    # it from contradicting the reconciled state read just above.
+    journal_posture = _JOURNAL_INVENTORY_POSTURE.get(inventory_state)
+    if journal_posture is not None:
+        source_posture["local_material_inventory"] = journal_posture
+    reference_state = progression["reference_catalog"]["state"]
+    overview["dashboard_pin"]["imports"] = (
+        "Local reference active"
+        if reference_state == "commander_supplied_validated"
+        else "No local reference pack"
+    )
+    source_posture["engineering_reference_catalog"] = {
+        "state": reference_state,
+        "network_access": "none",
+        "universal_coverage": False,
     }
     counts = overview.setdefault("counts", {})
     counts["material_gaps"] = len(gaps)
@@ -462,6 +602,773 @@ async def get_overview() -> dict[str, Any]:
         [plan for plan in acquisitions if plan.state not in {"complete", "archived"}]
     )
     return overview
+
+
+@router.get("/progression")
+async def get_progression() -> dict[str, Any]:
+    """Return the canonical target-to-readiness portfolio."""
+    factory = _ensure_session_factory()
+    return await engineering_progression.portfolio(
+        factory,
+        await engineering.list_build_plans(factory),
+        await engineering.list_goals(factory),
+        _state_manager.public_snapshot() if _state_manager is not None else {},
+    )
+
+
+async def _create_linked_progression(
+    *,
+    title: str,
+    module_targets: list[dict[str, Any]],
+    priority: str,
+    acquisition_destination: str | None,
+    notes: str | None,
+    target_ship: dict[str, Any] | None = None,
+    catalog_scope: str = engineering_progression.CATALOG_SCOPE,
+    catalog_version: str = engineering_progression.CATALOG_VERSION,
+    calculation_version: str = engineering_progression.CALCULATION_VERSION,
+    build_source: str = "commander_designed_from_observed_loadout",
+    baseline: dict[str, Any] | None = None,
+    preserve_cargo_capacity: bool = True,
+    power_plan: dict[str, Any] | None = None,
+    operating_conditions: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Create one durable build, goal, assessment, and acquisition plan."""
+    factory = _ensure_session_factory()
+    live_state = _state_manager.public_snapshot() if _state_manager is not None else {}
+    ship_state = baseline or live_state
+    build = await engineering.create_build_plan(
+        factory,
+        engineering.BuildPlanCreate(
+            title=title,
+            target_ship=target_ship
+            or {
+                "ship_type": ship_state.get("current_ship_type"),
+                "ship_id": ship_state.get("current_ship_id"),
+                "truth_class": "commander_observed_reference",
+            },
+            target_loadout_summary={
+                "module_targets": module_targets,
+                "acquisition_destination": acquisition_destination,
+                "configuration_version": engineering_workbench.CONFIGURATION_VERSION,
+                "catalog_scope": catalog_scope,
+                "catalog_version": catalog_version,
+                "calculation_version": calculation_version,
+                "observed_baseline": baseline,
+                "constraints": {"preserve_cargo_capacity": preserve_cargo_capacity},
+                "power_plan": power_plan,
+                "operating_conditions": operating_conditions,
+            },
+            source=build_source,
+            state="active",
+            notes=notes,
+        ),
+        activity_log=_activity_log,
+    )
+    goal = await engineering.create_goal(
+        factory,
+        engineering.EngineeringGoalCreate(
+            title=title,
+            target_kind="ship_build_engineering",
+            target_reference={
+                "module_targets": module_targets,
+                "catalog_scope": catalog_scope,
+            },
+            state="active",
+            priority=priority,
+            notes=notes,
+            linked_build_plan_id=build.build_plan_id,
+        ),
+        activity_log=_activity_log,
+    )
+    updated_build = await engineering.update_build_plan(
+        factory,
+        build.build_plan_id,
+        {"linked_goal_ids": [goal.goal_id]},
+        activity_log=_activity_log,
+    )
+    progression = await engineering_progression.portfolio(
+        factory,
+        await engineering.list_build_plans(factory),
+        await engineering.list_goals(factory),
+        live_state,
+    )
+    assessment = next(
+        row
+        for row in progression["builds"]
+        if row["build_plan_id"] == build.build_plan_id
+    )
+    target_materials = [
+        {
+            "material_id": material["material_id"],
+            "display_name": material["display_name"],
+            "quantity_needed": material["deficit"],
+            "required": material["required"],
+            "reserved": material["reserved"],
+            "destination": acquisition_destination,
+            "inventory_state": material["state"],
+            "trade_alternatives": [
+                trade
+                for trade in assessment.get("trade_alternatives", [])
+                if trade.get("to_material_id") == material["material_id"]
+            ],
+        }
+        for material in assessment["materials"]
+        if material["deficit"] is None or material["deficit"] > 0
+    ]
+    acquisition = await engineering.create_acquisition_plan(
+        factory,
+        engineering.AcquisitionPlanCreate(
+            title=f"Acquire materials — {title}",
+            linked_goal_ids=[goal.goal_id],
+            linked_build_plan_ids=[build.build_plan_id],
+            target_materials=target_materials,
+            notes=(
+                notes
+                or "Generated from locally observed recipes; unknown inputs "
+                "remain visible in Engineering."
+            ),
+        ),
+        activity_log=_activity_log,
+    )
+    return {
+        "goal": _goal_payload(goal),
+        "build": _build_payload(updated_build or build),
+        "acquisition_plan": _acquisition_payload(acquisition),
+        "assessment": assessment,
+        "nullprovider_safe": True,
+    }
+
+
+@router.post("/progression/commission", status_code=status.HTTP_201_CREATED)
+async def create_progression_commission(
+    body: ProgressionCommissionRequest,
+) -> dict[str, Any]:
+    """Persist the linked goal, target build, and acquisition plan."""
+    live_state = _state_manager.public_snapshot() if _state_manager is not None else {}
+    recipes = await engineering_progression.observed_recipes(_ensure_session_factory())
+    reference_catalog = await engineering_catalog.active_catalog(
+        _ensure_session_factory()
+    )
+    workbench = engineering_workbench.build_observed_workbench(
+        live_state, recipes, reference_catalog
+    )
+    try:
+        targets = engineering_workbench.validate_observed_targets(
+            workbench,
+            [
+                {
+                    "slot": body.slot,
+                    "target_state": "engineered",
+                    "blueprint_id": body.blueprint_id,
+                    "target_grade": body.target_grade,
+                    "experimental_effect": body.experimental_effect,
+                }
+            ],
+        )
+        performance = engineering_workbench.performance_comparison(
+            live_state, targets, reference_catalog
+        )
+        _apply_cargo_constraint(performance, True)
+        errors = performance.get("configuration_check", {}).get("errors", [])
+        if errors:
+            raise ValueError(" ".join(errors))
+        return await _create_linked_progression(
+            title=body.title,
+            module_targets=targets,
+            priority=body.priority,
+            acquisition_destination=body.acquisition_destination,
+            notes=body.notes,
+            baseline=engineering_workbench.observed_baseline(live_state),
+            catalog_version=(
+                f"{reference_catalog['catalog_id']}@{reference_catalog['version']}"
+                if reference_catalog
+                else engineering_progression.CATALOG_VERSION
+            ),
+        )
+    except ValueError as exc:
+        raise _http_422(exc) from exc
+
+
+@router.post("/workbench/builds", status_code=status.HTTP_201_CREATED)
+async def create_workbench_build(
+    body: WorkbenchBuildCommissionRequest,
+) -> dict[str, Any]:
+    """Commission a build from an observed ship or active local reference pack."""
+    if (
+        sum(
+            bool(value)
+            for value in (
+                body.hull_id,
+                body.baseline_build_id,
+                body.baseline_observation_id,
+            )
+        )
+        > 1
+    ):
+        raise HTTPException(
+            status_code=422, detail="Choose one ship observation or saved variant."
+        )
+
+    if body.hull_id and not any(
+        h.get("stock_modules")
+        for h in (
+            await engineering_catalog.active_catalog(_ensure_session_factory()) or {}
+        ).get("hulls", [])
+        if h["id"] == body.hull_id
+    ):
+        active = await engineering_catalog.active_catalog(_ensure_session_factory())
+        if active is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="No validated local Engineering reference pack is active.",
+            )
+        try:
+            targets = engineering_catalog.validate_design(
+                active,
+                body.hull_id,
+                [target.model_dump() for target in body.module_targets],
+            )
+        except ValueError as exc:
+            raise _http_422(exc) from exc
+        hull = next(row for row in active["hulls"] if row["id"] == body.hull_id)
+        try:
+            return await _create_linked_progression(
+                title=body.title,
+                module_targets=targets,
+                priority=body.priority,
+                acquisition_destination=body.acquisition_destination,
+                notes=body.notes,
+                target_ship={
+                    "ship_type": hull["id"],
+                    "ship_label": hull["name"],
+                    "truth_class": "commander_planned_reference",
+                    "ownership_state": "not_required",
+                },
+                catalog_scope="commander_supplied_reference_pack",
+                catalog_version=f"{active['catalog_id']}@{active['version']}",
+                calculation_version=engineering_catalog.CALCULATION_VERSION,
+                build_source="commander_designed_from_reference_pack",
+            )
+        except ValueError as exc:
+            raise _http_422(exc) from exc
+
+    live_state = _state_manager.public_snapshot() if _state_manager is not None else {}
+    saved_catalog = None
+    if body.hull_id:
+        active = await engineering_catalog.active_catalog(_ensure_session_factory())
+        if active is None:
+            raise HTTPException(
+                status_code=422, detail="A validated local catalogue is required."
+            )
+        try:
+            live_state = engineering_workbench.catalogue_baseline(active, body.hull_id)
+        except ValueError as exc:
+            raise _http_422(exc) from exc
+    if body.baseline_build_id:
+        live_state, saved_catalog = await _saved_baseline(body.baseline_build_id)
+    elif body.baseline_observation_id:
+        live_state = await _observation_baseline(body.baseline_observation_id)
+    catalog = engineering_progression.observed_loadout_catalog(live_state)
+    if catalog["state"] != "verified_local":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="A locally observed ship Loadout is required to design a build.",
+        )
+    recipes = await engineering_progression.observed_recipes(_ensure_session_factory())
+    reference_catalog = await engineering_catalog.active_catalog(
+        _ensure_session_factory()
+    )
+    if body.baseline_build_id:
+        reference_catalog = saved_catalog
+    workbench = engineering_workbench.build_observed_workbench(
+        live_state, recipes, reference_catalog
+    )
+    try:
+        targets = engineering_workbench.validate_observed_targets(
+            workbench,
+            [target.model_dump() for target in body.module_targets],
+            allow_empty=body.power_plan is not None,
+        )
+        performance = engineering_workbench.performance_comparison(
+            live_state,
+            targets,
+            reference_catalog,
+            body.power_plan,
+            body.operating_conditions,
+        )
+        _apply_cargo_constraint(performance, body.preserve_cargo_capacity)
+        errors = performance.get("configuration_check", {}).get("errors", [])
+        if errors:
+            raise ValueError(" ".join(errors))
+    except ValueError as exc:
+        raise _http_422(exc) from exc
+    try:
+        return await _create_linked_progression(
+            title=body.title,
+            module_targets=targets,
+            priority=body.priority,
+            acquisition_destination=body.acquisition_destination,
+            notes=body.notes,
+            calculation_version=engineering_progression.CALCULATION_VERSION,
+            baseline=engineering_workbench.observed_baseline(live_state),
+            target_ship={
+                "ship_type": live_state["current_ship_type"],
+                "truth_class": "commander_planned_reference",
+                "ownership_state": "not_required",
+            }
+            if live_state.get("planning_hull_id")
+            else None,
+            build_source="commander_designed_from_reference_pack"
+            if live_state.get("planning_hull_id")
+            else "commander_designed_from_observed_loadout",
+            operating_conditions=performance.get("operating_conditions"),
+            preserve_cargo_capacity=body.preserve_cargo_capacity,
+            power_plan=performance["power_management"]["plan"]
+            if body.power_plan is not None
+            else None,
+            catalog_version=(
+                f"{reference_catalog['catalog_id']}@{reference_catalog['version']}"
+                if reference_catalog
+                else engineering_progression.CATALOG_VERSION
+            ),
+        )
+    except ValueError as exc:
+        raise _http_422(exc) from exc
+
+
+@router.post("/workbench/preview")
+async def preview_workbench_build(body: WorkbenchPreviewRequest) -> dict[str, Any]:
+    """Validate and calculate a non-persistent observed-ship plan preview."""
+    if (
+        sum(
+            bool(v)
+            for v in (
+                body.hull_id,
+                body.baseline_build_id,
+                body.baseline_observation_id,
+            )
+        )
+        > 1
+    ):
+        raise HTTPException(
+            status_code=422, detail="Choose one ship observation or saved variant."
+        )
+    live_state = _state_manager.public_snapshot() if _state_manager is not None else {}
+    recipes = await engineering_progression.observed_recipes(_ensure_session_factory())
+    reference_catalog = await engineering_catalog.active_catalog(
+        _ensure_session_factory()
+    )
+    if body.hull_id:
+        if reference_catalog is None:
+            raise HTTPException(
+                status_code=422, detail="A validated local catalogue is required."
+            )
+        try:
+            live_state = engineering_workbench.catalogue_baseline(
+                reference_catalog, body.hull_id
+            )
+        except ValueError as exc:
+            raise _http_422(exc) from exc
+    if body.baseline_build_id:
+        live_state, reference_catalog = await _saved_baseline(body.baseline_build_id)
+    elif body.baseline_observation_id:
+        live_state = await _observation_baseline(body.baseline_observation_id)
+    workbench = engineering_workbench.build_observed_workbench(
+        live_state, recipes, reference_catalog
+    )
+    if workbench["state"] != "verified_local":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="A locally observed ship Loadout is required to preview a build.",
+        )
+    try:
+        targets = engineering_workbench.validate_observed_targets(
+            workbench,
+            [target.model_dump() for target in body.module_targets],
+            allow_empty=body.power_plan is not None,
+        )
+    except ValueError as exc:
+        raise _http_422(exc) from exc
+    try:
+        performance = engineering_workbench.performance_comparison(
+            live_state,
+            targets,
+            reference_catalog,
+            body.power_plan,
+            body.operating_conditions,
+        )
+    except ValueError as exc:
+        raise _http_422(exc) from exc
+    _apply_cargo_constraint(performance, body.preserve_cargo_capacity)
+    # Use the existing portfolio allocator without writing a build, goal, or
+    # reservation. The hypothetical variant competes with the same active plans
+    # and priority order it will use after Save.
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    preview_id = "engineering-preview"
+    candidate = engineering.BuildPlanRecord(
+        build_plan_id=preview_id,
+        title="Preview",
+        description=None,
+        target_ship=workbench["ship"],
+        target_loadout_summary={
+            "module_targets": targets,
+            "power_plan": performance["power_management"]["plan"]
+            if body.power_plan is not None
+            else None,
+            "operating_conditions": performance.get("operating_conditions"),
+            "observed_baseline": engineering_workbench.observed_baseline(live_state),
+            "catalog_scope": engineering_progression.CATALOG_SCOPE,
+            "catalog_version": (
+                f"{reference_catalog['catalog_id']}@{reference_catalog['version']}"
+                if reference_catalog
+                else engineering_progression.CATALOG_VERSION
+            ),
+        },
+        source="commander_designed_from_observed_loadout",
+        format_verification_state="not_applicable",
+        state="active",
+        linked_goal_ids=[],
+        linked_material_gap_view_id=None,
+        source_url=None,
+        notes=None,
+        created_at=now,
+        updated_at=now,
+    )
+    candidate_goal = engineering.EngineeringGoalRecord(
+        goal_id=preview_id,
+        commander_id=None,
+        title="Preview",
+        description=None,
+        target_kind="module_engineering",
+        target_reference={},
+        state="active",
+        priority=body.priority,
+        notes=None,
+        linked_build_plan_id=preview_id,
+        linked_material_gap_view_id=None,
+        linked_acquisition_handoff_ids=[],
+        linked_operations_task_id=None,
+        created_at=now,
+        updated_at=now,
+    )
+    assessment = await engineering_progression.portfolio(
+        _ensure_session_factory(),
+        [*await engineering.list_build_plans(_ensure_session_factory()), candidate],
+        [*await engineering.list_goals(_ensure_session_factory()), candidate_goal],
+        live_state,
+        include_workbenches=False,
+    )
+    return {
+        "configuration_version": engineering_workbench.CONFIGURATION_VERSION,
+        "targets": targets,
+        "performance": performance,
+        "requirements": next(
+            row for row in assessment["builds"] if row["build_plan_id"] == preview_id
+        ),
+        "persisted": False,
+        "nullprovider_safe": True,
+    }
+
+
+def _apply_cargo_constraint(performance: dict[str, Any], preserve: bool) -> None:
+    cargo = next(
+        (m for m in performance.get("metrics", []) if m["id"] == "cargo_capacity"), None
+    )
+    if (
+        preserve
+        and cargo
+        and cargo["installed"].get("value") is not None
+        and cargo["planned"].get("value") is None
+    ):
+        check = performance["configuration_check"]
+        check["errors"].append(
+            "Cargo preservation cannot be verified: "
+            "planned capacity inputs are missing."
+        )
+        check["state"] = "invalid"
+    if preserve and cargo and cargo.get("delta") is not None and cargo["delta"] < 0:
+        check = performance["configuration_check"]
+        check["errors"].append(
+            "Cargo preservation is enabled: this change reduces cargo capacity."
+        )
+        check["state"] = "invalid"
+
+
+async def _observation_baseline(observation_id: int) -> dict[str, Any]:
+    async with _ensure_session_factory()() as db:
+        row = await db.get(JournalEvent, observation_id)
+        if row is None or row.event_type != "Loadout":
+            raise HTTPException(
+                status_code=404, detail="Loadout observation not found."
+            )
+        try:
+            event = json.loads(row.raw_json)
+        except (ValueError, TypeError) as exc:
+            raise HTTPException(
+                status_code=422, detail="Loadout observation is unreadable."
+            ) from exc
+        if not isinstance(event, dict):
+            raise HTTPException(
+                status_code=422, detail="Loadout observation is unreadable."
+            )
+    return engineering_workbench.loadout_baseline(event)
+
+
+@router.get("/workbench/hulls/{hull_id}")
+async def get_catalogue_workbench(hull_id: str) -> dict[str, Any]:
+    """Open an unowned hull without persisting or changing local telemetry."""
+    factory = _ensure_session_factory()
+    catalog = await engineering_catalog.active_catalog(factory)
+    if catalog is None:
+        raise HTTPException(
+            status_code=422, detail="A validated local catalogue is required."
+        )
+    try:
+        baseline = engineering_workbench.catalogue_baseline(catalog, hull_id)
+    except ValueError as exc:
+        raise _http_422(exc) from exc
+    workbench = engineering_workbench.build_observed_workbench(baseline, [], catalog)
+    workbench.pop("_catalog", None)
+    return {
+        "workbench": workbench,
+        "truth_class": "commander_planned_reference",
+        "live_ship_changed": False,
+    }
+
+
+@router.get("/workbench/observations/{observation_id}")
+async def get_observed_workbench(observation_id: int) -> dict[str, Any]:
+    baseline = await _observation_baseline(observation_id)
+    factory = _ensure_session_factory()
+    catalog = await engineering_catalog.active_catalog(factory)
+    recipes = await engineering_progression.observed_recipes(factory)
+    workbench = engineering_workbench.build_observed_workbench(
+        baseline, recipes, catalog
+    )
+    workbench.pop("_catalog", None)
+    return {
+        "workbench": workbench,
+        "observation_id": observation_id,
+        "truth_class": "commander_observed",
+        "live_ship_changed": False,
+    }
+
+
+async def _saved_baseline(
+    build_id: str,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    factory = _ensure_session_factory()
+    build = next(
+        (
+            b
+            for b in await engineering.list_build_plans(factory)
+            if b.build_plan_id == build_id
+        ),
+        None,
+    )
+    if build is None or not isinstance(
+        build.target_loadout_summary.get("observed_baseline"), dict
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Saved observation is unavailable; select the "
+            "current observed ship.",
+        )
+    summary = build.target_loadout_summary
+    catalogs = await engineering_catalog.catalogs_by_version(factory)
+    return summary["observed_baseline"], catalogs.get(
+        summary.get("catalog_version", "")
+    )
+
+
+@router.post("/workbench/power-proposal")
+async def propose_power_plan(body: WorkbenchPreviewRequest) -> dict[str, Any]:
+    preview = await preview_workbench_build(body)
+    errors = preview["performance"].get("configuration_check", {}).get("errors", [])
+    if errors:
+        return {"state": "invalid_configuration", "reason": " ".join(errors)}
+    return await asyncio.to_thread(
+        ship_power.propose, preview["performance"]["power_management"]
+    )
+
+
+@router.get("/workbench/power-plant-variants")
+async def get_power_plant_variants(
+    baseline_build_id: str | None = None,
+    baseline_observation_id: int | None = None,
+) -> dict[str, Any]:
+    if baseline_build_id and baseline_observation_id:
+        raise HTTPException(
+            status_code=422, detail="Choose one ship observation or saved variant."
+        )
+    factory = _ensure_session_factory()
+    live_state = _state_manager.public_snapshot() if _state_manager is not None else {}
+    catalog = await engineering_catalog.active_catalog(factory)
+    if baseline_build_id:
+        live_state, catalog = await _saved_baseline(baseline_build_id)
+    elif baseline_observation_id:
+        live_state = await _observation_baseline(baseline_observation_id)
+    recipes = await engineering_progression.observed_recipes(factory)
+    return await asyncio.to_thread(
+        engineering_workbench.power_plant_variants, live_state, recipes, catalog
+    )
+
+
+@router.get("/catalog")
+async def get_catalog() -> dict[str, Any]:
+    """Return the active local reference pack for the offline build designer."""
+    active = await engineering_catalog.active_catalog(_ensure_session_factory())
+    return engineering_catalog.designer_catalog(active)
+
+
+@router.post("/catalog/local-power-plants")
+@router.post("/catalog/local-outfitting")
+async def enable_local_outfitting_reference(
+    body: ReferenceDownloadRequest,
+) -> dict[str, Any]:
+    """Explicit private reference download; never uploads local commander data."""
+    if not body.private_use_confirmed:
+        raise HTTPException(
+            status_code=422,
+            detail="Confirm private non-commercial reference use before downloading.",
+        )
+    factory = _ensure_session_factory()
+    retained = await engineering_catalog.catalogs_by_version(factory)
+    key = f"{engineering_reference.CATALOG_ID}@{engineering_reference.VERSION}"
+    try:
+        catalog = retained.get(key)
+        if catalog is None:
+            catalog = await engineering_reference.download_reference()
+        # Reuse the existing canonical store and activation semantics.
+        result = await engineering_catalog.import_catalog(factory, catalog)
+    except (ValueError, OSError, TimeoutError) as exc:
+        if _activity_log is not None:
+            _activity_log.append(
+                ActivityEntry(
+                    event_type=ENGINEERING_SOURCE_ATTEMPT_FAILED,
+                    source="engineering",
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    summary="Private outfitting reference could not be enabled",
+                    payload={
+                        "source_url": engineering_reference.SOURCE_URL,
+                        "commander_data_sent": False,
+                    },
+                )
+            )
+        raise HTTPException(
+            status_code=422,
+            detail=f"Reference could not be enabled; existing data preserved. {exc}",
+        ) from exc
+    if _activity_log is not None:
+        _activity_log.append(
+            ActivityEntry(
+                event_type=ENGINEERING_CATALOG_IMPORTED,
+                source="engineering",
+                summary="Commander enabled private local outfitting reference",
+                timestamp=datetime.now(timezone.utc).isoformat(),
+                payload={
+                    "catalog_id": result["catalog_id"],
+                    "version": result["version"],
+                    "source_url": engineering_reference.SOURCE_URL,
+                    "commander_data_sent": False,
+                    "outbound_call_executed": key not in retained,
+                },
+            )
+        )
+    return result
+
+
+@router.post("/catalog/import", status_code=status.HTTP_201_CREATED)
+async def import_catalog(body: CatalogImportRequest) -> dict[str, Any]:
+    """Validate and persist a Commander-authorized local reference pack."""
+    if not body.rights_attested:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=(
+                "Confirm that you may use this local reference pack and that "
+                "its provenance and licence fields are accurate."
+            ),
+        )
+    try:
+        result = await engineering_catalog.import_catalog(
+            _ensure_session_factory(), body.catalog
+        )
+    except (TypeError, ValueError) as exc:
+        raise _http_422(ValueError(str(exc))) from exc
+    event_id = str(uuid4())
+    if _activity_log is not None:
+        _activity_log.append(
+            ActivityEntry(
+                event_type=ENGINEERING_CATALOG_IMPORTED,
+                timestamp=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                summary="Local Engineering reference pack imported",
+                payload={
+                    "catalog_id": result["catalog_id"],
+                    "version": result["version"],
+                    "sha256": result["sha256"],
+                    "hull_count": result["hull_count"],
+                    "module_count": result["module_count"],
+                    "outbound_call_executed": False,
+                },
+                source_chain=[
+                    {
+                        "source": result["provenance"]["source_name"],
+                        "truth_class": "commander_supplied_reference",
+                    }
+                ],
+                redaction_state="metadata_only",
+                is_fact=False,
+                linked_entity_refs={"catalog_id": result["catalog_id"]},
+                surface_origin="engineering",
+                correlation_id=event_id,
+                event_id=event_id,
+                source="commander_local_import",
+            )
+        )
+    return result
+
+
+@router.post("/progression/{build_plan_id}/acknowledge-ready")
+async def acknowledge_progression_ready(build_plan_id: str) -> dict[str, Any]:
+    """Record an explicit Commander acknowledgement; never imply telemetry."""
+    factory = _ensure_session_factory()
+    build = next(
+        (
+            item
+            for item in await engineering.list_build_plans(factory)
+            if item.build_plan_id == build_plan_id
+        ),
+        None,
+    )
+    if build is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Build not found"
+        )
+    updated_build = await engineering.update_build_plan(
+        factory,
+        build_plan_id,
+        {"state": "complete", "notes": "Commander acknowledged readiness."},
+        activity_log=_activity_log,
+    )
+    updated_goals = []
+    for goal in await engineering.list_goals(factory):
+        if goal.linked_build_plan_id != build_plan_id or goal.state == "archived":
+            continue
+        updated = await engineering.update_goal(
+            factory,
+            goal.goal_id,
+            {"state": "complete", "notes": "Commander acknowledged readiness."},
+            activity_log=_activity_log,
+        )
+        if updated is not None:
+            updated_goals.append(_goal_payload(updated))
+    return {
+        "status": "commander_acknowledged",
+        "build": _build_payload(updated_build) if updated_build is not None else None,
+        "goals": updated_goals,
+        "observed_completion": False,
+    }
 
 
 @router.get("/goals")
@@ -559,6 +1466,7 @@ async def get_builds() -> dict[str, Any]:
 async def create_build(body: BuildPlanCreateRequest) -> dict[str, Any]:
     """Create a local planned build."""
     try:
+        _reject_unvalidated_module_targets(body.target_loadout_summary)
         record = await engineering.create_build_plan(
             _ensure_session_factory(),
             engineering.BuildPlanCreate(
@@ -586,6 +1494,30 @@ async def update_build(
     body: BuildPlanPatchRequest,
 ) -> dict[str, Any]:
     """Update a local planned build."""
+    protected = {
+        "target_ship",
+        "target_loadout_summary",
+        "source",
+        "format_verification_state",
+    }
+    if protected & body.model_fields_set:
+        existing = next(
+            (
+                build
+                for build in await engineering.list_build_plans(
+                    _ensure_session_factory()
+                )
+                if build.build_plan_id == build_plan_id
+            ),
+            None,
+        )
+        if existing is not None and "module_targets" in existing.target_loadout_summary:
+            raise HTTPException(
+                status_code=422,
+                detail="Use the outfitting editor to create a revalidated variant; "
+                "a canonical build's ship, targets and provenance cannot be replaced "
+                "through manual build updates.",
+            )
     changes: engineering.BuildPlanUpdate = {}
     if "title" in body.model_fields_set and body.title is not None:
         changes["title"] = body.title
@@ -597,6 +1529,10 @@ async def update_build(
         "target_loadout_summary" in body.model_fields_set
         and body.target_loadout_summary is not None
     ):
+        try:
+            _reject_unvalidated_module_targets(body.target_loadout_summary)
+        except ValueError as exc:
+            raise _http_422(exc) from exc
         changes["target_loadout_summary"] = body.target_loadout_summary
     if "source" in body.model_fields_set and body.source is not None:
         changes["source"] = body.source
@@ -643,12 +1579,19 @@ async def delete_build(build_plan_id: str) -> DeleteResponse:
 @router.get("/materials")
 async def get_materials() -> dict[str, Any]:
     """Return material gap view rows without inferred-zero inventory."""
-    rows = await engineering.list_material_gaps(_ensure_session_factory())
+    factory = _ensure_session_factory()
+    rows = await engineering.list_material_gaps(factory)
+    # ``inventory_state`` below describes the manual planning rows only; the
+    # reconciled Journal inventory is reported beside it, never merged in.
+    journal = await engineering_progression.horizons_inventory(factory)
     if not rows:
-        return engineering.material_gap_empty_snapshot()
+        snapshot = engineering.material_gap_empty_snapshot()
+        snapshot["journal_inventory_state"] = journal["state"]
+        return snapshot
     return {
         "surface_state": "manual_planning",
         "inventory_state": "manual_or_not_loaded",
+        "journal_inventory_state": journal["state"],
         "requirement_state": "manual_or_unknown",
         "rows": [_gap_payload(row) for row in rows],
         "caveats": [

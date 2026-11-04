@@ -3,12 +3,13 @@
   "schema_version": 1,
   "last_full_audit_date": "2026-04-28",
   "game_version_at_last_audit": "unknown",
-  "total_entries": 44,
-  "entries_needing_review": 8,
-    "notes": [
-      "Phase 1 seed entries: hull, shields, fuel, cargo, wanted, FSD jump",
-      "Phase 2 additions: ship identity, hull/shield thresholds, fuel thresholds, heat thresholds, module thresholds, cargo filter, wanted per system, FSDJump vs StartJump",
-      "Week 9 Part E additions: 3 heat thresholds + 5 heat rule entries; Week 9 Part G additions: core_module_slots, hardpoint_slot_sizes, hardpoint_slot_naming_convention, module_offline_threshold, shield_regen_broken_threshold, pip_archetypes",
-      "Week 10 additions: ship_hull_values (combat_mechanics); insurance_percentage, cargo_rack_internal_names, station_service_types, station_type_service_availability, rebuy_calculation_formula (trading_mechanics)"
-    ]
-  }
+  "total_entries": 48,
+  "entries_needing_review": 10,
+  "notes": [
+    "Phase 1 seed entries: hull, shields, fuel, cargo, wanted, FSD jump",
+    "Phase 2 additions: ship identity, hull/shield thresholds, fuel thresholds, heat thresholds, module thresholds, cargo filter, wanted per system, FSDJump vs StartJump",
+    "Week 9 Part E additions: 3 heat thresholds + 5 heat rule entries; Week 9 Part G additions: core_module_slots, hardpoint_slot_sizes, hardpoint_slot_naming_convention, module_offline_threshold, shield_regen_broken_threshold, pip_archetypes",
+    "Week 10 additions: ship_hull_values (combat_mechanics); insurance_percentage, cargo_rack_internal_names, station_service_types, station_type_service_availability, rebuy_calculation_formula (trading_mechanics)",
+    "Phase 13 exobiology additions: biological_signal_counts_are_reported (high confidence, journal-observed); exobiology_sample_values (community-derived, needs_review true — must be checked against a trusted source before any consumer treats it as settled). genus_spawn_conditions was reconciled 2026-08-17 and its needs_review cleared: the broad genus bands it used to assert were replaced by an independently audited, repaired and verified species-level ruleset shipped at omnicovas/data/exobiology_species_ruleset.json, and the entry now describes how prediction works rather than acting as a second, competing source of rules."
+  ]
+}

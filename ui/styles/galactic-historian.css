@@ -1,0 +1,101 @@
+/* Living Galactic Historian and Commander Chronicle (GKI-07). A shipboard
+   archive: dossier cards over the Atlas grammar. Cyan marks the place and the
+   Journal's evidence, amber marks what is the Commander's own (their word, their
+   actions, focus), muted blue-grey carries provenance. Evidence classes differ
+   in shape (filled, diamond, hollow diamond, open ring) as well as colour. */
+.gh-chronicle { color: #d9e5f0; display: flex; flex-direction: column; gap: 16px; padding: 8px 0 16px; min-width: 0; }
+.gh-chronicle :is(button, summary, a):focus-visible,
+.gh-record :is(button, summary):focus-visible { outline: 2px solid #ffb35a; outline-offset: 3px; }
+.gh-chronicle h3, .gh-chronicle h4, .gh-chronicle h5 { margin: 0; }
+.gh-chronicle h4 { font-size: 14px; font-weight: 600; color: #c3d4e3; margin-bottom: 8px; }
+.gh-chronicle h5 { margin: 12px 0 6px; font-size: 12px; font-weight: 600; color: #c3d4e3; text-transform: uppercase; letter-spacing: .06em; }
+.gh-muted { margin: 4px 0; font-size: 12px; line-height: 1.55; color: #a9bacb; }
+.gh-line { margin: 4px 0; font-size: 13px; line-height: 1.55; color: #c9d7e3; }
+.gh-kicker { margin: 0; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8fa2b5; }
+.gh-state { margin: 6px 0 0; padding: 10px 14px; border-left: 3px solid #5c6f82; background: #142231; font-size: 13px; line-height: 1.55; }
+.gh-status { margin: 6px 0 0; font-size: 12px; color: #ffe0b8; }
+.gh-lead { margin: 6px 0 0; font-size: 13px; line-height: 1.6; color: #c3d4e3; max-width: 78ch; }
+
+/* Header and totals */
+.gh-chronicle-header { border: 1px solid #344354; border-radius: 6px; background: linear-gradient(180deg, #112031 0%, #0f1a26 100%); padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+.gh-chronicle-title { font-size: 22px; font-weight: 500; color: #e1ebf4; }
+.gh-tiles { list-style: none; margin: 10px 0 4px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.gh-tile { border: 1px solid #2c3a49; border-radius: 6px; background: #0d1721; padding: 10px 12px; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: baseline; }
+.gh-tile-glyph { grid-row: span 2; font-size: 18px; color: #7acada; }
+.gh-tile-commander_confirmed .gh-tile-glyph { color: #ffb35a; }
+.gh-tile-value { font-size: 22px; font-variant-numeric: tabular-nums; color: #e1ebf4; }
+.gh-tile-label { font-size: 11px; color: #a9bacb; }
+
+/* Evidence badges */
+.gh-evidence { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; line-height: 1; border-radius: 3px; padding: 3px 8px; white-space: nowrap; }
+.gh-evidence-glyph { font-size: 12px; }
+.gh-evidence-observed { border: 1px solid #7acada; color: #c8f0f7; background: #13303a; }
+.gh-evidence-commander_confirmed { border: 3px double #ffb35a; color: #ffe0b8; background: #2a2114; padding: 1px 7px; }
+.gh-evidence-suggested { border: 1px dashed #9fb3c6; color: #c3d4e3; }
+.gh-evidence-unknown { border: 1px dotted #6f8296; color: #a9bacb; }
+
+/* Here and now */
+.gh-here { border: 1px solid #344354; border-radius: 6px; background: #0f1a26; padding: 16px 20px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(260px, 1fr); gap: 6px 22px; align-items: start; }
+.gh-here > .gh-kicker, .gh-here > .gh-here-title, .gh-here > .gh-where, .gh-here > .gh-muted { grid-column: 1 / -1; }
+.gh-here-title { font-size: 18px; font-weight: 500; color: #e1ebf4; margin: 0; }
+.gh-where { margin: 0 0 8px; font-size: 13px; color: #a9bacb; }
+.gh-dossier { min-width: 0; border-left: 3px solid #7acada; padding: 4px 0 4px 16px; display: flex; flex-direction: column; gap: 6px; }
+.gh-eyebrow { margin: 0; font-size: 12px; color: #a9bacb; }
+.gh-dossier-title { margin: 0; font-size: 20px; font-weight: 500; color: #e1ebf4; }
+.gh-significance { margin: 2px 0; font-size: 14px; line-height: 1.55; color: #e1ebf4; }
+.gh-summary { margin: 0; font-size: 13px; line-height: 1.6; color: #c9d7e3; max-width: 72ch; }
+.gh-record-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.gh-record-line p { flex-basis: 100%; margin: 2px 0; }
+.gh-topic summary { cursor: pointer; font-size: 12px; color: #c3d4e3; }
+.gh-claims { margin: 4px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.55; display: flex; flex-direction: column; gap: 4px; }
+.gh-practical { border: 1px dashed #44576a; border-radius: 4px; padding: 6px 12px; }
+.gh-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.gh-reveal { align-self: flex-start; }
+.gh-here-side { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+/* Cards and lists */
+.gh-card { border: 1px solid #2c3a49; border-radius: 6px; background: #0d1721; padding: 12px 14px; min-width: 0; }
+.gh-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.gh-list > li { min-width: 0; }
+.gh-next-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.gh-name { font-size: 13px; font-weight: 600; color: #e1ebf4; }
+.gh-meta { font-size: 11px; color: #8fa2b5; }
+.gh-link { background: transparent; border: 0; padding: 0; color: #ffcf8f; font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; }
+.gh-link:hover { color: #ffe0b8; }
+.gh-connection { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.gh-connection-text { flex-basis: 100%; font-size: 12px; line-height: 1.5; color: #c3d4e3; }
+.gh-historical .gh-connection-text { font-style: italic; color: #a9bacb; }
+.gh-current { margin: 10px 0 0; padding: 8px 12px; border-left: 3px solid #ffb35a; background: #1c1912; font-size: 12px; line-height: 1.5; }
+.gh-flag { display: inline-block; margin: 4px 6px 0 0; font-size: 11px; border: 1px solid #44576a; border-radius: 3px; padding: 1px 6px; color: #c3d4e3; }
+.gh-plan { margin-top: 6px; }
+
+/* Filters, columns and timeline */
+.gh-filter { display: flex; flex-wrap: wrap; border-bottom: 1px solid #344354; }
+.gh-filter-tab { background: transparent; color: #a9bacb; border: 0; border-bottom: 3px solid transparent; padding: 8px 10px; min-height: 36px; font: inherit; font-size: 12px; cursor: pointer; }
+.gh-filter-tab[aria-selected=true] { color: #e1ebf4; border-bottom-color: #7acada; }
+.gh-columns { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr); gap: 16px; align-items: start; }
+.gh-main, .gh-side { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.gh-timeline-list { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid #2c3a49; display: flex; flex-direction: column; gap: 10px; }
+.gh-moment { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; }
+.gh-moment::before { content: ""; position: absolute; left: -20px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: #7acada; }
+.gh-moment-commander_confirmed::before { background: #ffb35a; }
+.gh-moment p { flex-basis: 100%; margin: 0; }
+.gh-when { font-size: 11px; font-variant-numeric: tabular-nums; color: #8fa2b5; min-width: 150px; }
+.gh-moment-title { color: #e1ebf4; }
+
+/* Atlas "Your record" card */
+.gh-record { border-color: #5a4a2c; background: linear-gradient(180deg, #17150f 0%, #0d1721 70%); }
+.gh-record h4 { color: #ffe0b8; }
+.gh-record .gh-actions button { min-height: 32px; }
+
+@media (max-width: 1100px) {
+  .gh-here { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .gh-columns { grid-template-columns: minmax(0, 1fr); }
+  .gh-chronicle-header, .gh-here { padding: 14px; }
+  .gh-when { min-width: 0; flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gh-chronicle * { scroll-behavior: auto; }
+}

@@ -25,6 +25,15 @@
 'use strict';
 
 import { setSafeText, appendTextChild } from '../utils/safe-dom.js';
+import { freshnessLabel } from '../utils/freshness.js';
+
+export {
+  FRESHNESS,
+  FRESHNESS_KEYS,
+  choosePreferredFact,
+  describeFreshness,
+  freshnessLabel,
+} from '../utils/freshness.js';
 
 /* §7.1 controlled state-badge vocabulary. The visible label and the key
  * are both stable: code must reference STATE_LABEL keys, not free strings. */
@@ -276,7 +285,14 @@ export function createProofDrawer(proof, options) {
   const list = makeEl('dl', 'omni-proof-drawer-list');
   appendProofField(list, 'Source', proof.source);
   appendProofField(list, 'Observed', proof.timestamp);
-  appendProofField(list, 'Freshness', proof.freshness);
+  if (proof.freshness !== null && proof.freshness !== undefined && proof.freshness !== '') {
+    appendProofField(list, 'Freshness', freshnessLabel({
+      freshness: proof.freshness,
+      source: proof.source,
+      truthClass: proof.truthClass,
+    }));
+    appendProofField(list, 'Freshness token', proof.freshness);
+  }
   appendProofField(list, 'Truth class', proof.truthClass);
   appendProofField(list, 'Raw value', proof.rawValue);
   if (list.childNodes.length > 0) body.appendChild(list);

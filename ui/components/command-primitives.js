@@ -21,7 +21,15 @@
 
 'use strict';
 
+import './uiv3-frame-primitives.js';
 import { setSafeText } from '../utils/safe-dom.js';
+import { commanderError } from '../utils/commander-language.js';
+
+export {
+  COMMANDER_STATUS,
+  commanderStatus,
+  confirmationLabels,
+} from '../utils/commander-language.js';
 
 export {
   commodityComparisonKey,
@@ -37,6 +45,14 @@ export {
   normalizeSourceLabel,
   normalizeTruthClass,
 } from '../utils/display-names.js';
+
+export {
+  FRESHNESS,
+  FRESHNESS_KEYS,
+  choosePreferredFact,
+  describeFreshness,
+  freshnessLabel,
+} from '../utils/freshness.js';
 
 export {
   createCommandContextSpine,
@@ -66,21 +82,23 @@ export const STATUS_BADGE_VARIANTS = Object.freeze([
   'disabled',
   'requires-auth',
   'local-only',
+  'future',
 ]);
 
 const STATUS_BADGE_LABELS = Object.freeze({
   live: 'Live',
   off: 'Off',
   locked: 'Locked',
-  reserved: 'Reserved',
-  'not-loaded': 'Not loaded',
-  stale: 'Stale',
-  cached: 'Cached',
+  reserved: 'Not supported',
+  'not-loaded': 'Not checked',
+  stale: 'Out of date',
+  cached: 'Last seen',
   available: 'Available',
   'needs-setup': 'Needs setup',
-  disabled: 'Disabled',
-  'requires-auth': 'Requires Authorization',
-  'local-only': 'Local-only',
+  disabled: 'Off',
+  'requires-auth': 'Needs sign-in',
+  'local-only': 'On this PC',
+  future: 'Not supported',
 });
 
 /* Internal: element creation that always uses textContent for dynamic values. */
@@ -133,7 +151,7 @@ export function createStatusBadge(variant, customLabel) {
 export function createRouteHero(options) {
   const { title, kicker, statusText, statusVariant, primaryValues, action } = options || {};
 
-  const hero = makeEl('section', 'route-hero');
+  const hero = makeEl('section', 'route-hero route-header');
   hero.setAttribute('role', 'region');
   if (title) hero.setAttribute('aria-label', String(title));
 
@@ -161,7 +179,9 @@ export function createRouteHero(options) {
   }
 
   if (action && action.label) {
-    const actionEl = action.href ? makeEl('a', 'route-hero-action', action.label) : makeEl('button', 'route-hero-action', action.label);
+    const actionEl = action.href
+      ? makeEl('a', 'route-hero-action route-header-action cmd-btn cmd-btn--primary', action.label)
+      : makeEl('button', 'route-hero-action route-header-action cmd-btn cmd-btn--primary', action.label);
     if (action.href) actionEl.setAttribute('href', String(action.href));
     if (!action.href) actionEl.setAttribute('type', 'button');
     if (typeof action.onClick === 'function') actionEl.addEventListener('click', action.onClick);
@@ -204,7 +224,9 @@ export function createCommandCard(options) {
   }
 
   if (action && action.label) {
-    const actionEl = action.href ? makeEl('a', 'command-card-action', action.label) : makeEl('button', 'command-card-action', action.label);
+    const actionEl = action.href
+      ? makeEl('a', 'command-card-action cmd-btn cmd-btn--quiet', action.label)
+      : makeEl('button', 'command-card-action cmd-btn cmd-btn--quiet', action.label);
     if (action.href) actionEl.setAttribute('href', String(action.href));
     if (!action.href) actionEl.setAttribute('type', 'button');
     if (typeof action.onClick === 'function') actionEl.addEventListener('click', action.onClick);
@@ -242,7 +264,9 @@ export function createActionLinkGroup(links, options) {
       sep.setAttribute('aria-hidden', 'true');
       group.appendChild(sep);
     }
-    const el = link.href ? makeEl('a', 'action-link', link.label) : makeEl('button', 'action-link', link.label);
+    const el = link.href
+      ? makeEl('a', 'action-link cmd-btn cmd-btn--quiet', link.label)
+      : makeEl('button', 'action-link cmd-btn cmd-btn--quiet', link.label);
     if (link.href) el.setAttribute('href', String(link.href));
     if (!link.href) el.setAttribute('type', 'button');
     if (typeof link.onClick === 'function') el.addEventListener('click', link.onClick);
@@ -302,13 +326,49 @@ export function createEmptyState(options) {
   if (reason) wrap.appendChild(makeEl('p', 'empty-state-reason', reason));
 
   if (action && action.label) {
-    const actionEl = action.href ? makeEl('a', 'empty-state-action', action.label) : makeEl('button', 'empty-state-action', action.label);
+    const actionEl = action.href
+      ? makeEl('a', 'empty-state-action cmd-btn cmd-btn--quiet', action.label)
+      : makeEl('button', 'empty-state-action cmd-btn cmd-btn--quiet', action.label);
     if (action.href) actionEl.setAttribute('href', String(action.href));
     if (!action.href) actionEl.setAttribute('type', 'button');
     if (typeof action.onClick === 'function') actionEl.addEventListener('click', action.onClick);
     wrap.appendChild(actionEl);
   }
 
+  return wrap;
+}
+
+/* Commander-facing failure state. Raw technical detail is optional and is
+ * kept behind a native disclosure instead of being promoted into Pilot View. */
+export function createErrorState(options) {
+  const { error, task, impact, recovery, retry, detailsHref } = options || {};
+  const model = commanderError(error, { task, impact, recovery });
+  const wrap = makeEl('section', 'error-state');
+  wrap.setAttribute('role', 'alert');
+  wrap.append(
+    makeEl('h2', 'error-state-title', model.title),
+    makeEl('p', 'error-state-impact', model.impact),
+    makeEl('p', 'error-state-recovery', model.recovery),
+  );
+  const actions = makeEl('div', 'error-state-actions');
+  if (typeof retry === 'function') {
+    const button = makeEl('button', 'error-state-action cmd-btn cmd-btn--primary', 'Try again');
+    button.type = 'button';
+    button.addEventListener('click', retry);
+    actions.appendChild(button);
+  }
+  if (detailsHref) {
+    const link = makeEl('a', 'error-state-action cmd-btn cmd-btn--quiet', 'Open connection details');
+    link.href = String(detailsHref);
+    actions.appendChild(link);
+  }
+  if (actions.childElementCount) wrap.appendChild(actions);
+  if (model.technicalDetail) {
+    wrap.appendChild(createDetailDrawer({
+      summary: 'Technical details',
+      content: model.technicalDetail,
+    }));
+  }
   return wrap;
 }
 
@@ -347,8 +407,11 @@ export function createReservedFeatureRow(options) {
   row.appendChild(createStatusBadge(variant));
 
   if (typeof onInspect === 'function') {
-    const btn = makeEl('button', 'reserved-feature-inspect', inspectLabel || 'Inspect');
+    const visibleLabel = inspectLabel || 'Details';
+    const featureName = name || 'reserved feature';
+    const btn = makeEl('button', 'reserved-feature-inspect cmd-btn cmd-btn--quiet', visibleLabel);
     btn.setAttribute('type', 'button');
+    btn.setAttribute('aria-label', `${visibleLabel} for ${featureName}`);
     btn.addEventListener('click', onInspect);
     row.appendChild(btn);
   }

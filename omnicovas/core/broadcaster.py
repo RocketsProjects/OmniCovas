@@ -33,6 +33,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from omnicovas.core.logging_config import get_logger
+from omnicovas.core.observation import CURRENT_OBSERVATION, Observation
 
 logger = get_logger(__name__)
 
@@ -63,6 +64,7 @@ class ShipStateEvent:
     timestamp: datetime
     payload: dict[str, Any]
     source: str
+    observation: Observation | None = None
 
     @classmethod
     def now(
@@ -81,6 +83,7 @@ class ShipStateEvent:
             timestamp=datetime.now(timezone.utc),
             payload=payload,
             source=source,
+            observation=CURRENT_OBSERVATION.get(),
         )
 
 

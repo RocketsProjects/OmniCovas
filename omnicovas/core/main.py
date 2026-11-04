@@ -22,9 +22,16 @@ import asyncio
 import json
 import logging
 import sys
+from contextlib import suppress
 from datetime import datetime, timezone
+from typing import Any
 
-from omnicovas.core.api_bridge import ApiBridge
+from omnicovas.api import local_context as local_context_api
+from omnicovas.core.api_bridge import (
+    BRIDGE_APP_IDENTITY,
+    BRIDGE_PROTOCOL_VERSION,
+    ApiBridge,
+)
 from omnicovas.core.broadcaster import ShipStateBroadcaster
 from omnicovas.core.dispatcher import EventDispatcher
 from omnicovas.core.handlers import make_handlers
@@ -36,8 +43,55 @@ from omnicovas.core.state_manager import StateManager
 from omnicovas.core.status_reader import StatusReader
 from omnicovas.db.engine import init_database, make_session_factory
 from omnicovas.db.recorder import EventRecorder
+from omnicovas.features.commander_memory import CommanderMemoryService
 
 logger = logging.getLogger(__name__)
+
+
+def occurred_at(event: Any) -> str:
+    """When the thing happened, not when OmniCOVAS heard about it.
+
+    ``ShipStateEvent.timestamp`` is the instant the broadcast was constructed,
+    which is correct for what it documents. The Activity Log renders this field
+    as when the event *occurred*, and on a catch-up ingest the two are hours
+    apart: every restart replays the journal from the top, so a whole evening of
+    dockings and jumps arrived stamped with the restart moment — five
+    "Docked at ..." entries inside the same 45ms, dated today, while their raw
+    journal twins carried the true times. Sorted newest-first that is a
+    chronology which never happened, and the informative half of each pair was
+    the misdated one.
+
+    Publishers that carry the originating game timestamp in their payload are
+    believed. Broadcast time remains the fallback for events that genuinely do
+    originate now, so no time is ever asserted that was not read (Law 5).
+    """
+    payload = getattr(event, "payload", None)
+    occurred = payload.get("timestamp") if isinstance(payload, dict) else None
+    if isinstance(occurred, str) and occurred.strip():
+        return occurred
+    return str(event.timestamp.isoformat())
+
+
+def _state_heartbeat_signature(
+    snapshot: object,
+    events_recorded: int,
+    websocket_clients: int,
+) -> tuple[object, ...]:
+    """Return only the operational fields that make an INFO heartbeat useful.
+
+    Resource samples are intentionally excluded: normal CPU/memory jitter must
+    not turn an otherwise unchanged five-second heartbeat into INFO log flood.
+    """
+    return (
+        getattr(snapshot, "current_system", None),
+        getattr(snapshot, "current_station", None),
+        getattr(snapshot, "is_docked", None),
+        getattr(snapshot, "hull_health", None),
+        getattr(snapshot, "fuel_main", None),
+        getattr(snapshot, "current_ship_type", None),
+        events_recorded,
+        websocket_clients,
+    )
 
 
 async def main() -> None:
@@ -93,6 +147,7 @@ async def main() -> None:
     )
 
     activity_log = ActivityLog()
+    commander_memory = CommanderMemoryService(session_factory, activity_log)
 
     # Phase 5 PB05-06: Source routing foundation
     from omnicovas.api import source as source_api
@@ -109,6 +164,7 @@ async def main() -> None:
         resource_monitor=resource_monitor,
         activity_log=activity_log,
         session_factory=session_factory,
+        commander_memory_service=commander_memory,
     )
 
     # Step 5: dispatcher wiring -- broadcaster passed to make_handlers
@@ -161,7 +217,7 @@ async def main() -> None:
         await bridge.push_event(
             {
                 "event_type": event.event_type,
-                "timestamp": event.timestamp.isoformat(),
+                "timestamp": occurred_at(event),
                 "payload": event.payload,
                 "source": event.source,
             }
@@ -172,19 +228,60 @@ async def main() -> None:
 
     dispatcher.register_recorder(recorder.record_event)
 
+    async def observe_commander_memory(event: dict[str, Any], raw_line: str) -> None:
+        await commander_memory.observe_event(event, raw_line)
+
+    dispatcher.register_recorder(observe_commander_memory)
+
     async def push_to_bridge(event: dict[str, object], raw_line: str) -> None:
         await bridge.push_event(event)
 
     dispatcher.register_recorder(push_to_bridge)
 
+    # GKI-04 Galactic Intelligence: registered after the state handlers so each
+    # FSDJump/CarrierJump/Location/Docked briefing sees the state that event
+    # produced, and after Commander Memory so the active commander is known.
+    from omnicovas.features import galactic_intelligence as _galactic_intelligence
+
+    _galactic_intelligence.register(
+        dispatcher.register, dispatcher.register_recorder, bridge.galactic_intelligence
+    )
+
+    # GKI-06 Galactic Expeditions: after Galactic Intelligence, so a docking event
+    # that names no system is read against the system the state just recorded.
+    from omnicovas.features import expedition_service as _expedition_service
+
+    _expedition_service.register(dispatcher.register, bridge.expeditions)
+
+    # GKI-07 Commander Chronicle: last, so a briefing reads the Chronicle as it was
+    # before the event it describes.
+    from omnicovas.features import commander_chronicle as _commander_chronicle
+
+    _commander_chronicle.register(dispatcher.register, bridge.chronicle)
+
+    # NHI-02 observes completed projections and frozen broadcaster provenance.
+    # It has no authority over the existing forwarding/presentation path.
+    from omnicovas.features.notification_shadow import wire as wire_notification_shadow
+
+    wire_notification_shadow(dispatcher, broadcaster, bridge.notification_shadow)
+    await bridge.notification_shadow.start()
+
     logger.info("Event handlers, recorder, broadcaster, and bridge registered.")
 
     # Step 6: journal watcher
-    def _on_journal_rollover(old: object, new: object) -> None:
-        """Record an auditable Activity Log entry when the watcher switches to a
-        newer journal (JOURNAL_ROLLOVER_01). Local-only proof; no provider call."""
+    async def _on_journal_rollover(old: object, new: object) -> None:
+        """Adopt the new journal, then record auditable proof of the switch.
+
+        Elite writes one journal per play session, so a rollover starts a new
+        recording session. Opening it here — before the watcher replays the new
+        file — keeps each session's events with the journal they came from;
+        previously every event after a rollover was recorded against the
+        journal that happened to be current at startup.
+        """
         old_name = getattr(old, "name", None) or "none"
         new_name = getattr(new, "name", None) or "unknown"
+        commander_memory.set_current_journal_file(new_name)
+        await recorder.start_session(journal_filename=new_name)
         activity_log.append(
             ActivityEntry(
                 event_type="JOURNAL_ROLLOVER",
@@ -200,8 +297,15 @@ async def main() -> None:
         dispatch_fn=budgeted.dispatch, on_rollover=_on_journal_rollover
     )
     current_journal = journal_watcher._find_current_journal()
-    journal_filename = current_journal.name if current_journal else "unknown"
-    await recorder.start_session(journal_filename=journal_filename)
+    # No journal means no sitting to record. Opening a session anyway wrote a
+    # phantom row named "unknown" with zero events, which then appeared in the
+    # session timeline as a sitting that never happened. When Elite starts
+    # later the watcher's rollover callback opens the session for real.
+    if current_journal is not None:
+        commander_memory.set_current_journal_file(current_journal.name)
+        await recorder.start_session(journal_filename=current_journal.name)
+    else:
+        logger.info("No journal found yet; session opens when one appears.")
     await journal_watcher.start()
 
     # Step 7: Status.json reader
@@ -217,6 +321,8 @@ async def main() -> None:
     # Emit ready JSON so Tauri can pick up the port
     ready_message = {
         "status": "ready",
+        "app": BRIDGE_APP_IDENTITY,
+        "bridge_protocol": BRIDGE_PROTOCOL_VERSION,
         "port": bridge.port,
         "host": bridge.host,
         "version": "0.1.0",
@@ -226,6 +332,36 @@ async def main() -> None:
     logger.info("Ready signal emitted: port=%d", bridge.port)
     logger.info("OmniCOVAS core brain running. Press Ctrl+C to stop.")
 
+    # Phase 11: an adopted pre-Memory database may contain years of Journal
+    # history. Backfill after the bridge is ready so it never delays the native
+    # ready signal. The service lock serializes this rebuild with live ingestion.
+    async def initialize_commander_memory() -> None:
+        try:
+            result = await commander_memory.ensure_initialized()
+            if result is not None:
+                # A snapshot may have arrived just before the adopted-database
+                # rebuild acquired the Memory lock. The rebuild replaces all
+                # derived Memory, so observe the current local files once more
+                # before declaring bootstrap complete. Fingerprints make this
+                # harmless if the UI already repeated the observation.
+                companion_count = await commander_memory.observe_local_context(
+                    local_context_api.build_local_context_snapshot()
+                )
+                logger.info(
+                    "Commander Memory initial rebuild complete: events=%d "
+                    "records=%d companion_records=%d",
+                    result["events_scanned"],
+                    result["records_observed"],
+                    companion_count,
+                )
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("Commander Memory initial rebuild failed")
+
+    memory_bootstrap_task = asyncio.create_task(initialize_commander_memory())
+
+    last_state_signature: tuple[object, ...] | None = None
     try:
         while True:
             await asyncio.sleep(5)
@@ -236,7 +372,15 @@ async def main() -> None:
                 if res is not None
                 else "mem=? cpu=?"
             )
-            logger.info(
+            state_signature = _state_heartbeat_signature(
+                snap,
+                recorder.events_recorded,
+                bridge._broadcaster.client_count,
+            )
+            log_state = (
+                logger.info if state_signature != last_state_signature else logger.debug
+            )
+            log_state(
                 "[STATE] system=%s station=%s docked=%s hull=%s "
                 "fuel=%s ship=%s (db=%d ws=%d %s)",
                 snap.current_system,
@@ -249,9 +393,14 @@ async def main() -> None:
                 bridge._broadcaster.client_count,
                 res_str,
             )
+            last_state_signature = state_signature
     except asyncio.CancelledError:
         pass
     finally:
+        if not memory_bootstrap_task.done():
+            memory_bootstrap_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await memory_bootstrap_task
         await status_reader.stop()
         await journal_watcher.stop()
         await bridge.stop()

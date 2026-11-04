@@ -173,7 +173,7 @@
   }
 
   function createHero(activeArea) {
-    const hero = makeEl('header', 'systems-hero');
+    const hero = makeEl('header', 'systems-hero route-header');
     const copy = makeEl('div', 'systems-hero-copy');
 
     const breadcrumb = makeEl('p', 'systems-breadcrumb');
@@ -207,19 +207,23 @@
     const isActive = area.key === activeKey;
     const card = makeEl(
       'button',
-      `systems-area-card${isActive ? ' systems-area-card--active' : ''}${area.reserved ? ' systems-area-card--reserved' : ''}`,
+      `systems-area-card cmd-btn cmd-btn--quiet${isActive ? ' systems-area-card--active' : ''}${area.reserved ? ' systems-area-card--reserved' : ''}`,
     );
     card.type = 'button';
     card.dataset.systemsArea = area.key;
     card.setAttribute('aria-label', `Open ${area.label} in Systems`);
+    /* `aria-current="page"` is reserved for the app-level tab row in
+       shell.js — exactly one page marker exists at a time. A Systems card
+       marks the current item *within* the Systems workspace, which is
+       `aria-current="true"`. */
     if (isActive) {
-      card.setAttribute('aria-current', 'page');
+      card.setAttribute('aria-current', 'true');
     }
 
     const topRow = makeEl('span', 'systems-area-topline');
     topRow.append(
       makeEl('span', 'systems-area-title', area.label),
-      makeEl('span', 'systems-area-state', isActive ? 'NOW OPEN' : 'OPEN >'),
+      makeEl('span', 'systems-area-state', isActive ? 'Selected' : 'Open'),
     );
 
     const description = makeEl('span', 'systems-area-description', area.description);
@@ -254,7 +258,7 @@
     main.appendChild(makeEl('p', 'systems-panel-body', copy.body));
 
     if (copy.action) {
-      const action = makeEl('a', 'systems-panel-link', `${copy.action[0]} >`);
+      const action = makeEl('a', 'systems-panel-link cmd-btn cmd-btn--quiet', copy.action[0]);
       action.href = copy.action[1];
       main.appendChild(action);
     }
@@ -326,17 +330,34 @@
     return renderSystems(document.getElementById('systems-root'));
   }
 
+  /* The Systems workspace keeps its last render while hidden. Without this,
+     the selected card's current-item marker would stay in the DOM on every
+     other route, leaving stale state for assistive technology. */
+  function clearInactiveSystemsCurrent() {
+    const root = document.getElementById('systems-root');
+    if (!root) return;
+    root
+      .querySelectorAll('[data-systems-area][aria-current]')
+      .forEach((card) => card.removeAttribute('aria-current'));
+  }
+
   function handleHashChange() {
     const route = normalizeRoute(window.location.hash);
     if (route === '/systems' || route.startsWith('/systems/')) {
       mountSystems();
+      return;
     }
+    clearInactiveSystemsCurrent();
   }
 
+  /* Initial mount goes through the same route-aware handler as every later
+     navigation. Mounting unconditionally would render the Systems workspace
+     — and its current-item marker — on a cold load of any other route, where
+     the workspace is hidden and nothing may claim to be current. */
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountSystems);
+    document.addEventListener('DOMContentLoaded', handleHashChange);
   } else {
-    mountSystems();
+    handleHashChange();
   }
   window.addEventListener('hashchange', handleHashChange);
 

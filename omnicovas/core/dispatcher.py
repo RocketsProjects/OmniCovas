@@ -35,6 +35,15 @@ import logging
 from collections import defaultdict
 from typing import Any, Callable, Coroutine
 
+from omnicovas.core.journal_watcher import is_startup_replay
+from omnicovas.core.observation import (
+    CURRENT_OBSERVATION,
+    Observation,
+    Scope,
+    fingerprint,
+    timestamp,
+)
+
 logger = logging.getLogger(__name__)
 
 # Type-specific handler: receives parsed event dict
@@ -59,6 +68,15 @@ class EventDispatcher:
         self._handlers: dict[str, list[EventHandler]] = defaultdict(list)
         self._raw_recorders: list[RawRecorder] = []
         self._events_processed = 0
+        self._after_handlers: list[EventHandler] = []
+        self._scope_provider: Callable[[dict[str, Any]], Scope] | None = None
+
+    def register_observer(
+        self, handler: EventHandler, scope_provider: Callable[[dict[str, Any]], Scope]
+    ) -> None:
+        """Observe completed state; immutable provenance also follows broadcasts."""
+        self._after_handlers.append(handler)
+        self._scope_provider = scope_provider
 
     def register(self, event_type: str, handler: EventHandler) -> None:
         """
@@ -101,7 +119,39 @@ class EventDispatcher:
             logger.warning("Skipping malformed journal line: %s", raw_line[:120])
             return
 
+        if not isinstance(event, dict):
+            logger.warning("Skipping non-object journal input")
+            return
+        scope = Scope()
+        if self._scope_provider is not None:
+            try:
+                scope = self._scope_provider(event)
+            except Exception:
+                logger.warning("Observation scope unavailable")
+        source = (
+            "status_json"
+            if event.get("event") == "Status" or event.get("source") == "Status.json"
+            else "journal"
+        )
+        observation = Observation(
+            fingerprint(json.dumps(event, sort_keys=True, separators=(",", ":"))),
+            str(event.get("event", "Unknown")),
+            timestamp(event.get("timestamp")),
+            source,
+            is_startup_replay(),
+            scope,
+        )
+        token = CURRENT_OBSERVATION.set(observation)
+        try:
+            await self._dispatch_parsed(event, raw_line)
+        finally:
+            CURRENT_OBSERVATION.reset(token)
+
+    async def _dispatch_parsed(self, event: dict[str, Any], raw_line: str) -> None:
+
         event_type = event.get("event", "Unknown")
+        if not isinstance(event_type, str):
+            event_type = "Unknown"
         self._events_processed += 1
 
         logger.debug("Dispatching event #%d: %s", self._events_processed, event_type)
@@ -120,7 +170,7 @@ class EventDispatcher:
                 )
 
         # Fire type-specific handlers
-        handlers = self._handlers.get(event_type, [])
+        handlers = [*self._handlers.get(event_type, []), *self._after_handlers]
         for handler in handlers:
             try:
                 await handler(event)

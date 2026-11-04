@@ -23,7 +23,16 @@
   <link rel="stylesheet" href="styles/dashboard.css" />
   <link rel="stylesheet" href="styles/intel.css" />
   <link rel="stylesheet" href="styles/navigation.css" />
+  <link rel="stylesheet" href="styles/expeditions.css" />
   <link rel="stylesheet" href="styles/engineering.css" />
+  <link rel="stylesheet" href="styles/engineering-materials.css" />
+  <link rel="stylesheet" href="styles/material-intelligence.css" />
+  <link rel="stylesheet" href="styles/engineering-blueprints.css" />
+  <link rel="stylesheet" href="styles/engineering-technology.css" />
+  <link rel="stylesheet" href="styles/galactic-atlas.css" />
+  <link rel="stylesheet" href="styles/galactic-intelligence.css" />
+  <link rel="stylesheet" href="styles/attention-lane.css" />
+  <link rel="stylesheet" href="styles/galactic-historian.css" />
   <link rel="stylesheet" href="styles/operations.css" />
   <link rel="stylesheet" href="styles/systems.css" />
   <link rel="stylesheet" href="styles/settings.css" />
@@ -36,8 +45,51 @@
   <!-- v2 UI/UX redesign — Command Surface, operations workspaces, intel briefing -->
   <link rel="stylesheet" href="styles/command-surface.css" />
   <link rel="stylesheet" href="styles/uiv3-frame.css" />
+  <!-- PB10-R7 accessibility contrast accommodations: forced-colors /
+       prefers-contrast / focus-visibility floor. Loaded last so the overrides
+       win over route stylesheets without needing !important. -->
+  <link rel="stylesheet" href="styles/a11y-contrast.css" />
 </head>
 <body class="uiv3-cockpit-frame">
+
+<!-- Accessibility: keyboard users skip the cockpit frame chrome. -->
+<a class="uiv3-skip-link" href="#content-area">Skip to main content</a>
+
+<!-- ── PB11-01 startup readiness curtain ──
+     Visible local-first initialization: paints immediately (static markup),
+     reports discrete honest checks while the shell boots, never blocks
+     (hard timeout to an honest limited mode with a diagnostics path), and
+     dissolves into the active route. No fake progress, no provider or
+     network claims. Controlled by components/boot-curtain.js. -->
+<div id="uiv3-boot-curtain" class="uiv3-boot-curtain" role="status" aria-live="polite"
+     data-boot-stage="starting"
+     aria-label="OmniCOVAS local-first initialization">
+  <div class="uiv3-boot-card">
+    <p class="uiv3-boot-brand">OMNICOVAS</p>
+    <p class="uiv3-boot-title">Local-first initialization</p>
+    <p id="uiv3-boot-stage" class="uiv3-boot-stage" data-boot-stage="starting">Starting</p>
+    <ul class="uiv3-boot-checks">
+      <li class="uiv3-boot-check" data-boot-check="shell" data-boot-status="pending">
+        <span class="uiv3-boot-check-label">Runtime shell</span>
+        <span class="uiv3-boot-check-status">Starting…</span>
+      </li>
+      <li class="uiv3-boot-check" data-boot-check="bridge" data-boot-status="pending">
+        <span class="uiv3-boot-check-label">Backend bridge</span>
+        <span class="uiv3-boot-check-status">Locating local bridge…</span>
+      </li>
+      <li class="uiv3-boot-check" data-boot-check="local-files" data-boot-status="pending">
+        <span class="uiv3-boot-check-label">Local Elite sources</span>
+        <span class="uiv3-boot-check-status">Checking Journal, Status, and snapshots…</span>
+      </li>
+      <li class="uiv3-boot-check" data-boot-check="session-state" data-boot-status="pending">
+        <span class="uiv3-boot-check-label">Cached session state</span>
+        <span class="uiv3-boot-check-status">Restoring last-known state…</span>
+      </li>
+    </ul>
+    <p class="uiv3-boot-note">Local data only. No outbound connections. External providers stay disabled.</p>
+    <a class="uiv3-boot-diagnostics" href="#/diagnostics">Open Diagnostics</a>
+  </div>
+</div>
 
 <!-- ── Top connection bar ──
      Correction #16: split Backend (WS to Python core) from Elite session
@@ -75,14 +127,14 @@
   </span>
   <div id="connection-status" class="uiv3-topbar-status" role="status" aria-live="polite" aria-atomic="true">
     <span class="status-segment status-segment--backend uiv3-status-pill" data-uiv3-topbar-item="backend">
-      <span class="status-dot uiv3-dot uiv3-dot--warn" id="status-dot" aria-label="Backend disconnected"></span>
-      <span class="status-segment-label">Backend:</span>
+      <span class="status-dot uiv3-dot uiv3-dot--warn" id="status-dot" aria-label="OmniCOVAS is starting"></span>
+      <span class="status-segment-label">OmniCOVAS:</span>
       <span class="status-segment-value uiv3-status-value--warn" id="status-text">Connecting&hellip;</span>
     </span>
     <span class="status-segment status-segment--elite uiv3-status-pill" data-uiv3-topbar-item="session">
       <span class="status-dot uiv3-dot uiv3-dot--warn" id="elite-session-dot" aria-label="Elite session waiting"></span>
-      <span class="status-segment-label">Session:</span>
-      <span class="status-segment-value" id="elite-session-text" aria-live="polite">Waiting</span>
+      <span class="status-segment-label">Game:</span>
+      <span class="status-segment-value" id="elite-session-text" aria-live="polite">Not detected</span>
     </span>
     <span class="status-segment status-segment--sources uiv3-status-pill" data-uiv3-topbar-item="sources">
       <span class="status-dot uiv3-dot uiv3-dot--warn" id="sources-status-dot" aria-label="Local data waiting"></span>
@@ -102,15 +154,15 @@
 <section id="uiv3-identity-band" class="uiv3-identity-band" aria-label="Commander identity and current location">
   <div class="uiv3-identity-block" data-uiv3-identity-slot="commander">
     <span class="uiv3-label">Commander</span>
-    <span class="uiv3-identity-value" id="uiv3-commander-value">Unknown</span>
-    <span class="uiv3-identity-subvalue" data-uiv3-identity-slot="ship">Ship: Not Loaded</span>
+    <span class="uiv3-identity-value" id="uiv3-commander-value">Commander not checked</span>
+    <span class="uiv3-identity-subvalue" data-uiv3-identity-slot="ship">Ship not checked</span>
   </div>
   <div class="uiv3-location-chain" aria-label="Current system and station">
     <span class="uiv3-label">System</span>
-    <span class="uiv3-location-value" id="uiv3-system-value" data-uiv3-identity-slot="system">Unknown</span>
+    <span class="uiv3-location-value" id="uiv3-system-value" data-uiv3-identity-slot="system">System not checked</span>
     <span class="uiv3-location-arrow" aria-hidden="true">&gt;</span>
     <span class="uiv3-label">Station</span>
-    <span class="uiv3-location-value" id="uiv3-station-value" data-uiv3-identity-slot="station">Not Loaded</span>
+    <span class="uiv3-location-value" id="uiv3-station-value" data-uiv3-identity-slot="station">Station not checked</span>
   </div>
   <span class="uiv3-last-known-chip">
     <span class="uiv3-dot uiv3-dot--info" aria-hidden="true"></span>
@@ -119,9 +171,9 @@
 </section>
 
 <section id="uiv3-watch-ribbon" class="uiv3-watch-ribbon" aria-label="Watch ribbon">
-  <span class="uiv3-watch-item"><span class="uiv3-dot uiv3-dot--info" aria-hidden="true"></span>Watch <span class="uiv3-watch-value">Unknown</span></span>
-  <span class="uiv3-watch-item"><span class="uiv3-dot uiv3-dot--warn" aria-hidden="true"></span>Operation <span class="uiv3-watch-value">Not Loaded</span></span>
-  <span class="uiv3-watch-item"><span class="uiv3-dot uiv3-dot--info" aria-hidden="true"></span>Sources <span class="uiv3-watch-value">Unavailable</span></span>
+  <span class="uiv3-watch-item"><span class="uiv3-dot uiv3-dot--info" aria-hidden="true"></span>Ship watch <span class="uiv3-watch-value">Not checked</span></span>
+  <span class="uiv3-watch-item"><span class="uiv3-dot uiv3-dot--warn" aria-hidden="true"></span>Activity <span class="uiv3-watch-value">None selected</span></span>
+  <span class="uiv3-watch-item"><span class="uiv3-dot uiv3-dot--info" aria-hidden="true"></span>Game data <span class="uiv3-watch-value">Checking</span></span>
   <span class="uiv3-watch-item"><span class="uiv3-dot" aria-hidden="true"></span>Route <span class="uiv3-watch-value">No route plotted</span></span>
   <span class="uiv3-watch-right">Data <span class="uiv3-watch-value">Local</span> - Last-known</span>
 </section>
@@ -200,7 +252,10 @@
     <div id="intel-root" class="intel-route" data-route="intel"></div>
   </section>
 
-  <section id="view-navigation" class="view ocv-page" aria-labelledby="navigation-title">
+  <!-- aria-label, not aria-labelledby: each view replaces its own children on
+       render, which destroys the heading a labelledby reference depends on and
+       leaves the landmark with no accessible name after first paint. -->
+  <section id="view-navigation" class="view ocv-page" aria-label="Navigation">
     <div id="navigation-root" class="navigation-route" data-route="navigation"></div>
   </section>
 
@@ -226,88 +281,19 @@
   <!-- ══════════════════════════════════════
        VIEW: Activity Log — Flight Recorder / Black Box (PB05-09)
   ══════════════════════════════════════ -->
-  <section id="view-activity-log" class="view ocv-page" aria-labelledby="log-title">
+  <section id="view-activity-log" class="view ocv-page" aria-label="Activity Log">
 
-    <div class="ocv-page-header">
+    <div class="ocv-page-header route-header">
       <p class="ocv-page-kicker">Flight Recorder</p>
       <h1 class="ocv-page-title" id="log-title">Activity Log</h1>
-      <p class="ocv-page-subtitle">Local event record &mdash; black box telemetry audit trail</p>
+      <p class="ocv-page-subtitle">Local event record</p>
     </div>
 
     <!-- Correction #11: Log surface regrouped into five sections
          (Events / Sources / Known Data / Proof / Diagnostics) with
          filter + sort controls. The Log is the dense inspection
          surface; density is intentionally higher than the Pilot view. -->
-    <div class="log-section-nav" role="tablist" aria-label="Activity Log category views">
-      <button type="button" class="log-section-link log-view-tab" data-log-view="events"
-              role="tab" aria-selected="true" aria-controls="log-section-events">
-        Events
-      </button>
-      <button type="button" class="log-section-link log-view-tab" data-log-view="sources"
-              role="tab" aria-selected="false" aria-controls="log-section-sources">
-        Sources
-      </button>
-      <button type="button" class="log-section-link log-view-tab" data-log-view="known-data"
-              role="tab" aria-selected="false" aria-controls="log-section-known-data">
-</aside>
-
-<main id="content-area" role="main">
-
-  <div id="confirmation-gate-root" aria-label="Commander confirmation gate"></div>
-
-  <!-- ══════════════════════════════════════
-       VIEW: Dashboard — Command Surface (v2 UI/UX redesign)
-       Authority: OmniCOVAS_UI_UX_Master_Blueprint_v2_0_Human_Reference.md §9.1
-  ══════════════════════════════════════ -->
-  <section id="view-dashboard" class="view ocv-page" aria-labelledby="dashboard-title">
-    <div id="dashboard-root" class="dashboard-route" data-route="dashboard"></div>
-  </section>
-  <!-- ══════════════════════════════════════
-       VIEW: Operations — Session Operations Console
-  ══════════════════════════════════════ -->
-  <section id="view-intel" class="view ocv-page" aria-labelledby="intel-title">
-    <div id="intel-root" class="intel-route" data-route="intel"></div>
-  </section>
-
-  <section id="view-navigation" class="view ocv-page" aria-labelledby="navigation-title">
-    <div id="navigation-root" class="navigation-route" data-route="navigation"></div>
-  </section>
-
-  <section id="view-engineering" class="view ocv-page" aria-labelledby="engineering-title">
-    <div id="engineering-root" class="engineering-route" data-route="engineering"></div>
-  </section>
-
-  <section id="view-operations" class="view ocv-page" aria-labelledby="operations-title">
-    <div id="operations-root" class="operations-route" data-route="operations"></div>
-  </section>
-
-  <section id="view-systems" class="view ocv-page" aria-labelledby="systems-title">
-    <div id="systems-root" class="systems-route" data-route="systems"></div>
-  </section>
-
-  <!-- ══════════════════════════════════════
-       VIEW: Squadron — Group Coordination Console (PB07-04)
-  ══════════════════════════════════════ -->
-  <section id="view-squadrons" class="view ocv-page" aria-labelledby="squadrons-title">
-    <div id="squadrons-root" class="squadrons-route" data-route="squadrons"></div>
-  </section>
-
-  <!-- ══════════════════════════════════════
-       VIEW: Activity Log — Flight Recorder / Black Box (PB05-09)
-  ══════════════════════════════════════ -->
-  <section id="view-activity-log" class="view ocv-page" aria-labelledby="log-title">
-
-    <div class="ocv-page-header">
-      <p class="ocv-page-kicker">Flight Recorder</p>
-      <h1 class="ocv-page-title" id="log-title">Activity Log</h1>
-      <p class="ocv-page-subtitle">Local event record &mdash; black box telemetry audit trail</p>
-    </div>
-
-    <!-- Correction #11: Log surface regrouped into five sections
-         (Events / Sources / Known Data / Proof / Diagnostics) with
-         filter + sort controls. The Log is the dense inspection
-         surface; density is intentionally higher than the Pilot view. -->
-    <div class="log-section-nav" role="tablist" aria-label="Activity Log category views">
+    <div class="log-section-nav route-subnav" role="tablist" aria-label="Activity Log category views">
       <button type="button" class="log-section-link log-view-tab" data-log-view="events"
               role="tab" aria-selected="true" aria-controls="log-section-events">
         Events
@@ -333,54 +319,80 @@
     <!-- Controls bar -->
     <div id="log-controls" class="ocv-form-row" data-log-section="diagnostics">
       <input type="search" id="log-search" class="ocv-search-input"
-             placeholder="Search events&hellip;"
+             placeholder="Search local proof&hellip;"
              aria-label="Search activity log" />
 
-      <fieldset class="log-filter-group">
-        <legend class="ocv-sr-only">Filter by category</legend>
-        <label class="log-filter-label" for="log-filter-critical">
-          <input type="checkbox" class="log-filter" id="log-filter-critical" name="log-filter-critical" value="critical" />
-          Critical
-        </label>
-        <label class="log-filter-label" for="log-filter-extended">
-          <input type="checkbox" class="log-filter" id="log-filter-extended" name="log-filter-extended" value="extended" />
-          Extended
-        </label>
-        <label class="log-filter-label" for="log-filter-ai">
-          <input type="checkbox" class="log-filter" id="log-filter-ai" name="log-filter-ai" value="ai" />
-          AI
-        </label>
-        <label class="log-filter-label" for="log-filter-telemetry">
-          <input type="checkbox" class="log-filter" id="log-filter-telemetry" name="log-filter-telemetry" value="telemetry" />
-          Telemetry
-        </label>
-        <label class="log-filter-label" for="log-filter-source">
-          <input type="checkbox" class="log-filter" id="log-filter-source" name="log-filter-source" value="source" />
-          Source
-        </label>
-      </fieldset>
-
       <label class="log-sort-label">
-        Sort
-        <!-- Sort scaffold: visible control surface for later phase wiring. -->
-        <select id="log-sort" aria-label="Sort log entries"
-                title="Sort control is scaffolded; live re-sort wiring lands in a later phase"
-                disabled>
-          <option value="newest" selected>Newest first (default)</option>
-          <option value="source">By source &mdash; coming</option>
-          <option value="category">By category &mdash; coming</option>
+        Search field
+        <select id="log-entity-filter" aria-label="Search Activity Log field">
+          <option value="all" selected>All supported fields</option>
+          <option value="system">System</option>
+          <option value="station">Station</option>
+          <option value="commodity">Commodity</option>
+          <option value="module">Module</option>
+          <option value="ship">Ship</option>
+          <option value="mission">Mission</option>
+          <option value="route">Route</option>
+          <option value="event">Event</option>
+          <option value="session">Session</option>
+          <option value="source">Source</option>
+          <option value="file">File</option>
         </select>
       </label>
 
-      <button type="button" id="log-export-btn" class="ocv-btn-ghost"
+      <label class="log-sort-label">
+        Category
+        <select id="log-category-filter" aria-label="Filter log category">
+          <option value="all" selected>All categories</option>
+          <option value="critical">Critical</option>
+          <option value="extended">Extended</option>
+          <option value="ai">AI</option>
+          <option value="telemetry">Telemetry</option>
+          <option value="source">Source</option>
+          <option value="engineering">Engineering</option>
+        </select>
+      </label>
+
+      <label class="log-sort-label">
+        Sort
+        <select id="log-sort" aria-label="Sort log entries">
+          <option value="newest" selected>Newest first (default)</option>
+          <option value="oldest">Oldest first</option>
+          <option value="source">Source, then newest</option>
+          <option value="event">Event, then newest</option>
+        </select>
+      </label>
+
+      <button type="button" id="log-export-btn" class="ocv-btn-ghost cmd-btn cmd-btn--quiet"
               aria-label="Export activity log as JSON">
         Export
       </button>
-      <button type="button" id="log-clear-btn" class="ocv-btn-ghost"
+      <button type="button" id="log-clear-btn" class="ocv-btn-danger cmd-btn cmd-btn--danger"
               aria-label="Clear activity log display">
-        Clear
+        Clear display
       </button>
     </div>
+
+    <p id="log-persistence-note" class="log-section-hint">
+      This display is a bounded record for the current app session and does not
+      itself survive restart. The flight recorder and Commander Memory are
+      separate persisted local stores; open Intel History or Observed Galaxy for
+      those retained records.
+    </p>
+
+    <details id="log-more-filters" class="log-more-filters">
+      <summary class="log-more-filters-summary"
+               data-section-id="more-filters"
+               aria-controls="log-more-filters-body"
+               aria-expanded="false">
+        More filters
+      </summary>
+      <div id="log-more-filters-body" class="log-more-filters-body">
+        <fieldset class="log-filter-group">
+          <legend>Filter within current Activity Log view</legend>
+        </fieldset>
+      </div>
+    </details>
 
     <!-- Section: Events -->
     <section id="log-section-events" class="log-section" data-log-section="events"
@@ -455,33 +467,14 @@
       </button>
     </div>
 
-    <!-- Clear confirmation modal -->
-    <div id="log-clear-modal" style="display:none;"
-         role="dialog" aria-modal="true" aria-labelledby="log-clear-modal-title">
-      <div class="ocv-modal-content">
-        <h2 id="log-clear-modal-title">Clear Activity Log?</h2>
-        <p>This will remove all entries from the display.</p>
-        <div class="ocv-modal-buttons">
-          <button type="button" id="log-clear-confirm-btn" class="ocv-btn-danger"
-                  aria-label="Confirm clear activity log">
-            Clear Log
-          </button>
-          <button type="button" id="log-clear-cancel-btn" class="ocv-btn-ghost"
-                  aria-label="Cancel clear">
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-
   </section>
 
   <!-- ══════════════════════════════════════
        VIEW: Settings (PB05-08; humanized in PB07.6-09)
   ══════════════════════════════════════ -->
-  <section id="view-settings" class="view" aria-labelledby="settings-title">
+  <section id="view-settings" class="view" aria-label="Settings">
     <div id="settings-container">
-      <div class="page-header">
+      <div class="page-header route-header">
         <p class="settings-page-kicker">Configuration</p>
         <h1 id="settings-title">Settings</h1>
         <p>How OmniCOVAS behaves on your machine.</p>
@@ -490,13 +483,15 @@
       <!-- Tab strip (UI v3 containment: no retired systems row). Settings panels render real
            controls where they exist and honest "coming in later phase" stubs
            where they don't, per minimum-viable surface direction. -->
-      <div role="tablist" id="settings-tablist" aria-label="Settings tabs" class="ocv-config-tabs">
+      <div role="tablist" id="settings-tablist" aria-label="Settings tabs" class="ocv-config-tabs route-subnav">
         <button type="button" role="tab" id="tab-appearance"
                 aria-selected="true" aria-controls="panel-appearance" class="ocv-tab">Appearance</button>
         <button type="button" role="tab" id="tab-command-center"
                 aria-selected="false" aria-controls="panel-command-center" class="ocv-tab">Command Center</button>
+        <button type="button" role="tab" id="tab-galactic-intelligence"
+                aria-selected="false" aria-controls="panel-galactic-intelligence" class="ocv-tab">Galactic Intelligence</button>
         <button type="button" role="tab" id="tab-overlay"
-                aria-selected="false" aria-controls="panel-overlay" class="ocv-tab">Overlay</button>
+                aria-selected="false" aria-controls="panel-overlay" class="ocv-tab">Notifications &amp; Overlay</button>
         <button type="button" role="tab" id="tab-ai"
                 aria-selected="false" aria-controls="panel-ai" class="ocv-tab">AI &amp; Voice</button>
         <button type="button" role="tab" id="tab-controls"
@@ -517,12 +512,15 @@
           <div class="setting-group">
             <h3>Density</h3>
             <p style="margin:0 0 0.5rem 0;color:var(--color-fg-muted);font-size:0.9rem">
-              Compact density tightens spacing for dense surfaces like the Log. Comfortable density widens spacing for the Pilot view.
+              Density modes are display-only views of the same data: Pilot tightens the deck
+              for cockpit glances, Proof opens up source and detail drawers for review.
+              No mode ever hides blockers, the Confirmation Gate, or proof access.
             </p>
             <label for="appearance-density">Density mode</label>
             <select id="appearance-density" aria-label="Visual density mode">
-              <option value="comfortable" selected>Comfortable (default)</option>
-              <option value="compact">Compact</option>
+              <option value="commander" selected>Commander (default)</option>
+              <option value="pilot">Pilot — cockpit glance</option>
+              <option value="proof">Proof — auditor detail</option>
             </select>
           </div>
         </section>
@@ -548,8 +546,10 @@
 
       <!-- Panel: Overlay -->
       <div role="tabpanel" id="panel-overlay" aria-labelledby="tab-overlay" class="ocv-tab-panel" hidden>
+        <!-- NHI-03/04: attention choices for the current commander (component). -->
+        <div id="notification-settings-root"></div>
         <section id="overlay-settings-section" aria-labelledby="overlay-settings-heading">
-          <h2 id="overlay-settings-heading">Overlay Settings</h2>
+          <h2 id="overlay-settings-heading">In-game overlay</h2>
           <p id="overlay-settings-status" class="ocv-page-notice" hidden></p>
           <div class="setting-group">
             <label for="overlay-opacity">Opacity</label>
@@ -558,25 +558,27 @@
                      aria-label="Overlay opacity" />
               <span id="opacity-display">95%</span>
             </div>
-            <label for="overlay-anchor">Anchor Position</label>
-            <select id="overlay-anchor" aria-label="Overlay anchor position">
-              <option value="tl">Top-Left</option>
-              <option value="tr">Top-Right</option>
-              <option value="bl">Bottom-Left</option>
-              <option value="br">Bottom-Right</option>
-              <option value="center" selected>Center</option>
+            <label for="overlay-anchor">Position on the game screen</label>
+            <select id="overlay-anchor" aria-label="Overlay position on the game screen">
+              <option value="tr">Top right (recommended)</option>
+              <option value="tl">Top left</option>
+              <option value="tc">Top centre</option>
+              <option value="br">Lower right</option>
+              <option value="bl">Lower left</option>
+              <option value="center" selected>Centre (shown top centre, clear of the reticle)</option>
             </select>
-            <div style="margin-top:1rem">
-              <button type="button" id="save-overlay-settings-btn" class="secondary-button"
-                      aria-label="Save overlay settings">Save Overlay Settings</button>
-            </div>
+            <p class="ocv-page-absence">Shown on your primary monitor. Positions keep clear of the reticle and lower instruments, but every cockpit and HUD differs: check it in game.</p>
           </div>
           <div id="overlay-event-toggles" class="setting-group" hidden>
-            <h3>Event Notifications</h3>
+            <h3>Critical ship alerts</h3>
             <p style="margin:0 0 0.75rem 0;color:var(--color-fg-muted)">
-              Control which critical events trigger overlay banners.
+              Choose which ship conditions may interrupt you. A turned-off alert is still recorded in the Activity Log.
             </p>
             <div id="overlay-event-grid" class="overlay-event-grid"></div>
+          </div>
+          <div class="setting-group">
+            <button type="button" id="save-overlay-settings-btn" class="secondary-button"
+                    aria-label="Save overlay settings">Save overlay settings</button>
           </div>
           <div id="overlay-clickthrough-info" class="setting-group" hidden>
             <h3>Click-Through</h3>
@@ -672,7 +674,7 @@
         </section>
         <section aria-labelledby="data-refresh-heading">
           <h2 id="data-refresh-heading">Refresh cadence</h2>
-          <p>Data refresh intervals are managed automatically based on event arrivals. Manual refresh is available on the Sources &amp; Diagnostics surface.</p>
+          <p>Data refresh follows local event arrivals and each source's declared cadence. Review source status on the Sources &amp; Diagnostics surface.</p>
         </section>
       </div>
 
@@ -707,12 +709,21 @@
         </section>
       </div>
 
+      <!-- Panel: Galactic Intelligence (GKI-04). Rendered by
+           ui/components/galactic-intelligence.js when the tab opens. -->
+      <div role="tabpanel" id="panel-galactic-intelligence" aria-labelledby="tab-galactic-intelligence" class="ocv-tab-panel" hidden>
+        <div id="galactic-intelligence-settings-root"></div>
+      </div>
+
       <!-- Panel: Developer / Test -->
       <div role="tabpanel" id="panel-developer" aria-labelledby="tab-developer" class="ocv-tab-panel" hidden>
         <section aria-labelledby="dev-heading">
           <h2 id="dev-heading">Developer / Test</h2>
           <p>Diagnostic actions and test helpers. Does not affect game telemetry or Python state.</p>
         </section>
+
+        <!-- NHI-03/04: presentation owner (Director / classic fallback). -->
+        <div id="notification-owner-root"></div>
 
         <!-- Banner Test Center (moved from Overlay panel) -->
         <section id="banner-test-center" aria-labelledby="btc-heading">
@@ -987,7 +998,7 @@
   <!-- ══════════════════════════════════════
        VIEW: Privacy (PB05-09; humanized in PB07.6-09)
   ══════════════════════════════════════ -->
-  <section id="view-privacy" class="view ocv-page" aria-labelledby="privacy-title">
+  <section id="view-privacy" class="view ocv-page" aria-label="Privacy">
 
     <div class="ocv-page-header">
       <p class="ocv-page-kicker">Privacy &amp; Security</p>
@@ -999,6 +1010,87 @@
       <p class="privacy-local-only-notice" id="privacy-local-only-notice">
         OmniCOVAS is local-only by default. No maintainer telemetry or automatic outbound reporting is shipped in this build. Stored preferences do not activate network traffic.
       </p>
+
+      <!-- Phase 11 Commander Memory controls. Memory is derived observed
+           history; it is not the raw flight recorder and never current truth. -->
+      <section id="commander-memory-section" aria-labelledby="commander-memory-heading">
+        <div class="memory-section-header">
+          <div>
+            <p class="memory-kicker">Local private observed history</p>
+            <h2 id="commander-memory-heading">Commander Memory</h2>
+          </div>
+          <span id="memory-status-badge" class="status-badge status-badge--not-loaded">Not loaded</span>
+        </div>
+        <p>
+          Remembers sanitized systems, stations, and local market, outfitting, and shipyard observations. Current Journal, Status, and current local snapshots always take precedence.
+        </p>
+        <p class="memory-boundary-note">
+          Commander Memory is separate from the raw local flight recorder. Clearing Memory does not delete retained Journal events; a confirmed rebuild can derive Memory from them again.
+        </p>
+
+        <div id="memory-action-status" class="memory-action-status" role="status" aria-live="polite" aria-atomic="true"></div>
+
+        <div class="memory-summary" aria-label="Commander Memory summary">
+          <div class="memory-stat">
+            <span class="memory-stat-label">Remembered records</span>
+            <strong id="memory-total-records">&mdash;</strong>
+          </div>
+          <div class="memory-stat">
+            <span class="memory-stat-label">Profiles</span>
+            <strong id="memory-profile-count">&mdash;</strong>
+          </div>
+          <div class="memory-stat">
+            <span class="memory-stat-label">Last rebuild</span>
+            <strong id="memory-last-rebuild">Not run</strong>
+          </div>
+        </div>
+
+        <div class="memory-primary-controls" aria-label="Commander Memory acquisition controls">
+          <button id="memory-refresh-btn" class="privacy-secondary-button cmd-btn cmd-btn--quiet" type="button">
+            Refresh Status
+          </button>
+          <button id="memory-observed-galaxy-btn" class="privacy-secondary-button cmd-btn cmd-btn--quiet" type="button">
+            Open Observed Galaxy
+          </button>
+          <button id="memory-pause-btn" class="privacy-secondary-button cmd-btn cmd-btn--quiet" type="button" disabled>
+            Pause Memory
+          </button>
+          <button id="memory-rebuild-btn" class="privacy-secondary-button cmd-btn cmd-btn--quiet" type="button" disabled>
+            Rebuild from Local History
+          </button>
+          <button id="memory-export-btn" class="privacy-secondary-button cmd-btn cmd-btn--quiet" type="button" disabled>
+            Export Commander Memory
+          </button>
+          <button id="memory-proof-btn" class="privacy-secondary-button cmd-btn cmd-btn--quiet" type="button">
+            View Memory Proof
+          </button>
+        </div>
+
+        <div class="memory-management-grid">
+          <div class="memory-management-panel" aria-labelledby="memory-categories-heading">
+            <h3 id="memory-categories-heading">Remembered categories</h3>
+            <div id="memory-categories-list" class="memory-list">
+              <p class="field-value unknown">Waiting for the local backend.</p>
+            </div>
+          </div>
+          <div class="memory-management-panel" aria-labelledby="memory-profiles-heading">
+            <h3 id="memory-profiles-heading">Local profiles</h3>
+            <div id="memory-profiles-list" class="memory-list">
+              <p class="field-value unknown">Waiting for the local backend.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="memory-danger-zone">
+          <div>
+            <h3>Clear all derived Memory</h3>
+            <p>Deletes every remembered record while preserving profile controls and the distinct flight recorder.</p>
+          </div>
+          <button id="memory-clear-btn" class="privacy-danger-button cmd-btn cmd-btn--danger" type="button" disabled>
+            Clear Commander Memory
+          </button>
+        </div>
+      </section>
 
       <!-- Privacy Toggles Section -->
       <section id="privacy-toggles-section" aria-labelledby="privacy-toggles-heading">
@@ -1016,7 +1108,7 @@
           Review the declared disabled or reserved posture for external features. This is not a live network monitor.
         </p>
         <button
-          class="privacy-secondary-button"
+          class="privacy-secondary-button cmd-btn cmd-btn--quiet"
           id="view-data-flows-btn"
           aria-label="View configured outbound posture"
         >
@@ -1031,7 +1123,7 @@
           Download vault-backed settings and configuration values as JSON. This snapshot excludes secrets, Activity Log entries, and local database records.
         </p>
         <button
-          class="privacy-secondary-button"
+          class="privacy-secondary-button cmd-btn cmd-btn--quiet"
           id="export-data-btn"
           aria-label="Export OmniCOVAS configuration snapshot as JSON"
         >
@@ -1046,7 +1138,7 @@
           Clear vault-backed settings and configuration values. This does not delete Activity Log entries, local database records, or runtime log files.
         </p>
         <button
-          class="privacy-danger-button"
+          class="privacy-danger-button cmd-btn cmd-btn--danger"
           id="delete-data-btn"
           aria-label="Reset OmniCOVAS configuration vault"
         >
@@ -1068,7 +1160,7 @@
           </div>
 
           <button
-            class="privacy-primary-button"
+            class="privacy-primary-button cmd-btn cmd-btn--primary"
             id="close-flows-modal-btn"
             aria-label="Close data flows modal"
           >
@@ -1077,61 +1169,6 @@
         </div>
       </div>
 
-      <!-- Delete Confirmation Modal (hidden by default) -->
-      <div id="delete-confirm-modal" class="privacy-modal" style="display: none;" role="dialog" aria-labelledby="delete-modal-title">
-        <div class="privacy-modal-content privacy-modal-danger">
-          <h2 id="delete-modal-title">Reset Configuration Vault?</h2>
-          <p>
-            This will clear:
-          </p>
-          <ul>
-            <li>Vault-backed OmniCOVAS settings and configuration values</li>
-            <li>Stored privacy preferences</li>
-          </ul>
-          <p><strong>Activity Log entries and local database records are not deleted by this control.</strong></p>
-
-          <p>
-            To confirm, please click the Reset button below twice.
-          </p>
-
-          <div id="delete-confirm-buttons" class="privacy-modal-buttons">
-            <button
-              class="privacy-danger-button"
-              id="delete-confirm-1st-btn"
-              aria-label="First confirmation: reset configuration vault"
-            >
-              I understand, reset configuration
-            </button>
-            <button
-              class="privacy-secondary-button"
-              id="delete-confirm-cancel-btn"
-              aria-label="Cancel deletion"
-            >
-              Cancel
-            </button>
-          </div>
-
-          <div id="delete-confirm-2nd-buttons" style="display: none;" class="privacy-modal-buttons">
-            <p style="font-weight: bold; color: var(--color-critical);">
-              Click again to clear vault-backed configuration.
-            </p>
-            <button
-              class="privacy-danger-button"
-              id="delete-confirm-2nd-btn"
-              aria-label="Final confirmation: reset configuration vault"
-            >
-              Reset Configuration Vault
-            </button>
-            <button
-              class="privacy-secondary-button"
-              id="delete-confirm-cancel-2nd-btn"
-              aria-label="Cancel deletion"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -1142,7 +1179,7 @@
   ══════════════════════════════════════ -->
   <section id="view-sources-diagnostics" class="view ocv-page"
            aria-labelledby="sources-diagnostics-title">
-    <div class="ocv-page-header">
+    <div class="ocv-page-header route-header">
       <p class="ocv-page-kicker">Systems</p>
       <h1 class="ocv-page-title" id="sources-diagnostics-title">Sources &amp; Diagnostics</h1>
       <p class="ocv-page-subtitle">Bridge status, local data source freshness, and provider posture &mdash; all local.</p>
@@ -1155,7 +1192,7 @@
   ══════════════════════════════════════ -->
   <section id="view-resources" class="view ocv-page" aria-labelledby="resources-title">
 
-    <div class="ocv-page-header">
+    <div class="ocv-page-header route-header">
       <p class="ocv-page-kicker">System Resources</p>
       <h1 class="ocv-page-title" id="resources-title">Resources</h1>
       <p class="ocv-page-subtitle">System resource monitoring &mdash; all diagnostic data stays on your machine.</p>
@@ -1254,7 +1291,7 @@
     <!-- Footer: last updated + manual refresh -->
     <div class="res-footer">
       <span class="field-value unknown" id="res-last-updated"></span>
-      <button id="res-refresh-btn" class="ocv-btn-ghost"
+      <button id="res-refresh-btn" class="ocv-btn-ghost cmd-btn cmd-btn--quiet"
               aria-label="Refresh resource data">
         &#8635; Refresh
       </button>
@@ -1267,7 +1304,7 @@
   ══════════════════════════════════════ -->
   <section id="view-credits" class="view" aria-labelledby="credits-title">
     <div class="registry-plaque">
-      <div class="registry-header">
+      <div class="registry-header route-header">
         <h1 class="registry-title" id="credits-title">About OmniCOVAS</h1>
       </div>
 
@@ -1335,7 +1372,7 @@
   <span class="uiv3-spine-anchor">
     <span class="uiv3-icon" data-uiv3-icon="compass-diamond" aria-hidden="true"></span>
     <span>Ship</span>
-    <span class="uiv3-spine-value">Unknown</span>
+    <span class="uiv3-spine-value">Not checked</span>
   </span>
   <span class="uiv3-spine-vitals">
     <span class="uiv3-spine-item"><span>Hull</span><span class="uiv3-spine-value">--</span></span>
@@ -1811,6 +1848,7 @@
 <script type="module" src="scripts/inline-event-log.js"></script>
 
 <!-- Shell must load first so OmniEvents bus exists before dashboard.js runs -->
+<script src="components/boot-curtain.js"></script>
 <script src="components/uiv3-frame-primitives.js"></script>
 <script src="components/shell.js"></script>
 <script src="components/confirmation-gate.js"></script>
@@ -1834,19 +1872,19 @@
 <script src="views/activity-log.js"></script>
 <script src="views/sources-diagnostics.js"></script>
 
-<!-- Mount the commander-facing confirmation gate globally across routes -->
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    new ConfirmationGateComponent().mount('#confirmation-gate-root');
-  });
-</script>
+<!-- Mount the commander-facing confirmation gate globally across routes.
+     Extracted to external files so the Tauri CSP can enforce
+     script-src 'self' with no inline script blocks. -->
+<script src="scripts/boot-confirmation-gate.js"></script>
+
+<!-- GKI-04: Galactic Intelligence briefings, mounted once for every route. -->
+<script type="module" src="scripts/boot-galactic-intelligence.js"></script>
+
+<!-- NHI-03/04: the desktop side of the Notification Director's attention slot. -->
+<script type="module" src="scripts/boot-attention-lane.js"></script>
 
 <!-- Wire log entries from the WS bus after all scripts are loaded -->
-<script>
-  window.OmniEvents.addEventListener('event', function (ev) {
-    if (window._addLogEntry) window._addLogEntry(ev.detail);
-  });
-</script>
+<script src="scripts/boot-event-log-bridge.js"></script>
 
 </body>
 </html>

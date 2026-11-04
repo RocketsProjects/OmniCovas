@@ -371,9 +371,8 @@
         statusVariant: 'available',
         primaryValues: [
           { label: 'Share scope', value: 'Local' },
-          { label: 'Local status', value: 'No active group plan' },
-          { label: 'Sync', value: 'Not available yet' },
-          { label: 'Reserved features', value: `${RESERVED_SURFACES.length} reserved` },
+          { label: 'Posture', value: 'Local-only' },
+          { label: 'Sync', value: 'Future' },
         ],
       });
 
@@ -501,11 +500,11 @@
       }));
 
       grid.appendChild(primitives.createCommandCard({
-        title: 'Blocked Intent Proof',
+        title: 'Intent recording',
         primaryValue: 'Intent recording available',
-        statusBadge: { variant: 'reserved', label: 'Reserved' },
+        statusBadge: { variant: 'future', label: 'Future' },
         action: {
-          label: 'View Activity Log proof',
+          label: 'View in Log',
           href: '#/activity-log',
           onClick: this._routeTransferClick({
             originSectionId: 'squadrons-available-now',
@@ -528,7 +527,7 @@
       detail.className = 'squadrons-detail-stack';
       detail.appendChild(this._createFactRow('Share scope', 'Local'));
       detail.appendChild(this._createFactRow('Outbound traffic', 'Off'));
-      detail.appendChild(this._createFactRow('Sync', 'Not available yet'));
+      detail.appendChild(this._createFactRow('Sync', 'Future'));
       detail.appendChild(this._createCaveat('Local-only squadron state. No external profile calls.'));
       detail.appendChild(this._createFallbackWordList());
 
@@ -566,7 +565,7 @@
       const detail = document.createElement('div');
       detail.className = 'squadrons-detail-stack';
       detail.appendChild(this._createCaveat(
-        'Reserved features can record blocked local intent as proof only. No feature is enabled.',
+        'Reserved features can record blocked local intent only. No feature is enabled.',
       ));
       detail.appendChild(this._createProofActionLinks());
       return detail;
@@ -576,7 +575,7 @@
       if (commandPrimitivesModule && typeof commandPrimitivesModule.createActionLinkGroup === 'function') {
         return commandPrimitivesModule.createActionLinkGroup(
           [{
-            label: 'View source event',
+            label: 'View in Log',
             href: '#/activity-log',
             onClick: this._routeTransferClick({
               originSectionId: 'squadrons-available-now',
@@ -599,7 +598,7 @@
       const link = document.createElement('a');
       link.className = 'action-link';
       link.href = '#/activity-log';
-      link.textContent = 'View source event';
+      link.textContent = 'View in Log';
       link.addEventListener('click', this._routeTransferClick({
         originSectionId: 'squadrons-available-now',
         targetRoute: '/activity-log',
@@ -621,35 +620,24 @@
       grid.className = 'squadrons-command-grid squadrons-command-grid--status';
 
       grid.appendChild(primitives.createCommandCard({
-        title: 'Outbound Traffic',
-        primaryValue: 'Off',
-        statusBadge: { variant: 'off', label: 'Off' },
-        detail: () => this._createOutboundStatusDetail(),
-      }));
-
-      grid.appendChild(primitives.createCommandCard({
-        title: 'Sync',
-        primaryValue: 'Not available yet',
-        statusBadge: { variant: 'disabled', label: 'Disabled' },
-        detail: () => this._createSyncStatusDetail(data.telemetrySync),
-      }));
-
-      grid.appendChild(primitives.createCommandCard({
-        title: 'External Providers',
-        primaryValue: 'Disabled',
-        statusBadge: { variant: 'disabled', label: 'Disabled' },
-        detail: () => this._createProviderStatusDetail(data.integrations),
-      }));
-
-      grid.appendChild(primitives.createCommandCard({
-        title: 'Local-only Posture',
-        primaryValue: 'Local-only',
+        title: 'Local-only posture',
+        primaryValue: 'Outbound off · sync future · providers disabled',
         statusBadge: { variant: 'local-only', label: 'Local-only' },
-        detail: () => this._createLocalOnlyStatusDetail(),
+        detail: () => this._createLocalPostureDetail(data),
       }));
 
       section.appendChild(grid);
       return section;
+    }
+
+    _createLocalPostureDetail(data) {
+      const detail = document.createElement('div');
+      detail.className = 'squadrons-detail-stack';
+      detail.appendChild(this._createOutboundStatusDetail());
+      detail.appendChild(this._createSyncStatusDetail(data.telemetrySync));
+      detail.appendChild(this._createProviderStatusDetail(data.integrations));
+      detail.appendChild(this._createLocalOnlyStatusDetail());
+      return detail;
     }
 
     _createOutboundStatusDetail() {
@@ -664,7 +652,7 @@
     _createSyncStatusDetail(telemetrySync) {
       const detail = document.createElement('div');
       detail.className = 'squadrons-detail-stack';
-      detail.appendChild(this._createFactRow('Sync', 'Not available yet'));
+      detail.appendChild(this._createFactRow('Sync', 'Future'));
       detail.appendChild(this._createFactRow(
         'Active',
         telemetrySync ? String(telemetrySync.active) : 'false',
@@ -762,7 +750,7 @@
           /* PB09-08: View Campaign bridge link */
           if (note.linked_campaign_id) {
             const viewCampaignBtn = document.createElement('button');
-            viewCampaignBtn.className = 'sq-bridge-btn';
+            viewCampaignBtn.className = 'sq-bridge-btn cmd-btn cmd-btn--quiet';
             viewCampaignBtn.setAttribute('type', 'button');
             viewCampaignBtn.setAttribute('aria-label', 'View linked campaign in Operations');
             viewCampaignBtn.textContent = 'View Campaign';
@@ -791,10 +779,10 @@
           /* PB09-08: View Proof bridge link */
           if (note.note_id) {
             const viewProofBtn = document.createElement('button');
-            viewProofBtn.className = 'sq-bridge-btn';
+            viewProofBtn.className = 'sq-bridge-btn cmd-btn cmd-btn--quiet';
             viewProofBtn.setAttribute('type', 'button');
             viewProofBtn.setAttribute('aria-label', 'View note proof in Activity Log');
-            viewProofBtn.textContent = 'View Proof';
+            viewProofBtn.textContent = 'View in Log';
             viewProofBtn.addEventListener('click', () => {
               if (typeof window.Shell?.startRouteTransfer !== 'function') {
                 window.location.hash = '#/activity-log';
@@ -818,7 +806,7 @@
 
           if (note.note_id) {
             const archiveBtn = document.createElement('button');
-            archiveBtn.className = 'sq-revoke-btn';
+            archiveBtn.className = 'sq-revoke-btn cmd-btn cmd-btn--danger';
             archiveBtn.setAttribute('type', 'button');
             archiveBtn.setAttribute('aria-label', 'Archive campaign note');
             archiveBtn.textContent = 'Archive';
@@ -962,9 +950,9 @@
       controls.className = 'squadrons-reserved-controls';
 
       const button = document.createElement('button');
-      button.className = 'sq-reserved-intent-btn';
+      button.className = 'sq-reserved-intent-btn cmd-btn cmd-btn--quiet';
       button.setAttribute('type', 'button');
-      button.textContent = 'Record blocked local intent';
+      button.textContent = 'Record local intent';
 
       const status = document.createElement('p');
       status.className = 'sq-reserved-intent-status';
@@ -1353,9 +1341,9 @@
       controls.className = 'squadrons-reserved-controls';
 
       const button = document.createElement('button');
-      button.className = 'sq-reserved-intent-btn';
+      button.className = 'sq-reserved-intent-btn cmd-btn cmd-btn--quiet';
       button.setAttribute('type', 'button');
-      button.textContent = 'Record blocked local intent';
+      button.textContent = 'Record local intent';
 
       const status = document.createElement('p');
       status.className = 'sq-reserved-intent-status';
@@ -2164,7 +2152,7 @@
       buttons.className = 'sq-gate-buttons';
 
       const confirmBtn = document.createElement('button');
-      confirmBtn.className = 'sq-gate-btn sq-gate-btn--confirm';
+      confirmBtn.className = 'sq-gate-btn sq-gate-btn--confirm cmd-btn cmd-btn--primary';
       confirmBtn.setAttribute('type', 'button');
       confirmBtn.textContent = 'Confirm';
       confirmBtn.addEventListener('click', () => {
@@ -2173,7 +2161,7 @@
       });
 
       const cancelBtn = document.createElement('button');
-      cancelBtn.className = 'sq-gate-btn sq-gate-btn--cancel';
+      cancelBtn.className = 'sq-gate-btn sq-gate-btn--cancel cmd-btn cmd-btn--quiet';
       cancelBtn.setAttribute('type', 'button');
       cancelBtn.textContent = 'Cancel';
       cancelBtn.addEventListener('click', () => {
@@ -2219,7 +2207,7 @@
       wrapper.className = 'sq-write-controls';
 
       const btn = document.createElement('button');
-      btn.className = 'sq-add-btn';
+      btn.className = 'sq-add-btn cmd-btn cmd-btn--secondary';
       btn.textContent = label;
       btn.setAttribute('type', 'button');
       btn.addEventListener('click', onClick);
@@ -2235,7 +2223,7 @@
 
     _createRevokeButton(id, onClick) {
       const btn = document.createElement('button');
-      btn.className = 'sq-revoke-btn';
+      btn.className = 'sq-revoke-btn cmd-btn cmd-btn--danger';
       btn.textContent = 'Revoke';
       btn.setAttribute('type', 'button');
       btn.dataset.id = id;

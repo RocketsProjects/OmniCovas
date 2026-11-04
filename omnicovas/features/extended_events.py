@@ -63,6 +63,9 @@ async def handle_docked(
                 "station_type": station_type,
                 "system": system,
                 "market_id": market_id,
+                # The journal's own time, so the Activity Log dates this by
+                # when the commander docked rather than when the app read it.
+                "timestamp": ts,
             },
             source="journal",
         ),
@@ -85,7 +88,9 @@ async def handle_undocked(
 
     await broadcaster.publish(
         UNDOCKED,
-        ShipStateEvent.now(UNDOCKED, {"station": station}, source="journal"),
+        ShipStateEvent.now(
+            UNDOCKED, {"station": station, "timestamp": ts}, source="journal"
+        ),
     )
 
 
@@ -124,6 +129,7 @@ async def handle_fsd_jump(
                 "system": str(new_system),
                 "system_address": system_address,
                 "population": population,
+                "timestamp": ts,
             },
             source="journal",
         ),
@@ -147,7 +153,11 @@ async def handle_commit_crime(
         WANTED,
         ShipStateEvent.now(
             WANTED,
-            {"crime_type": crime_type, "system": state.snapshot.current_system},
+            {
+                "crime_type": crime_type,
+                "system": state.snapshot.current_system,
+                "timestamp": ts,
+            },
             source="journal",
         ),
     )
@@ -170,7 +180,11 @@ async def handle_bounty(
         WANTED,
         ShipStateEvent.now(
             WANTED,
-            {"reward": reward, "system": state.snapshot.current_system},
+            {
+                "reward": reward,
+                "system": state.snapshot.current_system,
+                "timestamp": ts,
+            },
             source="journal",
         ),
     )
@@ -200,6 +214,7 @@ async def handle_ship_destroyed(
                 "ship_type": snap.current_ship_type,
                 "hull_health": snap.hull_health,
                 "system": snap.current_system,
+                "timestamp": ts,
             },
             source="journal",
         ),

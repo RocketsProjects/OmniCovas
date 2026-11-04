@@ -88,61 +88,6 @@
     </div>
   </div>
 
-  <!-- Delete Confirmation Modal (hidden by default) -->
-  <div id="delete-confirm-modal" class="modal" style="display: none;" role="dialog" aria-labelledby="delete-modal-title">
-    <div class="modal-content modal-danger">
-      <h2 id="delete-modal-title">Reset Configuration Vault?</h2>
-      <p>
-        This will clear:
-      </p>
-      <ul>
-        <li>Vault-backed OmniCOVAS settings and configuration values</li>
-        <li>Stored privacy preferences</li>
-      </ul>
-      <p><strong>Activity Log entries and local database records are not deleted by this control.</strong></p>
-
-      <p>
-        To confirm, please click the Reset button below twice.
-      </p>
-
-      <div id="delete-confirm-buttons" class="modal-buttons">
-        <button
-          class="danger-button"
-          id="delete-confirm-1st-btn"
-          aria-label="First confirmation: reset configuration vault"
-        >
-          I understand, reset configuration
-        </button>
-        <button
-          class="secondary-button"
-          id="delete-confirm-cancel-btn"
-          aria-label="Cancel deletion"
-        >
-          Cancel
-        </button>
-      </div>
-
-      <div id="delete-confirm-2nd-buttons" style="display: none;" class="modal-buttons">
-        <p style="font-weight: bold; color: var(--color-warn);">
-          Click again to clear vault-backed configuration.
-        </p>
-        <button
-          class="danger-button"
-          id="delete-confirm-2nd-btn"
-          aria-label="Final confirmation: reset configuration vault"
-        >
-          Reset Configuration Vault
-        </button>
-        <button
-          class="secondary-button"
-          id="delete-confirm-cancel-2nd-btn"
-          aria-label="Cancel deletion"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
 </main>
 
 <style>

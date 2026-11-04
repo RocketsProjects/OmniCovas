@@ -31,9 +31,22 @@ $workDir = Join-Path $repoRoot "build/tauri-sidecar"
 $sidecarStem = "omnicovas-sidecar-$TargetTriple"
 $extension = if ($TargetTriple -like "*windows*" -or $TargetTriple -like "*msvc*") { ".exe" } else { "" }
 $outputPath = Join-Path $binDir "$sidecarStem$extension"
+$knowledgeBaseDir = Join-Path $repoRoot "omnicovas/knowledge_base"
+# Shipped galactic knowledge packs only; the restricted folder is never collected.
+$galacticKnowledgeDir = Join-Path $repoRoot "omnicovas/data/galactic_knowledge"
+$resourceBudgetPath = Join-Path $repoRoot "resource_budget.yaml"
 
 if (-not (Test-Path -LiteralPath $entryPoint)) {
     throw "Sidecar entry point missing: $entryPoint"
+}
+if (-not (Test-Path -LiteralPath $knowledgeBaseDir)) {
+    throw "Knowledge base directory missing: $knowledgeBaseDir"
+}
+if (-not (Test-Path -LiteralPath $galacticKnowledgeDir)) {
+    throw "Galactic knowledge directory missing: $galacticKnowledgeDir"
+}
+if (-not (Test-Path -LiteralPath $resourceBudgetPath)) {
+    throw "Resource budget missing: $resourceBudgetPath"
 }
 
 $mode = if ($DryRun) { "DRY-RUN" } else { "BUILD" }
@@ -45,10 +58,14 @@ Write-Host "Output path:   $outputPath"
 Write-Host "Mode:          $mode"
 
 $pyinstallerArgs = @(
-    "run",
-    "pyinstaller",
     "--clean",
     "--onefile",
+    "--add-data",
+    "$knowledgeBaseDir$([IO.Path]::PathSeparator)omnicovas/knowledge_base",
+    "--add-data",
+    "$galacticKnowledgeDir$([IO.Path]::PathSeparator)omnicovas/data/galactic_knowledge",
+    "--add-data",
+    "$resourceBudgetPath$([IO.Path]::PathSeparator).",
     "--hidden-import",
     "aiosqlite",
     "--name",
@@ -62,7 +79,16 @@ $pyinstallerArgs = @(
     $entryPoint
 )
 
-Write-Host "Command: uv $($pyinstallerArgs -join ' ')"
+$venvPyInstaller = Join-Path $repoRoot ".venv/Scripts/pyinstaller.exe"
+if (Test-Path -LiteralPath $venvPyInstaller) {
+    $runner = $venvPyInstaller
+    $runnerArgs = $pyinstallerArgs
+} else {
+    $runner = "uv"
+    $runnerArgs = @("run", "pyinstaller") + $pyinstallerArgs
+}
+
+Write-Host "Command: $runner $($runnerArgs -join ' ')"
 
 if ($DryRun) {
     Write-Host "Dry run only; no sidecar binary generated."
@@ -73,7 +99,7 @@ if ($DryRun) {
 New-Item -ItemType Directory -Force -Path $binDir | Out-Null
 New-Item -ItemType Directory -Force -Path $workDir | Out-Null
 
-& uv @pyinstallerArgs
+& $runner @runnerArgs
 if ($LASTEXITCODE -ne 0) {
     Write-Host "RESULT: FAIL"
     exit $LASTEXITCODE

@@ -18,16 +18,12 @@
 }
 
 .dashboard-uiv3-route-title {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  margin: 0;
 }
 
 .dashboard-uiv3-hero {
@@ -144,7 +140,7 @@
 }
 
 .dashboard-uiv3-card--primary .dashboard-uiv3-card-title {
-  color: var(--uiv3-accent-orange);
+  color: var(--uiv3-text-primary);
   font-size: clamp(20px, 2.2vw, 28px);
 }
 
@@ -156,6 +152,82 @@
   margin: 0;
 }
 
+/* PB10-R4 current-location unit.
+   Deliberately NOT part of the multi-column fact grid: the Runtime UI Repair
+   Doctrine forbids a generic fact grid for current system/station values
+   because label/value detachment is possible there. This is a self-contained
+   block whose freshness marker sits with the value it qualifies. */
+.dashboard-uiv3-location {
+  border: 1px solid var(--uiv3-border);
+  border-left-width: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+}
+
+.dashboard-uiv3-location-head {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.dashboard-uiv3-location-label {
+  color: var(--uiv3-text-dim);
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.dashboard-uiv3-location-pill {
+  border: 1px solid currentcolor;
+  font-family: var(--uiv3-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Freshness is conveyed by the pill's text, not by colour alone, so the state
+   survives greyscale, forced-colors and colour-vision-deficiency palettes. */
+.dashboard-uiv3-location-pill--ok {
+  color: var(--uiv3-accent-ok, var(--uiv3-text-primary));
+}
+
+.dashboard-uiv3-location-pill--info {
+  color: var(--uiv3-text-dim);
+}
+
+.dashboard-uiv3-location-pill--warn {
+  color: var(--uiv3-accent-warn, var(--uiv3-text-primary));
+}
+
+.dashboard-uiv3-location-system {
+  color: var(--uiv3-text-primary);
+  font-family: var(--uiv3-font-mono);
+  font-size: 15px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-uiv3-location-station,
+.dashboard-uiv3-location-docking {
+  color: var(--uiv3-text-primary);
+  font-family: var(--uiv3-font-mono);
+  font-size: 12px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-uiv3-location-note {
+  color: var(--uiv3-text-dim);
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 2px 0 0;
+}
+
 .dashboard-uiv3-card-meta,
 .dashboard-uiv3-fact-row,
 .dashboard-uiv3-support-grid {
@@ -164,7 +236,7 @@
 }
 
 .dashboard-uiv3-card-meta {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .dashboard-uiv3-fact-row {
@@ -229,7 +301,7 @@
 
 .dashboard-uiv3-card-action {
   align-self: flex-start;
-  color: var(--uiv3-accent-orange);
+  color: var(--uiv3-text-muted);
   margin-top: auto;
 }
 
@@ -397,7 +469,7 @@
 }
 
 .dashboard-uiv3-spine-op {
-  color: var(--uiv3-accent-orange);
+  color: var(--uiv3-text-primary);
 }
 
 @media (max-width: 1120px) {

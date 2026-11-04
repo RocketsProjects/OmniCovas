@@ -1,8 +1,9 @@
 <!-- Phase 3 Week 13 — Activity Log (Full) -->
 <main id="activity-log-container" role="main" aria-label="Activity log and event history">
-  <div class="page-header">
-    <h1>📋 Activity Log</h1>
-    <p>Every action OmniCOVAS takes is logged here. Fully auditable.</p>
+  <div class="page-header route-header">
+    <p class="route-hero-kicker">Local event record</p>
+    <h1>Activity Log</h1>
+    <p>Local events available on demand.</p>
   </div>
 
   <!-- Filters and Search -->
@@ -17,33 +18,22 @@
     </div>
 
     <div class="filter-box">
-      <label>Filter by category:</label>
-      <div class="filter-checkboxes">
-        <label for="log-filter-critical-view">
-          <input type="checkbox" class="log-filter" id="log-filter-critical-view" name="log-filter-critical-view" value="critical" checked />
-          Critical
-        </label>
-        <label for="log-filter-extended-view">
-          <input type="checkbox" class="log-filter" id="log-filter-extended-view" name="log-filter-extended-view" value="extended" checked />
-          Extended
-        </label>
-        <label for="log-filter-telemetry-view">
-          <input type="checkbox" class="log-filter" id="log-filter-telemetry-view" name="log-filter-telemetry-view" value="telemetry" checked />
-          Telemetry
-        </label>
-        <label for="log-filter-ai-view">
-          <input type="checkbox" class="log-filter" id="log-filter-ai-view" name="log-filter-ai-view" value="ai" checked />
-          AI
-        </label>
-      </div>
+      <label for="log-category-filter-view">Category</label>
+      <select id="log-category-filter-view" name="log-category-filter-view" aria-label="Filter activity log category">
+        <option value="all">All categories</option>
+        <option value="critical">Critical</option>
+        <option value="extended">Extended</option>
+        <option value="telemetry">Telemetry</option>
+        <option value="ai">AI</option>
+      </select>
     </div>
 
     <div class="action-buttons">
-      <button id="log-export-btn" class="secondary-button" aria-label="Export activity log as JSON">
-        ⬇️ Export
+      <button id="log-export-btn" class="secondary-button cmd-btn cmd-btn--quiet" aria-label="Export activity log as JSON">
+        Export
       </button>
-      <button id="log-clear-btn" class="secondary-button" aria-label="Clear activity log">
-        🗑️ Clear
+      <button id="log-clear-btn" class="danger-button cmd-btn cmd-btn--danger" aria-label="Clear activity log display">
+        Clear display
       </button>
     </div>
   </div>
@@ -77,22 +67,6 @@
     </button>
   </div>
 
-  <!-- Clear Confirmation Modal -->
-  <div id="log-clear-modal" class="modal" style="display: none;" role="dialog" aria-labelledby="clear-modal-title">
-    <div class="modal-content">
-      <h2 id="clear-modal-title">Clear Activity Log?</h2>
-      <p>This will delete all logged events. This action cannot be undone.</p>
-
-      <div class="modal-buttons">
-        <button id="log-clear-confirm-btn" class="danger-button" aria-label="Confirm clearing activity log">
-          Clear Log
-        </button>
-        <button id="log-clear-cancel-btn" class="secondary-button" aria-label="Cancel clearing">
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
 </main>
 
 <style>

@@ -1,0 +1,3274 @@
+{
+  "schema": "galactic-knowledge-v1",
+  "pack_id": "omnicovas-galactic-expeditions",
+  "version": "2026-11-02-1",
+  "reviewed_at": "2026-11-02",
+  "title": "Galactic Expeditions",
+  "scope": "GKI-06: authored story arcs over documented Atlas places, planning themes over the existing knowledge graph, documented requirements for reaching places, and a gazetteer of curation-time star positions for documented places that had none. GKI-08 adds four story arcs: the lost generation ships, the Second Thargoid War, the starports of the Nine Martyrs attack and the road to Colonia.",
+  "game_version": "Stories retell the cited Atlas claims as reviewed on 2026-10-29 and 2026-10-30; positions were read on 2026-10-30.",
+  "rights_basis": "Original OmniCOVAS writing: every story passage is new prose that retells documented claims, each named in its basis, so its sources are the sources of those claims. No wiki prose is reproduced. System positions are game identifiers and coordinates only.",
+  "distribution": {
+    "class": "original_facts",
+    "basis": "GKI-06 content audit (2026-10-30): story passages are original OmniCOVAS prose over documented claims, checked with the curator expression check against the wiki revisions those claims cite; the gazetteer holds only game identifiers.",
+    "decision_record": "docs/gki-06-galactic-expeditions-20261030.md"
+  },
+  "sources": [
+    {
+      "id": "edsm-system-positions",
+      "kind": "community_dataset",
+      "name": "EDSM public system records (curation-time positions)",
+      "url": "https://www.edsm.net/en/api-v1",
+      "licence": "Licence not reviewed; only game identifiers and coordinates recorded",
+      "accessed": "2026-10-30",
+      "reuse": "facts_restated",
+      "role": "Read once at curation time for SystemAddress (id64) and star positions of systems holding documented places, keeping only coordinates EDSM marks as locked. Not used at runtime."
+    }
+  ],
+  "references": [
+    {
+      "id": "cmdr-robbie-junior",
+      "kind": "person"
+    },
+    {
+      "id": "cobra-jj-386",
+      "kind": "vessel"
+    },
+    {
+      "id": "crash-site-discovery",
+      "kind": "discovery"
+    },
+    {
+      "id": "first-thargoid-war",
+      "kind": "event"
+    },
+    {
+      "id": "founders-world",
+      "kind": "body"
+    },
+    {
+      "id": "generation-ship-lycaon",
+      "kind": "landmark"
+    },
+    {
+      "id": "hip-12099",
+      "kind": "star_system"
+    },
+    {
+      "id": "hutton-orbital",
+      "kind": "station"
+    },
+    {
+      "id": "inra",
+      "kind": "organization"
+    },
+    {
+      "id": "inra-bases-rediscovery",
+      "kind": "discovery"
+    },
+    {
+      "id": "inra-hollis-gateway",
+      "kind": "settlement"
+    },
+    {
+      "id": "inra-stack",
+      "kind": "settlement"
+    },
+    {
+      "id": "inra-taylor-keep",
+      "kind": "settlement"
+    },
+    {
+      "id": "jameson-family",
+      "kind": "organization"
+    },
+    {
+      "id": "jameson-final-mission",
+      "kind": "event"
+    },
+    {
+      "id": "jamesons-crash-site",
+      "kind": "landmark"
+    },
+    {
+      "id": "john-jameson",
+      "kind": "person"
+    },
+    {
+      "id": "league-of-reparation",
+      "kind": "organization"
+    },
+    {
+      "id": "lori-jameson",
+      "kind": "person"
+    },
+    {
+      "id": "lycaon-discovery",
+      "kind": "discovery"
+    },
+    {
+      "id": "peter-jameson",
+      "kind": "person"
+    },
+    {
+      "id": "pilots-federation",
+      "kind": "organization"
+    },
+    {
+      "id": "shinrarta-dezhra",
+      "kind": "star_system"
+    },
+    {
+      "id": "station-shinrarta-dezhra-jameson-memorial",
+      "kind": "location"
+    },
+    {
+      "id": "thargoid-attack-shinrarta-3310",
+      "kind": "event"
+    },
+    {
+      "id": "li-qin-jao",
+      "kind": "person"
+    },
+    {
+      "id": "li-qing-jao",
+      "kind": "station"
+    },
+    {
+      "id": "generation-ship-atlas",
+      "kind": "landmark"
+    },
+    {
+      "id": "generation-ship-artemis",
+      "kind": "landmark"
+    },
+    {
+      "id": "generation-ship-thetis",
+      "kind": "landmark"
+    },
+    {
+      "id": "generation-ship-venusian",
+      "kind": "landmark"
+    },
+    {
+      "id": "generation-ship-hyperion",
+      "kind": "landmark"
+    },
+    {
+      "id": "generation-ship-odysseus",
+      "kind": "landmark"
+    },
+    {
+      "id": "sol",
+      "kind": "star_system"
+    },
+    {
+      "id": "second-thargoid-war",
+      "kind": "event"
+    },
+    {
+      "id": "first-thargoid-crash-site",
+      "kind": "landmark"
+    },
+    {
+      "id": "aegis",
+      "kind": "organization"
+    },
+    {
+      "id": "pleiades-station-attacks-3303",
+      "kind": "event"
+    },
+    {
+      "id": "the-oracle",
+      "kind": "station"
+    },
+    {
+      "id": "delphi",
+      "kind": "star_system"
+    },
+    {
+      "id": "raxxla",
+      "kind": "mystery"
+    },
+    {
+      "id": "obsidian-orbital",
+      "kind": "station"
+    },
+    {
+      "id": "titan-taranis-graveyard",
+      "kind": "landmark"
+    },
+    {
+      "id": "salvation",
+      "kind": "person"
+    },
+    {
+      "id": "titan-cocijo-graveyard",
+      "kind": "landmark"
+    },
+    {
+      "id": "battle-for-sol-3310",
+      "kind": "event"
+    },
+    {
+      "id": "titan-hadad-graveyard",
+      "kind": "landmark"
+    },
+    {
+      "id": "nine-martyrs-attack",
+      "kind": "event"
+    },
+    {
+      "id": "achenar",
+      "kind": "star_system"
+    },
+    {
+      "id": "alioth",
+      "kind": "star_system"
+    },
+    {
+      "id": "lave-station",
+      "kind": "station"
+    },
+    {
+      "id": "galactic-cooperative",
+      "kind": "organization"
+    },
+    {
+      "id": "dawes-hub",
+      "kind": "station"
+    },
+    {
+      "id": "donaldson",
+      "kind": "station"
+    },
+    {
+      "id": "jaques-station-voyage-3302",
+      "kind": "event"
+    },
+    {
+      "id": "jaques-station",
+      "kind": "station"
+    },
+    {
+      "id": "colonia",
+      "kind": "star_system"
+    },
+    {
+      "id": "jaques-station-rediscovery-3302",
+      "kind": "discovery"
+    },
+    {
+      "id": "jaques",
+      "kind": "person"
+    },
+    {
+      "id": "colonia-council",
+      "kind": "organization"
+    },
+    {
+      "id": "memorial-cmdr-garak",
+      "kind": "landmark"
+    },
+    {
+      "id": "cmdr-garak",
+      "kind": "person"
+    }
+  ],
+  "entities": [],
+  "relationships": [],
+  "narratives": [
+    {
+      "id": "inra-files",
+      "title": "The INRA Files",
+      "theme": "inra-mysteries",
+      "summary": "Follow the hidden history of the First Thargoid War through INRA's abandoned bases, to the moon where John Jameson's Cobra came down.",
+      "teaser": "A secret navy, a fungus that crippled the Thargoids, and a pilot who never came home.",
+      "introduction": {
+        "title": "A war humanity chose to forget",
+        "text": "In the 3100s humanity fought its first war against the Thargoids. Beside the Galactic Cooperative stood INRA, a covert arm set up jointly by the Federation and the Empire, which tracked the Thargoids and built the means to stop them. Its scientists turned a fungus that damaged Thargoid technology into a weapon, and by 3151 the Thargoids had left human space. INRA went public in 3193 and disbanded in 3253, and its bases were left to decay. From October 3303 commanders began to find them again, and the records inside told a story INRA had kept hidden. This expedition follows that search, base by base. Older sources disagree about when INRA was founded, and even about its name, so this story keeps to what the bases revealed.",
+        "basis": [
+          {
+            "entity": "first-thargoid-war",
+            "claim": "sides"
+          },
+          {
+            "entity": "first-thargoid-war",
+            "claim": "end"
+          },
+          {
+            "entity": "inra",
+            "claim": "founded"
+          },
+          {
+            "entity": "inra",
+            "claim": "mycoid"
+          },
+          {
+            "entity": "inra",
+            "claim": "dates"
+          },
+          {
+            "entity": "inra",
+            "claim": "bases"
+          }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "hollis-gateway",
+          "place": "inra-hollis-gateway",
+          "title": "Hollis Gateway: the discovery",
+          "teaser": "Where a junior researcher noticed something no one wanted to hear.",
+          "text": "The weapon that ended the war was first noticed here, on Hermitage 4 a. A junior researcher, studying whether Thargoid technology could help with farming, saw that a fungus was eating away at it, and took the finding past a superior who dismissed it. Corroded tanks on the base still carry mycohazard warnings, and what has leaked from them may be the weapon itself. When commanders found this derelict site on 9 October 3303, the hunt for INRA's other bases began.",
+          "basis": [
+            {
+              "entity": "inra-hollis-gateway",
+              "claim": "discovery"
+            },
+            {
+              "entity": "inra-hollis-gateway",
+              "claim": "tanks"
+            },
+            {
+              "entity": "inra-hollis-gateway",
+              "claim": "found"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "inra",
+              "text": "One of INRA's research bases."
+            },
+            {
+              "entity": "inra-bases-rediscovery",
+              "text": "The first INRA base found again, on 9 October 3303."
+            }
+          ]
+        },
+        {
+          "id": "stack",
+          "place": "inra-stack",
+          "title": "Stack: the specimen",
+          "teaser": "INRA's experiments went further than anyone had admitted.",
+          "text": "On HIP 12099 1 a, INRA built a secure octagonal pit to hold a captured Thargoid for its tests, and the base's records show the specimen tried to escape several times. This is where the fungus became a proven weapon: INRA tested it on captured Thargoids before producing it in quantity. Commanders found Stack on 24 November 3303. It stands in the same system where this story ends.",
+          "basis": [
+            {
+              "entity": "inra-stack",
+              "claim": "role"
+            },
+            {
+              "entity": "inra-stack",
+              "claim": "found"
+            },
+            {
+              "entity": "inra",
+              "claim": "mycoid"
+            },
+            {
+              "entity": "hip-12099",
+              "claim": "stack"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "inra",
+              "text": "One of INRA's research bases."
+            },
+            {
+              "entity": "inra-bases-rediscovery",
+              "text": "Found again on 24 November 3303."
+            }
+          ]
+        },
+        {
+          "id": "taylor-keep",
+          "place": "inra-taylor-keep",
+          "title": "Taylor Keep: the last stop",
+          "teaser": "A famous pilot's own ship was readied here for one last mission.",
+          "text": "At Taylor Keep, INRA modified John Jameson's own Cobra and loaded it with mycoid-armed missiles from Klatt Enterprises. Jameson was a celebrated independent pilot, admired for both exploration and combat. The weapon he carried from here is credited with ending the war. The base was found again on 25 November 3303, the same day as the wreck at the end of this journey. Its documented body name does not match the game's naming in 12 Trianguli, so OmniCOVAS cannot confirm a landing here; mark this stop yourself once you have found it.",
+          "basis": [
+            {
+              "entity": "inra-taylor-keep",
+              "claim": "mission"
+            },
+            {
+              "entity": "inra-taylor-keep",
+              "claim": "found"
+            },
+            {
+              "entity": "inra-taylor-keep",
+              "claim": "body-name"
+            },
+            {
+              "entity": "jameson-final-mission",
+              "claim": "prepared"
+            },
+            {
+              "entity": "john-jameson",
+              "claim": "pilot"
+            },
+            {
+              "entity": "first-thargoid-war",
+              "claim": "end"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "john-jameson",
+              "text": "His ship was armed here for the final mission."
+            },
+            {
+              "entity": "jameson-final-mission",
+              "text": "Prepared at this base."
+            },
+            {
+              "entity": "inra",
+              "text": "One of INRA's bases."
+            }
+          ]
+        },
+        {
+          "id": "crash-site",
+          "place": "jamesons-crash-site",
+          "title": "HIP 12099 1 b: the truth in the logs",
+          "teaser": "The end of the mission, and the reason INRA kept it secret.",
+          "spoiler": true,
+          "text": "INRA hired Jameson to deliver its weapon and told him it would only disable Thargoid hyperdrives. He got through a hive ship's defences, fired, and got away, and then his scans showed the weapon killing those aboard. A hidden program INRA had built into his Cobra shut it down on a course into this moon, so he could never report what he had seen. Before the end he recorded a last log for his son, and scanning the wreck still plays it. The wreck, his own Cobra Mk III registered JJ-386, was found on 25 November 3303, about 150 years after he disappeared; the wiki credits CMDR Robbie Junior. No body can be seen through the canopy and nobody knows who placed the beacons around the wreck, so whether Jameson survived the impact is still unknown.",
+          "basis": [
+            {
+              "entity": "john-jameson",
+              "claim": "recruited"
+            },
+            {
+              "entity": "john-jameson",
+              "claim": "strike"
+            },
+            {
+              "entity": "john-jameson",
+              "claim": "betrayal"
+            },
+            {
+              "entity": "john-jameson",
+              "claim": "fate"
+            },
+            {
+              "entity": "jamesons-crash-site",
+              "claim": "wreck"
+            },
+            {
+              "entity": "jamesons-crash-site",
+              "claim": "found"
+            },
+            {
+              "entity": "jamesons-crash-site",
+              "claim": "mystery"
+            },
+            {
+              "entity": "cobra-jj-386",
+              "claim": "logs"
+            },
+            {
+              "entity": "cobra-jj-386",
+              "claim": "modified"
+            },
+            {
+              "entity": "cmdr-robbie-junior",
+              "claim": "credit"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "john-jameson",
+              "text": "His ship came down here; whether he died here is not known."
+            },
+            {
+              "entity": "cobra-jj-386",
+              "text": "His personal ship, now the wreck."
+            },
+            {
+              "entity": "crash-site-discovery",
+              "text": "Found on 25 November 3303."
+            }
+          ]
+        }
+      ],
+      "discoveries": [
+        {
+          "place": "station-shinrarta-dezhra-jameson-memorial",
+          "title": "Jameson Memorial: a name that endures",
+          "text": "The Pilots Federation's showpiece starport in Shinrarta Dezhra is named in honour of a member of the Jameson family. The sources do not say which one, so this story does not claim it remembers John. The family line continues: his great-granddaughter Lori Jameson, the only known living Jameson, works as an Engineer from Jameson Base in the same system.",
+          "basis": [
+            {
+              "entity": "station-shinrarta-dezhra-jameson-memorial",
+              "claim": "namesake"
+            },
+            {
+              "entity": "jameson-family",
+              "claim": "memorial"
+            },
+            {
+              "entity": "lori-jameson",
+              "claim": "family"
+            },
+            {
+              "entity": "lori-jameson",
+              "claim": "work"
+            }
+          ]
+        }
+      ],
+      "conclusion": {
+        "title": "What the bases revealed",
+        "text": "The search that began at Hollis Gateway in October 3303 ended about seven weeks later at a crashed Cobra, and the logs found there fed a public condemnation of INRA: in December 3303 the Emperor and the Alliance Prime Minister denounced its conduct, including how it had used Jameson. The story did not end there. In 3304 a group calling itself the League of Reparation hunted descendants of INRA staff, leaving the words For Jameson at its killings, until a taskforce of the three superpowers dismantled it in July 3304.",
+        "basis": [
+          {
+            "entity": "inra-bases-rediscovery",
+            "claim": "start"
+          },
+          {
+            "entity": "crash-site-discovery",
+            "claim": "aftermath"
+          },
+          {
+            "entity": "inra",
+            "claim": "condemned"
+          },
+          {
+            "entity": "league-of-reparation",
+            "claim": "aim"
+          },
+          {
+            "entity": "league-of-reparation",
+            "claim": "end"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pilots-home",
+      "title": "Home of the Pilots Federation",
+      "theme": "historic-starports",
+      "summary": "Visit the permit-locked home of the Pilots Federation: its headquarters world, its showpiece starport, and the system commanders defended in 3310.",
+      "teaser": "The system every commander aims for, and the attack it survived.",
+      "introduction": {
+        "title": "A home for independent pilots",
+        "text": "Since 2805 the Pilots Federation has licensed and ranked independent pilots, first so they could share trade routes and protect one another from pirates. Its home, Shinrarta Dezhra, is closed to anyone without the Founders World permit, usually earned by reaching Elite in one of the ranked careers. This short journey stays within that one system.",
+        "basis": [
+          {
+            "entity": "pilots-federation",
+            "claim": "founded"
+          },
+          {
+            "entity": "pilots-federation",
+            "claim": "ranks"
+          },
+          {
+            "entity": "shinrarta-dezhra",
+            "claim": "access"
+          }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "founders-world",
+          "place": "founders-world",
+          "title": "Founders World: the headquarters",
+          "teaser": "A terraformed world where the Pilots Federation keeps its headquarters.",
+          "text": "Terraformed to be Earth-like, with air you can breathe and life of its own, Founders World is the seat of the Pilots Federation. The permit that opens the system takes its name from this planet, itself a nod to the game's Kickstarter founders, and Elite pilots may retire here.",
+          "basis": [
+            {
+              "entity": "founders-world",
+              "claim": "world"
+            },
+            {
+              "entity": "founders-world",
+              "claim": "permit-name"
+            },
+            {
+              "entity": "pilots-federation",
+              "claim": "hq"
+            },
+            {
+              "entity": "shinrarta-dezhra",
+              "claim": "headquarters"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "pilots-federation",
+              "text": "Its headquarters."
+            }
+          ]
+        },
+        {
+          "id": "jameson-memorial",
+          "place": "station-shinrarta-dezhra-jameson-memorial",
+          "title": "Jameson Memorial: the showpiece",
+          "teaser": "The starport that sells every ship, named for a famous family.",
+          "text": "This Orbis starport is documented as selling every ship and almost every module at a discount, as the only seller of Waters of Shintara, and as host to a Guardian Technology Broker. It is named in honour of a member of the Jameson family. The sources do not say which one, so OmniCOVAS names no individual.",
+          "basis": [
+            {
+              "entity": "station-shinrarta-dezhra-jameson-memorial",
+              "claim": "type"
+            },
+            {
+              "entity": "station-shinrarta-dezhra-jameson-memorial",
+              "claim": "outfitting"
+            },
+            {
+              "entity": "station-shinrarta-dezhra-jameson-memorial",
+              "claim": "rare"
+            },
+            {
+              "entity": "station-shinrarta-dezhra-jameson-memorial",
+              "claim": "broker"
+            },
+            {
+              "entity": "station-shinrarta-dezhra-jameson-memorial",
+              "claim": "namesake"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "jameson-family",
+              "text": "Named for one of its members; which one is not documented."
+            },
+            {
+              "entity": "pilots-federation",
+              "text": "Its showpiece starport."
+            }
+          ]
+        },
+        {
+          "id": "attack-3310",
+          "place": "shinrarta-dezhra",
+          "title": "September 3310: the attack",
+          "teaser": "Thargoids struck the Pilots Federation's home. Commanders held it.",
+          "text": "On 19 September 3310 the Thargoids attacked Shinrarta Dezhra. Commanders defeated the assault by 23 September, and Jameson Memorial stayed largely operational throughout, repairing and rearming the defenders. While the attack lasted, the Pilots Federation suspended its permit requirement, then restored it.",
+          "basis": [
+            {
+              "entity": "thargoid-attack-shinrarta-3310",
+              "claim": "attack"
+            },
+            {
+              "entity": "thargoid-attack-shinrarta-3310",
+              "claim": "station"
+            },
+            {
+              "entity": "thargoid-attack-shinrarta-3310",
+              "claim": "permit"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "thargoid-attack-shinrarta-3310",
+              "text": "The assault and its defence."
+            },
+            {
+              "entity": "pilots-federation",
+              "text": "Defended its home system."
+            }
+          ]
+        }
+      ],
+      "discoveries": [
+        {
+          "place": "jamesons-crash-site",
+          "title": "Where the most famous Jameson ended up",
+          "text": "John Jameson, celebrated for both exploration and combat, never came home from his last mission; his Cobra was found on HIP 12099 1 b in November 3303. The INRA Files tell how he got there.",
+          "basis": [
+            {
+              "entity": "john-jameson",
+              "claim": "pilot"
+            },
+            {
+              "entity": "jamesons-crash-site",
+              "claim": "found"
+            }
+          ]
+        }
+      ],
+      "conclusion": {
+        "title": "Pilots looking after their own",
+        "text": "From a founding in 2805 to the defence of 3310, this one system tells the story of independent pilots looking after their own. If the Jameson name caught your attention, the INRA Files follow the most famous of them to his last mission.",
+        "basis": [
+          {
+            "entity": "pilots-federation",
+            "claim": "founded"
+          },
+          {
+            "entity": "thargoid-attack-shinrarta-3310",
+            "claim": "attack"
+          },
+          {
+            "entity": "john-jameson",
+            "claim": "pilot"
+          }
+        ]
+      }
+    },
+    {
+      "id": "the-missing",
+      "title": "The Missing: lost generation ships",
+      "theme": "generation-ships",
+      "summary": "Visit six of the colony arks launched before the hyperdrive, all within about 125 light years of Sol, and end at the Earth starport named for the engineer who made them obsolete.",
+      "teaser": "Colony arks that never arrived, and the invention that left them behind.",
+      "introduction": {
+        "title": "Ships that set out too early",
+        "text": "From 2097 humanity sent colony arks to the stars at less than the speed of light, crews living and dying aboard for generations. Within a century Li Qin Jao's hyperdrive let ordinary ships overtake them, and none was built again. Most arrived. Some did not, and since April 3303 commanders have found sixteen of those lost ships. They drift or orbit where their voyages ended, so each stop below is found with the Full Spectrum System Scanner, not by a fixed position.",
+        "basis": [
+          {
+            "entity": "generation-ship-lycaon",
+            "claim": "ships"
+          },
+          {
+            "entity": "li-qin-jao",
+            "claim": "invention"
+          },
+          {
+            "entity": "li-qin-jao",
+            "claim": "generation-ships"
+          },
+          {
+            "entity": "lycaon-discovery",
+            "claim": "count"
+          },
+          {
+            "entity": "generation-ship-lycaon",
+            "claim": "finding"
+          }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "atlas",
+          "place": "generation-ship-atlas",
+          "title": "Charick Drift: the Atlas",
+          "teaser": "The nearest of the lost ships, under 30 light years from Sol.",
+          "text": "The Atlas was found circling the star Charick Drift A in May 3303, the closest of the lost ships to Sol. Its last chief engineer is the hero of its logs. Read them in the Atlas record when you arrive; spoiler protection keeps the ending back until you ask.",
+          "basis": [
+            {
+              "entity": "generation-ship-atlas",
+              "claim": "found"
+            },
+            {
+              "entity": "generation-ship-atlas",
+              "claim": "finding"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "li-qin-jao",
+              "text": "The hyperdrive overtook ships like this one."
+            }
+          ]
+        },
+        {
+          "id": "artemis",
+          "place": "generation-ship-artemis",
+          "title": "Mu Cassiopeia: the Artemis",
+          "teaser": "A ship whose logs read like a murder mystery.",
+          "text": "CMDR Friend 360 found the Artemis orbiting Mu Cassiopeia C 1 in October 3303. Its recovered logs are among the darkest of the Missing; its record holds them behind spoiler protection.",
+          "basis": [
+            {
+              "entity": "generation-ship-artemis",
+              "claim": "found"
+            }
+          ],
+          "connections": []
+        },
+        {
+          "id": "lycaon",
+          "place": "generation-ship-lycaon",
+          "title": "Alaunus: the Lycaon, the first found",
+          "teaser": "The discovery that started the search, in April 3303.",
+          "text": "On 23 April 3303 the Lycaon became the first lost generation ship found, in Alaunus. It drifts, so its recorded position is only a starting point: scan the system with the FSS to find where it is now.",
+          "basis": [
+            {
+              "entity": "generation-ship-lycaon",
+              "claim": "first"
+            },
+            {
+              "entity": "lycaon-discovery",
+              "claim": "when"
+            },
+            {
+              "entity": "generation-ship-lycaon",
+              "claim": "finding"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "lycaon-discovery",
+              "text": "The find that opened the search."
+            }
+          ]
+        },
+        {
+          "id": "thetis",
+          "place": "generation-ship-thetis",
+          "title": "Nefertem: the Thetis",
+          "teaser": "Found days after the Lycaon, orbiting Nefertem 6 a.",
+          "text": "CMDR Rhaider found the Thetis on 28 April 3303, five days after the Lycaon. Something it heard on the way is part of its story, and may not have ended with it.",
+          "basis": [
+            {
+              "entity": "generation-ship-thetis",
+              "claim": "found"
+            },
+            {
+              "entity": "generation-ship-thetis",
+              "claim": "echo"
+            }
+          ],
+          "spoiler": true,
+          "connections": []
+        },
+        {
+          "id": "venusian",
+          "place": "generation-ship-venusian",
+          "title": "Kitae: the Venusian",
+          "teaser": "A drifting ship last recorded 2,500 ls out towards Zephyrus.",
+          "text": "The Venusian was found in Kitae on 26 April 3303. It was recorded about 2,500 light seconds from the arrival star towards Zephyrus, but generation ships drift, so trust the FSS over that note.",
+          "basis": [
+            {
+              "entity": "generation-ship-venusian",
+              "claim": "found"
+            },
+            {
+              "entity": "generation-ship-venusian",
+              "claim": "finding"
+            }
+          ],
+          "connections": []
+        },
+        {
+          "id": "hyperion",
+          "place": "generation-ship-hyperion",
+          "title": "Lalande 2966: the Hyperion",
+          "teaser": "The farthest stop, and a position even the sources disagree on.",
+          "text": "CMDR Vall found the Hyperion on 27 April 3303. Even its documented position is uncertain: one part of the wiki says 7,000 light seconds from the fourth planet towards Yemaki, another says 9,500. The FSS settles it.",
+          "basis": [
+            {
+              "entity": "generation-ship-hyperion",
+              "claim": "found"
+            },
+            {
+              "entity": "generation-ship-hyperion",
+              "claim": "position"
+            },
+            {
+              "entity": "generation-ship-hyperion",
+              "claim": "finding"
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "discoveries": [
+        {
+          "place": "generation-ship-odysseus",
+          "title": "Off the route: the Odysseus",
+          "text": "Ross 859, on the far side of Sol from most of these stops, holds the Odysseus, found on 28 April 3303 orbiting Ross 859 B 1. Its last log is a warning.",
+          "basis": [
+            {
+              "entity": "generation-ship-odysseus",
+              "claim": "found"
+            }
+          ]
+        }
+      ],
+      "conclusion": {
+        "title": "Li Qing Jao, above Earth",
+        "text": "End in Sol, at the starport named after Li Qin Jao, whose hyperdrive opened the galaxy and made these voyages unnecessary. The station has a hard history of its own: it burned for two weeks after the 3307 bombings. Sol needs its permit.",
+        "basis": [
+          {
+            "entity": "li-qing-jao",
+            "claim": "namesake"
+          },
+          {
+            "entity": "li-qing-jao",
+            "claim": "bombing"
+          },
+          {
+            "entity": "sol",
+            "claim": "access"
+          }
+        ]
+      }
+    },
+    {
+      "id": "embers-of-war",
+      "title": "Embers of the Second Thargoid War",
+      "theme": "thargoid-history",
+      "summary": "From the first Thargoid wreck ever found, through the Pleiades starports the aliens crippled, to the graveyards of the Titans and the end of the war over Earth.",
+      "teaser": "Seven years of war, from a buried wreck to the skies over Earth.",
+      "introduction": {
+        "title": "The aliens came back",
+        "text": "The Thargoids left human space in 3151, after INRA's mycoid weapon. In 3303, 152 years later, they returned: on 26 September independent pilots were attacked at non-human signal sources, and a war began that lasted until 18 December 3310. This journey visits places that mark its course. Several are in the Pleiades, where Thargoids still remain.",
+        "basis": [
+          {
+            "entity": "first-thargoid-war",
+            "claim": "end"
+          },
+          {
+            "entity": "second-thargoid-war",
+            "claim": "start"
+          },
+          {
+            "entity": "second-thargoid-war",
+            "claim": "end"
+          },
+          {
+            "entity": "second-thargoid-war",
+            "claim": "remaining"
+          }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "first-wreck",
+          "place": "first-thargoid-crash-site",
+          "title": "Pleiades Sector AB-W b2-4: the first wreck",
+          "teaser": "Found in 3302 by following the last clue of a commanders' treasure hunt.",
+          "text": "On 30 August 3302 CMDRs Noctrach and Ihazevich found an alien wreck in a canyon here, the end of a trail of clues set by three other commanders. A year later Aegis dated it: a Thargoid Interceptor, a little over a century old. Its documented position is older than Odyssey, so look around it.",
+          "basis": [
+            {
+              "entity": "first-thargoid-crash-site",
+              "claim": "found"
+            },
+            {
+              "entity": "first-thargoid-crash-site",
+              "claim": "dated"
+            },
+            {
+              "entity": "first-thargoid-crash-site",
+              "claim": "position"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "aegis",
+              "text": "Dated the wreck in October 3303."
+            }
+          ]
+        },
+        {
+          "id": "oracle",
+          "place": "the-oracle",
+          "title": "Delphi: The Oracle",
+          "teaser": "Crippled on the first day of the starport attacks, and first to recover.",
+          "text": "On 14 December 3303 Thargoids struck three Pleiades starports in one day, The Oracle among them. Their shutdown fields silenced the defences before the reactor was hit, which witnesses took as an aim to cripple rather than destroy. The Oracle was the first station to recover. Delphi was also home to Aegis Research.",
+          "basis": [
+            {
+              "entity": "pleiades-station-attacks-3303",
+              "claim": "first"
+            },
+            {
+              "entity": "pleiades-station-attacks-3303",
+              "claim": "intent"
+            },
+            {
+              "entity": "the-oracle",
+              "claim": "recovered"
+            },
+            {
+              "entity": "delphi",
+              "claim": "aegis"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "aegis",
+              "text": "Its research arm was based in Delphi."
+            },
+            {
+              "entity": "raxxla",
+              "text": "Delphi's name has drawn Raxxla theories, all unproven."
+            }
+          ]
+        },
+        {
+          "id": "obsidian",
+          "place": "obsidian-orbital",
+          "title": "Maia: Obsidian Orbital",
+          "teaser": "A community-named station that hosted an Aegis laboratory.",
+          "text": "Commanders built Obsidian Orbital and voted on its name. It took in one of Aegis's laboratories in December 3303, was hit on 11 January 3304 and was repaired by 3 March, the second station to recover.",
+          "basis": [
+            {
+              "entity": "obsidian-orbital",
+              "claim": "named"
+            },
+            {
+              "entity": "obsidian-orbital",
+              "claim": "aegis-lab"
+            },
+            {
+              "entity": "obsidian-orbital",
+              "claim": "attack"
+            },
+            {
+              "entity": "the-oracle",
+              "claim": "recovered"
+            }
+          ],
+          "connections": []
+        },
+        {
+          "id": "taranis",
+          "place": "titan-taranis-graveyard",
+          "title": "Hyades Sector FB-N b7-6: Taranis",
+          "teaser": "The first Titan destroyed, and the drive it left behind.",
+          "text": "Taranis was the first of eight Titans to arrive, on 29 November 3308, and the first to fall, on 2 March 3310. Its drive remains finished Achilles Aerospace's research into the supercruise overcharge drive. Salvation, whose own weapon programme ran through this war, had once worked on INRA's mycoid.",
+          "basis": [
+            {
+              "entity": "titan-taranis-graveyard",
+              "claim": "first"
+            },
+            {
+              "entity": "titan-taranis-graveyard",
+              "claim": "sco"
+            },
+            {
+              "entity": "salvation",
+              "claim": "inra"
+            },
+            {
+              "entity": "salvation",
+              "claim": "proteus"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "salvation",
+              "text": "His team helped build the first war's weapon."
+            },
+            {
+              "entity": "inra",
+              "text": "The organisation behind the mycoid."
+            }
+          ]
+        },
+        {
+          "id": "cocijo",
+          "place": "titan-cocijo-graveyard",
+          "title": "Sol: where the war ended",
+          "teaser": "The last Titan reached Earth. It fell there on 18 December 3310.",
+          "text": "The last Titan, Cocijo, crossed to Sol and orbited Earth from 5 December 3310. Its fleet destroyed battle cruisers and rescue ships before pilots retook the occupied systems; Cocijo exploded over Earth on 18 December 3310, ending the war. Sol needs its permit.",
+          "basis": [
+            {
+              "entity": "titan-cocijo-graveyard",
+              "claim": "advance"
+            },
+            {
+              "entity": "titan-cocijo-graveyard",
+              "claim": "losses"
+            },
+            {
+              "entity": "titan-cocijo-graveyard",
+              "claim": "destroyed"
+            },
+            {
+              "entity": "sol",
+              "claim": "access"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "battle-for-sol-3310",
+              "text": "The war's last battle."
+            }
+          ]
+        }
+      ],
+      "discoveries": [
+        {
+          "place": "shinrarta-dezhra",
+          "title": "The attack on the pilots' home",
+          "text": "Three months before Cocijo reached Sol, Thargoids struck Shinrarta Dezhra; commanders held it between 19 and 23 September 3310.",
+          "basis": [
+            {
+              "entity": "thargoid-attack-shinrarta-3310",
+              "claim": "attack"
+            }
+          ]
+        },
+        {
+          "place": "titan-hadad-graveyard",
+          "title": "Another graveyard: Hadad",
+          "text": "Hadad, the eighth Titan, fell in HIP 30377 on 26 May 3310. Thargoid salvage floats around its wreck.",
+          "basis": [
+            {
+              "entity": "titan-hadad-graveyard",
+              "claim": "destroyed"
+            },
+            {
+              "entity": "titan-hadad-graveyard",
+              "claim": "salvage"
+            }
+          ]
+        }
+      ],
+      "conclusion": {
+        "title": "A victory, not an ending",
+        "text": "Humanity won, but the Thargoids were not gone: they still hold the Pleiades and three other nebulae. The INRA Files tell how the first war was won, and at what cost.",
+        "basis": [
+          {
+            "entity": "second-thargoid-war",
+            "claim": "end"
+          },
+          {
+            "entity": "second-thargoid-war",
+            "claim": "remaining"
+          },
+          {
+            "entity": "inra",
+            "claim": "mycoid"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nine-martyrs-starports",
+      "title": "Starports of the Nine Martyrs",
+      "theme": "historic-starports",
+      "summary": "Four starports struck on the same day in 3307: Lave Station, once half of the Galactic Cooperative's capital, and the starports above each superpower's capital.",
+      "teaser": "One day in 3307, nine starports, and the capitals behind four of them.",
+      "introduction": {
+        "title": "11 March 3307",
+        "text": "On 11 March 3307 the Neo-Marlinist Liberation Army bombed nine starports at once while the superpowers' leaders met at the Galactic Summit. This journey visits four of them. Three are inside permit-locked capital systems: Sol, Achenar and Alioth each need their own permit, which OmniCOVAS cannot see in your Journal.",
+        "basis": [
+          {
+            "entity": "nine-martyrs-attack",
+            "claim": "attack"
+          },
+          {
+            "entity": "nine-martyrs-attack",
+            "claim": "summit"
+          },
+          {
+            "entity": "sol",
+            "claim": "access"
+          },
+          {
+            "entity": "achenar",
+            "claim": "access"
+          },
+          {
+            "entity": "alioth",
+            "claim": "access"
+          }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "lave",
+          "place": "lave-station",
+          "title": "Lave Station: the old capital",
+          "teaser": "Where the Galactic Cooperative ruled, and where Elite began.",
+          "text": "The Galactic Cooperative, founded in 2696, governed from Lave, its capital shared between the planet and this Coriolis station, a design the Cooperative itself introduced. The First Thargoid War exhausted it and its charter ended in 3174. Lave Station was bombed in 3307 and restored by 25 March. It is where every commander began in the original Elite.",
+          "basis": [
+            {
+              "entity": "galactic-cooperative",
+              "claim": "founded"
+            },
+            {
+              "entity": "lave-station",
+              "claim": "co-capital"
+            },
+            {
+              "entity": "galactic-cooperative",
+              "claim": "coriolis"
+            },
+            {
+              "entity": "galactic-cooperative",
+              "claim": "end"
+            },
+            {
+              "entity": "lave-station",
+              "claim": "bombing"
+            },
+            {
+              "entity": "lave-station",
+              "claim": "original-elite"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "galactic-cooperative",
+              "text": "Its government sat here."
+            },
+            {
+              "entity": "first-thargoid-war",
+              "text": "The war that broke the Cooperative."
+            }
+          ]
+        },
+        {
+          "id": "li-qing-jao",
+          "place": "li-qing-jao",
+          "title": "Sol: Li Qing Jao",
+          "teaser": "Named for the hyperdrive's inventor; the worst hit of the nine.",
+          "text": "Above Earth, Li Qing Jao carries the name of Li Qin Jao, whose team invented the hyperdrive. It suffered worst on 11 March: it burned for two weeks, and Vice President Brad Mitchell and several Cabinet members died at a meeting aboard. It was working again by 1 April.",
+          "basis": [
+            {
+              "entity": "li-qing-jao",
+              "claim": "namesake"
+            },
+            {
+              "entity": "li-qing-jao",
+              "claim": "bombing"
+            },
+            {
+              "entity": "li-qing-jao",
+              "claim": "vice-president"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "li-qin-jao",
+              "text": "The station's namesake."
+            }
+          ]
+        },
+        {
+          "id": "dawes-hub",
+          "place": "dawes-hub",
+          "title": "Achenar: Dawes Hub",
+          "teaser": "The starport above the Empire's capital world.",
+          "text": "Dawes Hub orbits Capitol, the moon that is the Empire's capital. It burned on 11 March and was fully restored by 1 April 3307. Six years earlier it had been the focus of a coronation appeal for Emperor Arissa Lavigny-Duval.",
+          "basis": [
+            {
+              "entity": "dawes-hub",
+              "claim": "capitol"
+            },
+            {
+              "entity": "dawes-hub",
+              "claim": "bombing"
+            },
+            {
+              "entity": "dawes-hub",
+              "claim": "coronation"
+            }
+          ],
+          "connections": []
+        },
+        {
+          "id": "donaldson",
+          "place": "donaldson",
+          "title": "Alioth: Donaldson",
+          "teaser": "The Alliance capital's starport, where the Council of Admirals meets.",
+          "text": "Donaldson, where the Alliance's Council of Admirals meets, was bombed with the others and back in operation by 1 April 3307. Even its orbit is disputed: the wiki says Turner's World, EDSM says Alioth 4.",
+          "basis": [
+            {
+              "entity": "alioth",
+              "claim": "nine-martyrs"
+            },
+            {
+              "entity": "donaldson",
+              "claim": "bombing"
+            },
+            {
+              "entity": "donaldson",
+              "claim": "parent-body"
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "discoveries": [],
+      "conclusion": {
+        "title": "Capitals with long memories",
+        "text": "Each capital has an older story too: how Achenar became the Empire's heart, how Alioth's rising founded the Alliance, how the Federation's capital moved from Earth. The Historian keeps them in its founding-powers collection.",
+        "basis": [
+          {
+            "entity": "achenar",
+            "claim": "settlement"
+          },
+          {
+            "entity": "alioth",
+            "claim": "founding"
+          },
+          {
+            "entity": "sol",
+            "claim": "capital"
+          }
+        ]
+      }
+    },
+    {
+      "id": "road-to-colonia",
+      "title": "The Road to Colonia",
+      "summary": "Follow Jaques Station's failed leap of 3302 to the colony it founded 22,000 light years from Sol, and the memorial to one of the pilots who kept it supplied.",
+      "teaser": "A starport's failed jump, a lost station found, and the colony that grew around it.",
+      "introduction": {
+        "title": "A jump that went wrong",
+        "text": "In May 3302 commanders fuelled Jaques Station for a leap of almost 22,000 light years towards Beagle Point. Its drives failed in hyperspace and it came out somewhere nobody had noticed before. This is a long journey: Colonia sits about 22,000 light years from Sol, linked to the Core Systems by a chain of inhabited stops.",
+        "basis": [
+          {
+            "entity": "jaques-station-voyage-3302",
+            "claim": "fuel"
+          },
+          {
+            "entity": "jaques-station-voyage-3302",
+            "claim": "distance"
+          },
+          {
+            "entity": "jaques-station",
+            "claim": "jump"
+          },
+          {
+            "entity": "colonia",
+            "claim": "distance"
+          }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "jaques-station",
+          "place": "jaques-station",
+          "title": "Jaques Station",
+          "teaser": "The only finished station with engines, and the bartender who owns it.",
+          "text": "Commander Cly found the missing station on 29 June 3302, and pilots spent that summer hauling in repair materials. It is still the only completed station fitted with engines. Jaques, its owner and announcer, has said it is unlikely to jump again. Why the drives failed is unknown; Thargoid sensors smuggled aboard are the usual guess, which the station's own history calls speculation.",
+          "basis": [
+            {
+              "entity": "jaques-station-rediscovery-3302",
+              "claim": "found"
+            },
+            {
+              "entity": "jaques-station",
+              "claim": "repairs"
+            },
+            {
+              "entity": "jaques-station",
+              "claim": "engines"
+            },
+            {
+              "entity": "jaques",
+              "claim": "owner"
+            },
+            {
+              "entity": "jaques",
+              "claim": "staying"
+            },
+            {
+              "entity": "jaques-station",
+              "claim": "cause"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "jaques",
+              "text": "Owner and announcer."
+            }
+          ]
+        },
+        {
+          "id": "colonia-hub",
+          "place": "colonia",
+          "title": "Colonia: a colony takes shape",
+          "teaser": "From a placeholder name to a council and a permanent settlement.",
+          "text": "Explorers kept the name Colonia, first offered as a placeholder. On 9 September 3302 Colonia Hub on Colonia 2 a opened as the first permanent settlement and as the home of the Colonia Council, which builds infrastructure instead of governing.",
+          "basis": [
+            {
+              "entity": "colonia",
+              "claim": "naming"
+            },
+            {
+              "entity": "colonia",
+              "claim": "settlement"
+            },
+            {
+              "entity": "colonia-council",
+              "claim": "founding"
+            },
+            {
+              "entity": "colonia-council",
+              "claim": "role"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "colonia-council",
+              "text": "Founded the day Colonia Hub opened."
+            }
+          ]
+        },
+        {
+          "id": "garak",
+          "place": "memorial-cmdr-garak",
+          "title": "A memorial near the station",
+          "teaser": "A listening post for one of the pilots who kept Colonia supplied.",
+          "text": "Near Jaques Station a listening post remembers CMDR Garak, a real player who was among the first to haul supplies for the repairs and into the young colony. The tribute you hear when you scan it is the colony remembering its own.",
+          "basis": [
+            {
+              "entity": "memorial-cmdr-garak",
+              "claim": "memorial"
+            },
+            {
+              "entity": "memorial-cmdr-garak",
+              "claim": "player"
+            }
+          ],
+          "connections": [
+            {
+              "entity": "cmdr-garak",
+              "text": "The commander it remembers."
+            }
+          ]
+        }
+      ],
+      "discoveries": [],
+      "conclusion": {
+        "title": "The farthest home",
+        "text": "A failed jump became humanity's most distant colony. On the way back, the INRA Files and the Pilots Federation's home tell older stories from the Core Systems.",
+        "basis": [
+          {
+            "entity": "colonia",
+            "claim": "arrival"
+          },
+          {
+            "entity": "jaques-station",
+            "claim": "jump"
+          }
+        ]
+      }
+    }
+  ],
+  "themes": [
+    {
+      "id": "inra-mysteries",
+      "label": "INRA and the First Thargoid War",
+      "summary": "The covert arm that ended humanity's first Thargoid war, and the bases it left behind.",
+      "select": {
+        "narratives": [
+          "inra-files"
+        ],
+        "related_to": [
+          "inra",
+          "first-thargoid-war"
+        ]
+      }
+    },
+    {
+      "id": "historic-starports",
+      "label": "Historic starports",
+      "summary": "Starports with a documented history or reputation.",
+      "select": {
+        "kinds": [
+          "station"
+        ],
+        "narratives": [
+          "pilots-home",
+          "nine-martyrs-starports"
+        ]
+      }
+    },
+    {
+      "id": "famous-pilots",
+      "label": "Famous explorers and commanders",
+      "summary": "Places tied to documented pilots, from the Jameson family to the commanders who found their story.",
+      "select": {
+        "related_to": [
+          "john-jameson",
+          "peter-jameson",
+          "lori-jameson",
+          "pilots-federation",
+          "cmdr-robbie-junior"
+        ]
+      }
+    },
+    {
+      "id": "generation-ships",
+      "label": "Generation ships",
+      "summary": "Lost colony arks from the age before hyperdrives.",
+      "select": {
+        "related_to": [
+          "lycaon-discovery"
+        ],
+        "places": [
+          "generation-ship-lycaon"
+        ],
+        "narratives": [
+          "the-missing"
+        ],
+        "landmark_types": [
+          "generation_ship"
+        ]
+      }
+    },
+    {
+      "id": "abandoned-settlements",
+      "label": "Abandoned settlements",
+      "summary": "Derelict bases with documented histories.",
+      "select": {
+        "kinds": [
+          "settlement"
+        ]
+      }
+    },
+    {
+      "id": "guardian-archaeology",
+      "label": "Guardian archaeology",
+      "summary": "Documented Guardian ruins, structures and beacons.",
+      "select": {
+        "activity_contexts": [
+          "guardian_site"
+        ]
+      }
+    },
+    {
+      "id": "thargoid-history",
+      "label": "Thargoid history",
+      "summary": "Places tied to humanity's wars and encounters with the Thargoids.",
+      "select": {
+        "related_to": [
+          "first-thargoid-war",
+          "thargoid-attack-shinrarta-3310",
+          "second-thargoid-war",
+          "pleiades-station-attacks-3303",
+          "battle-for-sol-3310"
+        ],
+        "narratives": [
+          "embers-of-war"
+        ]
+      }
+    },
+    {
+      "id": "political-history",
+      "label": "Factions and political history",
+      "summary": "Organizations and the places their history touches.",
+      "select": {
+        "related_to": [
+          "inra",
+          "league-of-reparation",
+          "pilots-federation"
+        ]
+      }
+    },
+    {
+      "id": "discoveries",
+      "label": "Scientific and exploration discoveries",
+      "summary": "Places where documented discoveries were made.",
+      "select": {
+        "related_to": [
+          "inra-bases-rediscovery",
+          "crash-site-discovery",
+          "lycaon-discovery"
+        ]
+      }
+    },
+    {
+      "id": "crash-sites",
+      "label": "Famous crash sites and wrecks",
+      "summary": "Wrecks with a documented story, and wreckage that still yields materials.",
+      "select": {
+        "landmark_types": [
+          "crash_site"
+        ]
+      }
+    },
+    {
+      "id": "material-farming",
+      "label": "Material farming",
+      "summary": "Documented places that advance your current Engineering shortages.",
+      "select": {
+        "acquisition": true
+      }
+    },
+    {
+      "id": "sightseeing-and-farming",
+      "label": "Sightseeing and farming",
+      "summary": "Historic places together with the documented places that advance your shortages.",
+      "select": {
+        "acquisition": true,
+        "kinds": [
+          "landmark",
+          "station",
+          "settlement"
+        ]
+      }
+    }
+  ],
+  "requirements": [
+    {
+      "id": "founders-world-permit",
+      "place": "shinrarta-dezhra",
+      "kind": "permit",
+      "text": "Entering Shinrarta Dezhra needs the Founders World permit, usually earned with an Elite rank in any ranked career.",
+      "basis": [
+        {
+          "entity": "shinrarta-dezhra",
+          "claim": "access"
+        }
+      ]
+    },
+    {
+      "id": "crash-site-srv",
+      "place": "jamesons-crash-site",
+      "kind": "equipment",
+      "text": "An SRV is enough here: the site is abandoned and undefended, and no weapons, shields or cargo space are needed.",
+      "basis": [
+        {
+          "entity": "jamesons-crash-site",
+          "claim": "safe"
+        }
+      ]
+    },
+    {
+      "id": "hutton-supercruise",
+      "place": "hutton-orbital",
+      "kind": "access",
+      "text": "Hutton Orbital lies about 0.22 light years from the arrival star: plan on a long supercruise.",
+      "basis": [
+        {
+          "entity": "hutton-orbital",
+          "claim": "distance"
+        }
+      ]
+    },
+    {
+      "id": "taylor-keep-position",
+      "place": "inra-taylor-keep",
+      "kind": "access",
+      "text": "Its exact landing position is not documented in game terms, so expect to search the body.",
+      "basis": [
+        {
+          "entity": "inra-taylor-keep",
+          "claim": "body-name"
+        }
+      ]
+    },
+    {
+      "id": "lycaon-scanner",
+      "place": "generation-ship-lycaon",
+      "kind": "equipment",
+      "text": "Find its signal with the Full Spectrum System Scanner; listening posts give clues where to look.",
+      "basis": [
+        {
+          "entity": "generation-ship-lycaon",
+          "claim": "finding"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "name": "Antal",
+      "system_address": 5856087184066,
+      "star_pos": [
+        -142.5,
+        -91.375,
+        -66.03125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Brestla",
+      "system_address": 673101653409,
+      "star_pos": [
+        159.46875,
+        -103.75,
+        -19.6875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector CC-K b25-8",
+      "system_address": 18276025116009,
+      "star_pos": [
+        970.375,
+        -99.5625,
+        -160.53125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector DS-J b25-2",
+      "system_address": 5081080145257,
+      "star_pos": [
+        895.875,
+        -132.125,
+        -150.71875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector GS-J b25-4",
+      "system_address": 9479931962729,
+      "star_pos": [
+        957.03125,
+        -142,
+        -160.53125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector HN-I b26-5",
+      "system_address": 11679760721265,
+      "star_pos": [
+        1022.3125,
+        -76.9375,
+        -139.03125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector HR-M b23-3",
+      "system_address": 7281713816921,
+      "star_pos": [
+        1024.28125,
+        -191.71875,
+        -193.8125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector KY-Q d5-26",
+      "system_address": 904048658771,
+      "star_pos": [
+        975.3125,
+        -103.1875,
+        -222.125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector KY-Q d5-47",
+      "system_address": 1625603164499,
+      "star_pos": [
+        1043.875,
+        -100.75,
+        -246.0625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector LT-Q d5-82",
+      "system_address": 2828177213779,
+      "star_pos": [
+        926.84375,
+        -120.65625,
+        -199.6875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector ME-P d6-92",
+      "system_address": 3171757836635,
+      "star_pos": [
+        891.65625,
+        -98.53125,
+        -157.1875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector OD-J b25-2",
+      "system_address": 5082422125929,
+      "star_pos": [
+        1008.375,
+        -201.5625,
+        -157.4375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector PZ-O d6-110",
+      "system_address": 3790249888091,
+      "star_pos": [
+        943.0625,
+        -130.75,
+        -142.03125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector RU-O d6-16",
+      "system_address": 560434465115,
+      "star_pos": [
+        951.1875,
+        -223.25,
+        -152.40625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector SU-O d6-54",
+      "system_address": 1866121300315,
+      "star_pos": [
+        981.125,
+        -202.65625,
+        -110.53125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector SZ-G b26-0",
+      "system_address": 683301741937,
+      "star_pos": [
+        925.625,
+        -234.96875,
+        -132.6875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector XG-K b25-3",
+      "system_address": 7280103597417,
+      "star_pos": [
+        896.21875,
+        -81.90625,
+        -159.0625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector ZL-L b24-2",
+      "system_address": 5081080145249,
+      "star_pos": [
+        896.78125,
+        -134.90625,
+        -182.09375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 173 Sector ZS-F c12-27",
+      "system_address": 7507032314546,
+      "star_pos": [
+        894.6875,
+        -113.5625,
+        -166.46875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Col 69 Sector BA-Z c0",
+      "system_address": 84321931666,
+      "star_pos": [
+        285.09375,
+        -457.6875,
+        -1590.21875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Colonia",
+      "system_address": 3238296097059,
+      "star_pos": [
+        -9530.5,
+        -910.28125,
+        19808.125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Fotla",
+      "system_address": 2832765752026,
+      "star_pos": [
+        64.78125,
+        -103.8125,
+        43.09375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "GQ Virginis",
+      "system_address": 13865094096305,
+      "star_pos": [
+        12.15625,
+        27.3125,
+        23.28125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "HD 63154",
+      "system_address": 22810707116,
+      "star_pos": [
+        979.46875,
+        -207.40625,
+        -131.59375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "HD 69978",
+      "system_address": 85128286650,
+      "star_pos": [
+        748.3125,
+        821.3125,
+        -1406.09375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "HIP 36601",
+      "system_address": 84456968626,
+      "star_pos": [
+        337.8125,
+        562.96875,
+        -1457.84375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "HIP 36781",
+      "system_address": 44988074331,
+      "star_pos": [
+        682.03125,
+        -154.03125,
+        -126.65625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "HIP 36823",
+      "system_address": 84926173882,
+      "star_pos": [
+        640.4375,
+        -143.90625,
+        -118.3125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "HIP 39768",
+      "system_address": 8219259477,
+      "star_pos": [
+        866.59375,
+        -119.125,
+        -109.03125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "HR 3230",
+      "system_address": 182359951707,
+      "star_pos": [
+        394.15625,
+        19.25,
+        -152.375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector CA-A d43",
+      "system_address": 1488080308579,
+      "star_pos": [
+        591.5625,
+        -112.15625,
+        -36.1875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector CQ-Y c16",
+      "system_address": 4482838500042,
+      "star_pos": [
+        559.875,
+        -87.15625,
+        -33.15625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector FG-X b1-9",
+      "system_address": 20469679662481,
+      "star_pos": [
+        563.75,
+        -100.03125,
+        -59.3125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector FL-X b1-7",
+      "system_address": 16072170087825,
+      "star_pos": [
+        611.34375,
+        -78.40625,
+        -51.6875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector GW-V b2-4",
+      "system_address": 9474831951257,
+      "star_pos": [
+        587.9375,
+        -51.03125,
+        -38.53125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector HG-X b1-7",
+      "system_address": 16072170022289,
+      "star_pos": [
+        604.5625,
+        -101.78125,
+        -58.65625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector HG-X b1-8",
+      "system_address": 18271193277841,
+      "star_pos": [
+        603.9375,
+        -104.15625,
+        -61.5625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector MX-T b3-6",
+      "system_address": 13872878396833,
+      "star_pos": [
+        582.9375,
+        -72.28125,
+        -19.40625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector YE-A d103",
+      "system_address": 3549631072611,
+      "star_pos": [
+        489.03125,
+        -98.09375,
+        -34.96875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "IC 2391 Sector ZE-A d101",
+      "system_address": 3480928373091,
+      "star_pos": [
+        526.5,
+        -86.375,
+        -37.9375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Ix",
+      "system_address": 2381282543963,
+      "star_pos": [
+        -65.21875,
+        7.75,
+        -111.03125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Kappa-1 Volantis",
+      "system_address": 211772499132,
+      "star_pos": [
+        396.90625,
+        -142.5625,
+        106.09375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "LHS 20",
+      "system_address": 33656303199641,
+      "star_pos": [
+        11.1875,
+        -37.375,
+        -31.84375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "LP 908-11",
+      "system_address": 7268561200561,
+      "star_pos": [
+        42.84375,
+        25.34375,
+        16.9375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Latuba",
+      "system_address": 11667949561257,
+      "star_pos": [
+        140.03125,
+        -71.4375,
+        4.96875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Mbooni",
+      "system_address": 1733119939282,
+      "star_pos": [
+        10.53125,
+        -49.96875,
+        7.46875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "NGC 2451A Sector DL-Y d61",
+      "system_address": 2106572376395,
+      "star_pos": [
+        734.6875,
+        -150.28125,
+        -272.28125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "NGC 2451A Sector IR-W d1-77",
+      "system_address": 2656344967507,
+      "star_pos": [
+        742.78125,
+        -156.90625,
+        -260.96875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "NGC 2451A Sector LX-U d2-25",
+      "system_address": 869621795163,
+      "star_pos": [
+        726.0625,
+        -163.5625,
+        -171.78125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "NGC 2451A Sector RT-R c4-19",
+      "system_address": 5307807765170,
+      "star_pos": [
+        753.03125,
+        -84.03125,
+        -153.75
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "NGC 2451A Sector TO-R c4-10",
+      "system_address": 2833906569906,
+      "star_pos": [
+        758.875,
+        -122,
+        -165.03125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "NGC 2451A Sector TO-R c4-3",
+      "system_address": 909761221298,
+      "star_pos": [
+        739.46875,
+        -127.875,
+        -156.1875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "NGC 2451A Sector VJ-R c4-22",
+      "system_address": 6132441420466,
+      "star_pos": [
+        746.34375,
+        -153.09375,
+        -164.25
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Oochost BH-J d10-0",
+      "system_address": 10393454811,
+      "star_pos": [
+        -396.53125,
+        -138.8125,
+        -1420.90625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Oochoxt CD-E c1-0",
+      "system_address": 86469742858,
+      "star_pos": [
+        1540.15625,
+        -63.6875,
+        -2304.34375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Outotz IT-Z c13-2",
+      "system_address": 633675485562,
+      "star_pos": [
+        29.96875,
+        45.09375,
+        -1717.25
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Outotz LS-K d8-3",
+      "system_address": 113674078411,
+      "star_pos": [
+        526.3125,
+        238.46875,
+        -1613.75
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Outotz LZ-O c19-4",
+      "system_address": 1183632593322,
+      "star_pos": [
+        138.125,
+        -8.375,
+        -1495.15625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Pencil Sector VY-A b8",
+      "system_address": 18273877960049,
+      "star_pos": [
+        804.03125,
+        5.5,
+        -142.65625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Pencil Sector YJ-A c12",
+      "system_address": 3383729590970,
+      "star_pos": [
+        801.53125,
+        -12.15625,
+        -132.09375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Pencil Sector ZJ-A c4",
+      "system_address": 1184773444282,
+      "star_pos": [
+        854.90625,
+        7.8125,
+        -112.125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Segais",
+      "system_address": 20462163666353,
+      "star_pos": [
+        12.625,
+        -28.46875,
+        18.53125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Solati",
+      "system_address": 1458376315610,
+      "star_pos": [
+        66.53125,
+        29.1875,
+        34.6875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe AH-J d10-103",
+      "system_address": 3549698165083,
+      "star_pos": [
+        777.53125,
+        -158.28125,
+        -117.4375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe AH-J d10-20",
+      "system_address": 697839880539,
+      "star_pos": [
+        759.21875,
+        -148.3125,
+        -145.75
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe AH-J d10-46",
+      "system_address": 1591193078107,
+      "star_pos": [
+        741.3125,
+        -164.8125,
+        -138.78125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe AH-J d10-83",
+      "system_address": 2862503397723,
+      "star_pos": [
+        764.96875,
+        -169.6875,
+        -129.96875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe AS-H d11-9",
+      "system_address": 319849220451,
+      "star_pos": [
+        610.3125,
+        -65.125,
+        -101.84375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe BE-R c21-35",
+      "system_address": 9705921385146,
+      "star_pos": [
+        782.6875,
+        -96.15625,
+        -135.03125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe BH-J d10-68",
+      "system_address": 2347124099419,
+      "star_pos": [
+        831.375,
+        -149.125,
+        -175.96875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe BO-G b44-6",
+      "system_address": 13874220508537,
+      "star_pos": [
+        687.3125,
+        -96.75,
+        -112.125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe BZ-Q c21-11",
+      "system_address": 3108717367994,
+      "star_pos": [
+        727.21875,
+        -119.90625,
+        -128.15625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe CE-R c21-6",
+      "system_address": 1734529192634,
+      "star_pos": [
+        828.1875,
+        -78,
+        -105.1875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe CS-H d11-121",
+      "system_address": 4168173472099,
+      "star_pos": [
+        746.09375,
+        -100.78125,
+        -86.625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe DJ-G b44-3",
+      "system_address": 7277150676345,
+      "star_pos": [
+        679.59375,
+        -105.6875,
+        -122.40625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe DK-D b46-12",
+      "system_address": 27067823302025,
+      "star_pos": [
+        636.3125,
+        -53.65625,
+        -68.8125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe DK-D b46-4",
+      "system_address": 9475637257609,
+      "star_pos": [
+        652.9375,
+        -63.90625,
+        -80.78125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe DK-P c22-35",
+      "system_address": 9705787167426,
+      "star_pos": [
+        711.46875,
+        -102.6875,
+        -89.53125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe DZ-Q c21-14",
+      "system_address": 3933485306554,
+      "star_pos": [
+        793.96875,
+        -122.46875,
+        -135.03125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe ED-I b43-8",
+      "system_address": 18273609131377,
+      "star_pos": [
+        791.1875,
+        -120.625,
+        -129.40625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe EN-H d11-106",
+      "system_address": 3652777380195,
+      "star_pos": [
+        785.15625,
+        -167.0625,
+        -75.46875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe EN-H d11-28",
+      "system_address": 972717787491,
+      "star_pos": [
+        771.78125,
+        -145,
+        -26.65625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe EN-H d11-29",
+      "system_address": 1007077525859,
+      "star_pos": [
+        745.6875,
+        -115,
+        -91.34375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe EN-H d11-96",
+      "system_address": 3309179996515,
+      "star_pos": [
+        757.125,
+        -179.3125,
+        -96.0625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe EU-Q c21-10",
+      "system_address": 2833906537146,
+      "star_pos": [
+        758.65625,
+        -176.90625,
+        -133.21875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe EU-Q c21-15",
+      "system_address": 4208296071866,
+      "star_pos": [
+        754.15625,
+        -171.84375,
+        -138.09375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe FF-P c22-35",
+      "system_address": 9705787134658,
+      "star_pos": [
+        700.03125,
+        -129.5,
+        -96.375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe FK-P c22-2",
+      "system_address": 634950456002,
+      "star_pos": [
+        809.75,
+        -104.96875,
+        -104.5625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe FS-X b48-1",
+      "system_address": 2874809263521,
+      "star_pos": [
+        364.09375,
+        -89.84375,
+        -13.71875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe FU-E b45-5",
+      "system_address": 11675197252993,
+      "star_pos": [
+        682.28125,
+        -102.59375,
+        -104.5625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe GJ-G b44-9",
+      "system_address": 20472095516025,
+      "star_pos": [
+        747.84375,
+        -109.28125,
+        -121.65625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe GQ-N c23-21",
+      "system_address": 5857429361354,
+      "star_pos": [
+        655.53125,
+        -66.34375,
+        -62.1875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe GT-H b43-1",
+      "system_address": 2879909340529,
+      "star_pos": [
+        749,
+        -163.09375,
+        -128.0625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe HA-P c22-22",
+      "system_address": 6132374311618,
+      "star_pos": [
+        701.5,
+        -168.125,
+        -104.40625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe HE-G b44-5",
+      "system_address": 11675733992825,
+      "star_pos": [
+        726.6875,
+        -128.9375,
+        -112.71875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe HL-N c23-4",
+      "system_address": 1184437801674,
+      "star_pos": [
+        649.9375,
+        -114.78125,
+        -57.0625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe HP-E b45-4",
+      "system_address": 9476173931905,
+      "star_pos": [
+        678.59375,
+        -118.75,
+        -94.78125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe HP-E b45-8",
+      "system_address": 18272266954113,
+      "star_pos": [
+        688.59375,
+        -120.40625,
+        -87.21875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe IE-G b44-2",
+      "system_address": 5078932661625,
+      "star_pos": [
+        737.25,
+        -130.28125,
+        -111.34375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe IJ-G b44-5",
+      "system_address": 11676539364729,
+      "star_pos": [
+        790.0625,
+        -124.8125,
+        -120.40625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe IL-N c23-15",
+      "system_address": 4208161886922,
+      "star_pos": [
+        658.28125,
+        -117.96875,
+        -46.3125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe IL-N c23-19",
+      "system_address": 5307673514698,
+      "star_pos": [
+        667.40625,
+        -120.5625,
+        -58.8125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe IT-F d12-5",
+      "system_address": 182443805035,
+      "star_pos": [
+        739.46875,
+        -140.53125,
+        -13.375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe JP-E b45-4",
+      "system_address": 9476710802817,
+      "star_pos": [
+        724.34375,
+        -111.09375,
+        -103.5625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe JZ-F b44-8",
+      "system_address": 18272803693945,
+      "star_pos": [
+        720.625,
+        -163.59375,
+        -112.90625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe KU-F b44-4",
+      "system_address": 9476442170745,
+      "star_pos": [
+        714.34375,
+        -173.84375,
+        -113.59375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe KZ-F b44-5",
+      "system_address": 11676002362745,
+      "star_pos": [
+        747.90625,
+        -161.21875,
+        -109.46875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe LQ-T b50-1",
+      "system_address": 2879640905137,
+      "star_pos": [
+        728.5,
+        -155.65625,
+        19.3125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe NB-B b47-10",
+      "system_address": 22669776594321,
+      "star_pos": [
+        643.4375,
+        -113.84375,
+        -61.5625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe NL-N c23-4",
+      "system_address": 1184840454858,
+      "star_pos": [
+        860.125,
+        -124.59375,
+        -61.0625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe NU-F b44-5",
+      "system_address": 11676270732665,
+      "star_pos": [
+        768.21875,
+        -166.0625,
+        -106.40625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe OF-E b45-4",
+      "system_address": 9476979107201,
+      "star_pos": [
+        751.0625,
+        -157.71875,
+        -86.09375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe PF-E b45-5",
+      "system_address": 11676270798209,
+      "star_pos": [
+        758.5,
+        -164.65625,
+        -101.28125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe PX-J c25-8",
+      "system_address": 2283949429466,
+      "star_pos": [
+        649.6875,
+        -124.25,
+        32.4375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe QA-E b45-4",
+      "system_address": 9476979041665,
+      "star_pos": [
+        738.0625,
+        -174.375,
+        -103.25
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe RA-E b45-5",
+      "system_address": 11676270732673,
+      "star_pos": [
+        755.53125,
+        -169.125,
+        -88.28125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe RL-C b46-6",
+      "system_address": 13874757182857,
+      "star_pos": [
+        727.90625,
+        -157.1875,
+        -67.1875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe SP-F b44-0",
+      "system_address": 681959695737,
+      "star_pos": [
+        831.625,
+        -187.5625,
+        -121.84375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe TP-F b44-0",
+      "system_address": 682228131193,
+      "star_pos": [
+        838.75,
+        -197.84375,
+        -111.84375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe WL-J d10-113",
+      "system_address": 3893262010715,
+      "star_pos": [
+        645.0625,
+        -95.46875,
+        -142.4375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe XO-P c22-17",
+      "system_address": 4757716439746,
+      "star_pos": [
+        546.90625,
+        -56.46875,
+        -97.8125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe XR-H d11-102",
+      "system_address": 3515254557027,
+      "star_pos": [
+        357.34375,
+        -49.34375,
+        -74.75
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe ZG-J d10-49",
+      "system_address": 1694255515995,
+      "star_pos": [
+        723.8125,
+        -156.71875,
+        -152.3125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe ZG-J d10-79",
+      "system_address": 2725047667035,
+      "star_pos": [
+        728,
+        -121.34375,
+        -133.25
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe ZL-J d10-109",
+      "system_address": 3755873388891,
+      "star_pos": [
+        852.65625,
+        -51.125,
+        -124.84375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Synuefe ZL-J d10-119",
+      "system_address": 4099470772571,
+      "star_pos": [
+        834.21875,
+        -51.21875,
+        -154.65625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Vela Dark Region DL-Y d112",
+      "system_address": 3858969364835,
+      "star_pos": [
+        924.46875,
+        -171.8125,
+        -98.21875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Vela Dark Region DL-Y d83",
+      "system_address": 2862536952163,
+      "star_pos": [
+        930.4375,
+        -165.78125,
+        -65.1875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Vela Dark Region DL-Y d91",
+      "system_address": 3137414859107,
+      "star_pos": [
+        922.78125,
+        -126,
+        -101.78125
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Vela Dark Region EG-X b1-1",
+      "system_address": 2882862196089,
+      "star_pos": [
+        957.6875,
+        -143.34375,
+        -123.40625
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Vela Dark Region EL-Y d55",
+      "system_address": 1900481055075,
+      "star_pos": [
+        975.78125,
+        -156.8125,
+        -75.34375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Vela Dark Region JS-T b3-0",
+      "system_address": 683033634185,
+      "star_pos": [
+        899.9375,
+        -142.1875,
+        -82.25
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Vela Dark Region ZE-A d66",
+      "system_address": 2278421399899,
+      "star_pos": [
+        966.90625,
+        -158,
+        -131.6875
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    },
+    {
+      "name": "Wregoe IM-Z b41-2",
+      "system_address": 5080007058793,
+      "star_pos": [
+        820.71875,
+        55.78125,
+        -164.09375
+      ],
+      "sources": [
+        "edsm-system-positions"
+      ]
+    }
+  ],
+  "unsupported": [
+    {
+      "subject": "Flyable routes, jump counts and travel times",
+      "reason": "OmniCOVAS calculates no route and no jump count: only straight-line distances between documented positions. Neutron and white dwarf boosts and FSD injections make any jump figure unsafe, and permits, fuel and ship capability are not checked."
+    },
+    {
+      "subject": "Permits held by the commander",
+      "reason": "Permits are not observable in local game data; documented requirements are shown, never assumed met."
+    }
+  ]
+}

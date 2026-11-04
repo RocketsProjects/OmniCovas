@@ -1,17 +1,19 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 Build OmniCOVAS release artifacts and collect them into dist/release/.
 
 Steps (in order):
   1. Sync ui/assets/legal/LICENSE.md from root LICENSE.md (drift guard).
   2. Build the Python core sidecar via build_tauri_sidecar.ps1.
-  3. Run `npm run tauri build` (produces OmniCovas.exe, NSIS setup, MSI).
-  4. Create dist/release/.
+  3. Generate target-aware SBOM, inventory, and third-party notices.
+  4. Run `npm run tauri build` (produces OmniCovas.exe, NSIS setup, MSI).
+  5. Create dist/release/.
   5. Copy/rename the main app binary  -> dist/release/OmniCovas.exe
   6. Copy the sidecar companion       -> dist/release/omnicovas-sidecar.exe
   7. Copy/rename the NSIS installer   -> dist/release/setup.exe
   8. Copy the MSI as a secondary      -> dist/release/OmniCovas_<ver>_x64_en-US.msi
-  9. Copy LICENSE.md, NOTICE.md, THIRD_PARTY_NOTICES.md into dist/release/.
+  10. Copy legal files and durable machine-readable SBOM evidence.
+  11. Generate SHA256SUMS.txt over every release file.
 
 dist/release/ is gitignored and forbidden from export. Never commit generated
 .exe/.msi artifacts. Distribute only via GitHub Releases (Official Distribution
@@ -35,6 +37,26 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
+# PB10-R9: resolve a PowerShell host instead of assuming `pwsh` is installed.
+# The script previously hardcoded `pwsh`, so on a machine with only Windows
+# PowerShell 5.1 the release build failed at step 1 with CommandNotFoundException
+# — the same class of global-tool assumption as the hardcoded `uv` in the native
+# dev launcher. Prefer PowerShell 7 when present; otherwise use the host we are
+# already running under.
+function Resolve-PowerShellHost {
+    $pwshCommand = Get-Command pwsh -ErrorAction SilentlyContinue
+    if ($pwshCommand) {
+        return $pwshCommand.Source
+    }
+
+    $windowsPowerShell = Get-Command powershell -ErrorAction SilentlyContinue
+    if ($windowsPowerShell) {
+        return $windowsPowerShell.Source
+    }
+
+    throw "No PowerShell host found. Install PowerShell 7 (pwsh) or ensure powershell.exe is on PATH."
+}
 
 function Get-RepoRoot {
     $root = (& git rev-parse --show-toplevel 2>$null)
@@ -88,6 +110,10 @@ Write-Host "Mode:         $mode"
 Write-Host "SkipSidecar:  $SkipSidecar"
 Write-Host "SkipBuild:    $SkipBuild"
 
+$psHost = Resolve-PowerShellHost
+Write-Host "PS host:      $psHost"
+$pythonExe = Join-Path $repoRoot ".venv\Scripts\python.exe"
+
 # ── Step 1: Sync bundled license ──────────────────────────────────────────────
 
 Invoke-Step "Sync ui/assets/legal/LICENSE.md from root" {
@@ -96,9 +122,9 @@ Invoke-Step "Sync ui/assets/legal/LICENSE.md from root" {
         throw "sync_license.ps1 not found: $syncScript"
     }
     if ($DryRun) {
-        & pwsh -NonInteractive -File $syncScript -DryRun
+        & $psHost -NonInteractive -File $syncScript -DryRun
     } else {
-        & pwsh -NonInteractive -File $syncScript
+        & $psHost -NonInteractive -File $syncScript
     }
     if ($LASTEXITCODE -ne 0) {
         throw "sync_license.ps1 failed (exit $LASTEXITCODE)"
@@ -114,9 +140,9 @@ if (-not $SkipSidecar) {
             throw "build_tauri_sidecar.ps1 not found: $sidecarScript"
         }
         if ($DryRun) {
-            & pwsh -NonInteractive -File $sidecarScript -TargetTriple $TargetTriple -DryRun
+            & $psHost -NonInteractive -File $sidecarScript -TargetTriple $TargetTriple -DryRun
         } else {
-            & pwsh -NonInteractive -File $sidecarScript -TargetTriple $TargetTriple
+            & $psHost -NonInteractive -File $sidecarScript -TargetTriple $TargetTriple
         }
         if ($LASTEXITCODE -ne 0) {
             throw "build_tauri_sidecar.ps1 failed (exit $LASTEXITCODE)"
@@ -127,7 +153,30 @@ if (-not $SkipSidecar) {
     Write-Host "==> Sidecar build SKIPPED (-SkipSidecar)"
 }
 
-# ── Step 3: Tauri build ───────────────────────────────────────────────────────
+# ── Step 3: Generate SBOM, inventory, and notices ─────────────────────────────
+
+Invoke-Step "Generate target-aware SBOM and legal inventory" {
+    $sbomScript = Join-Path $repoRoot "scripts\release\generate_sbom_inventory.py"
+    $noticesScript = Join-Path $repoRoot "scripts\release\generate_third_party_notices.py"
+    if ($DryRun) {
+        Write-Host "  [DRY-RUN] Would run: $pythonExe $sbomScript"
+        Write-Host "  [DRY-RUN] Would run: $pythonExe $noticesScript"
+    } else {
+        if (-not (Test-Path -LiteralPath $pythonExe)) {
+            throw "Repository Python environment not found: $pythonExe"
+        }
+        & $pythonExe $sbomScript
+        if ($LASTEXITCODE -ne 0) {
+            throw "SBOM generation failed (exit $LASTEXITCODE)"
+        }
+        & $pythonExe $noticesScript
+        if ($LASTEXITCODE -ne 0) {
+            throw "Third-party notice generation failed (exit $LASTEXITCODE)"
+        }
+    }
+}
+
+# ── Step 4: Tauri build ───────────────────────────────────────────────────────
 
 if (-not $SkipBuild) {
     Invoke-Step "Run npm run tauri build" {
@@ -150,7 +199,7 @@ if (-not $SkipBuild) {
     Write-Host "==> Tauri build SKIPPED (-SkipBuild)"
 }
 
-# ── Step 4: Create clean dist/release/ ───────────────────────────────────────
+# ── Step 5: Create clean dist/release/ ───────────────────────────────────────
 
 Invoke-Step "Create clean dist/release/" {
     if ($DryRun) {
@@ -226,7 +275,7 @@ Invoke-Step "Copy MSI -> dist/release/ (secondary artifact)" {
     Copy-Artifact -Source $msiSrc -Dest $msiDest -Label "MSI"
 }
 
-# ── Step 9: Copy legal files ──────────────────────────────────────────────────
+# ── Step 10: Copy legal files and durable SBOM evidence ───────────────────────
 
 Invoke-Step "Copy legal files into dist/release/" {
     $legalFiles = @("LICENSE.md", "NOTICE.md", "THIRD_PARTY_NOTICES.md")
@@ -241,6 +290,52 @@ Invoke-Step "Copy legal files into dist/release/" {
     }
 }
 
+Invoke-Step "Copy durable SBOM evidence into dist/release/sbom/" {
+    $sbomSource = Join-Path $repoRoot "artifacts\sbom\phase10-reconciliation"
+    $sbomDest = Join-Path $distDir "sbom"
+    $sbomFiles = @(
+        "python-sbom-cyclonedx.json",
+        "rust-sbom-cyclonedx.json",
+        "npm-sbom-cyclonedx.json",
+        "dependency-license-inventory.csv",
+        "inventory-summary.json",
+        "sbom-manifest.json"
+    )
+    if ($DryRun) {
+        Write-Host "  [DRY-RUN] Would create: $sbomDest"
+    } else {
+        New-Item -ItemType Directory -Force -Path $sbomDest | Out-Null
+    }
+    foreach ($file in $sbomFiles) {
+        Copy-Artifact `
+            -Source (Join-Path $sbomSource $file) `
+            -Dest (Join-Path $sbomDest $file) `
+            -Label $file
+    }
+}
+
+# ── Step 11: Hash the complete release envelope ───────────────────────────────
+
+Invoke-Step "Generate SHA256SUMS.txt over the complete release envelope" {
+    $hashFile = Join-Path $distDir "SHA256SUMS.txt"
+    if ($DryRun) {
+        Write-Host "  [DRY-RUN] Would hash all release files into: $hashFile"
+    } else {
+        $prefixLength = $distDir.TrimEnd("\").Length + 1
+        $hashLines = Get-ChildItem -LiteralPath $distDir -File -Recurse |
+            Where-Object { $_.FullName -ne $hashFile } |
+            Sort-Object FullName |
+            ForEach-Object {
+                $relativePath = $_.FullName.Substring($prefixLength).Replace("\", "/")
+                $digest = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+                "$digest  $relativePath"
+            }
+        $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+        [System.IO.File]::WriteAllLines($hashFile, [string[]]$hashLines, $utf8NoBom)
+        Write-Host "  Hashed $($hashLines.Count) release files."
+    }
+}
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 
 Write-Host ""
@@ -249,9 +344,10 @@ Write-Host "BUILD_RELEASE COMPLETE"
 if (-not $DryRun) {
     Write-Host ""
     Write-Host "Artifacts in dist/release/:"
-    Get-ChildItem -LiteralPath $distDir -File | ForEach-Object {
+    Get-ChildItem -LiteralPath $distDir -File -Recurse | ForEach-Object {
         $sizeKb = [math]::Round($_.Length / 1KB, 1)
-        Write-Host ("  {0,-45} {1,8} KB" -f $_.Name, $sizeKb)
+        $displayName = $_.FullName.Substring($distDir.Length + 1)
+        Write-Host ("  {0,-55} {1,8} KB" -f $displayName, $sizeKb)
     }
     Write-Host ""
     Write-Host "SmartScreen notice: OmniCovas.exe and setup.exe are unsigned."

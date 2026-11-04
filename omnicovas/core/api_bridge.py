@@ -37,19 +37,31 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from omnicovas.api import activity_log as activity_log_router
 from omnicovas.api import combat as combat_router
 from omnicovas.api import combat_session as combat_session_router
+from omnicovas.api import commander_memory as commander_memory_router
 from omnicovas.api import engineering as engineering_router
+from omnicovas.api import expeditions as expeditions_router
+from omnicovas.api import galactic_historian as galactic_historian_router
+from omnicovas.api import galactic_knowledge as galactic_knowledge_router
 from omnicovas.api import intel as intel_router
+from omnicovas.api import intel_campaign as intel_campaign_router
+from omnicovas.api import intel_history as intel_history_router
+from omnicovas.api import intel_reference as intel_reference_router
+from omnicovas.api import knowledge_graph as knowledge_graph_router
 from omnicovas.api import local_context as local_context_router
 from omnicovas.api import local_economic as local_economic_router
 from omnicovas.api import navigation as navigation_router
 from omnicovas.api import navigation_bookmarks as navigation_bookmarks_router
+from omnicovas.api import navigation_history as navigation_history_router
 from omnicovas.api import operations as operations_router
 from omnicovas.api import pillar1 as pillar1_router
 from omnicovas.api import pvp as pvp_router
+from omnicovas.api import readiness as readiness_router
 from omnicovas.api import source as source_api
 from omnicovas.api import squadrons as squadrons_router
+from omnicovas.api import system_notes as system_notes_router
 from omnicovas.api import week13 as week13_router
 from omnicovas.config.vault import ConfigVault
 from omnicovas.core.activity_log import ActivityEntry, ActivityLog
@@ -59,10 +71,31 @@ from omnicovas.core.event_types import (
     COMBAT_STATE_CHANGED,
 )
 from omnicovas.core.state_manager import StateManager
+from omnicovas.features import commander_chronicle
+from omnicovas.features.commander_chronicle import ChronicleService
+from omnicovas.features.commander_memory import CommanderMemoryService
+from omnicovas.features.expedition_service import ExpeditionService
+from omnicovas.features.galactic_intelligence import (
+    BRIEFING_EVENT,
+    CLEARED_EVENT,
+    GalacticIntelligence,
+)
+from omnicovas.features.operations_objectives import OperationsObjectiveService
+from omnicovas.features.system_notes import SystemNoteService
 
 logger = logging.getLogger(__name__)
 
 ACTIVITY_LOG_CAPACITY = 1000
+
+# Bridge identity. The native launcher may find an already-listening loopback
+# port recorded in a previous run's log. Before adopting that listener as the
+# Commander's backend it verifies these two fields on /health, so a foreign
+# process that merely happens to hold a recycled port is rejected rather than
+# silently trusted. Bump BRIDGE_PROTOCOL_VERSION when the bridge contract
+# changes incompatibly, so an older running sidecar is not adopted by a newer
+# shell (or vice versa).
+BRIDGE_APP_IDENTITY = "omnicovas"
+BRIDGE_PROTOCOL_VERSION = 1
 
 # UI category classification — mirrors activity-log.js getEventCategory()
 # plus CRITICAL_EVENT_TYPES from event_types.py.
@@ -169,6 +202,7 @@ class ApiBridge:
         config_vault: ConfigVault | None = None,
         activity_log: ActivityLog | None = None,
         session_factory: async_sessionmaker[AsyncSession] | None = None,
+        commander_memory_service: CommanderMemoryService | None = None,
     ) -> None:
         self._state = state_manager
         self._host = host
@@ -179,7 +213,107 @@ class ApiBridge:
             activity_log if activity_log is not None else ActivityLog()
         )
         self._session_factory = session_factory
-        self._gate = ConfirmationGate()
+        self._commander_memory = commander_memory_service
+        # PB10-R6: stated explicitly. The only production consumers of this
+        # gate are advisory (Phase 9 campaign AI draft; route-activation
+        # review proposal) and perform no action. Commander-impacting
+        # confirmation is owned by the Week 13 queue.
+        self._gate = ConfirmationGate.for_advisory_drafting()
+        # GKI-04: one Galactic Intelligence service per bridge.  Its briefings
+        # travel the same push path as every other event; the dispatcher feeds it
+        # through galactic_intelligence.register().
+        self.galactic_intelligence = GalacticIntelligence(
+            state_manager,
+            session_factory,
+            self._vault,
+            profile_provider=lambda: (
+                commander_memory_service.active_profile_key
+                if commander_memory_service is not None
+                else None
+            ),
+            notify=self.push_event,
+        )
+        from omnicovas.features.notification_shadow import NotificationShadow
+
+        self.notification_shadow = NotificationShadow(
+            state_manager,
+            session_factory,
+            self._vault,
+            self.galactic_intelligence,
+            lambda: (
+                commander_memory_service.active_profile_key
+                if commander_memory_service
+                else None
+            ),
+        )
+        self._confirmation_activity_log.observe(
+            self.notification_shadow.observe_activity
+        )
+        if commander_memory_service is not None:
+            # Forgetting a commander in Commander Memory also forgets their
+            # Galactic Intelligence preferences, briefings and encounters.
+            commander_memory_service.add_forget_hook(
+                purge=self.galactic_intelligence.purge_profile,
+                after=self.galactic_intelligence.after_forget,
+            )
+        # GKI-06: Galactic Expeditions reuse Galactic Intelligence's preferences and
+        # commander checks; the dispatcher feeds them via expedition_service.register().
+        self.expeditions = ExpeditionService(
+            state_manager,
+            session_factory,
+            self.galactic_intelligence,
+            profile_provider=lambda: (
+                commander_memory_service.active_profile_key
+                if commander_memory_service is not None
+                else None
+            ),
+            notify=self.push_event,
+        )
+        if commander_memory_service is not None:
+            # Forgetting a commander also deletes their expeditions and history.
+            commander_memory_service.add_forget_hook(
+                purge=self.expeditions.purge_profile,
+                after=self.expeditions.after_forget,
+            )
+        # GKI-07: the Commander Chronicle reads Commander Memory and the
+        # expeditions, and supplies evidence to Galactic Intelligence's briefings;
+        # the dispatcher feeds it via commander_chronicle.register().
+        self.chronicle = ChronicleService(
+            state_manager,
+            session_factory,
+            self.galactic_intelligence,
+            expeditions=self.expeditions,
+            profile_provider=lambda: (
+                commander_memory_service.active_profile_key
+                if commander_memory_service is not None
+                else None
+            ),
+            notify=self.push_event,
+        )
+        self.galactic_intelligence.set_history(self.chronicle.briefing_history)
+        if commander_memory_service is not None:
+            # Forgetting a commander also deletes their Chronicle.
+            commander_memory_service.add_forget_hook(
+                purge=self.chronicle.purge_profile,
+                after=self.chronicle.after_forget,
+            )
+        if commander_memory_service is not None:
+            commander_memory_service.add_forget_hook(
+                purge=self.notification_shadow.purge_profile,
+                after=self.notification_shadow.after_forget,
+            )
+        self.notification_shadow.opportunity_providers = (
+            self.galactic_intelligence.recent_opportunities,
+            self.expeditions.opportunities,
+        )
+        # Director-owned presentation snapshots reach the overlay and desktop
+        # over the existing /ws/events stream; a dead socket cannot fail arbitration.
+        self.notification_shadow.publish = self._publish_presentation
+        self._profile_provider = lambda: (
+            commander_memory_service.active_profile_key
+            if commander_memory_service is not None
+            else None
+        )
         self._app = self._build_app()
         self._broadcaster = WebSocketBroadcaster()
         self._activity_log: deque[dict[str, Any]] = deque(maxlen=ACTIVITY_LOG_CAPACITY)
@@ -187,6 +321,9 @@ class ApiBridge:
         self._started_at: float | None = None
         self._events_counter = 0
         self._ready_event = asyncio.Event()
+
+    async def _publish_presentation(self, message: dict[str, Any]) -> None:
+        await self._broadcaster.broadcast(message)
 
     @property
     def port(self) -> int:
@@ -205,6 +342,16 @@ class ApiBridge:
             description="Internal bridge between Python core and Tauri UI",
             version="0.1.0",
         )
+        from omnicovas.api import notification_shadow as notification_shadow_router
+
+        notification_shadow_router.set_service(self.notification_shadow)
+        app.include_router(notification_shadow_router.router)
+        from omnicovas.api import notifications as notifications_router
+
+        notifications_router.set_service(
+            self.notification_shadow, self._profile_provider
+        )
+        app.include_router(notifications_router.router)
 
         app.add_middleware(
             TrustedHostMiddleware,
@@ -237,13 +384,51 @@ class ApiBridge:
         intel_router.set_state_manager(self._state)
         app.include_router(intel_router.router)
 
+        # Phase 13 Intel terminal core: journal search + visit catalogs over
+        # the local flight recorder (read-only bounded queries).
+        intel_history_router.set_session_factory(self._session_factory)
+        app.include_router(intel_history_router.router)
+
+        # Phase 13: workflow-scoped curated reference library (read-only).
+        app.include_router(intel_reference_router.router)
+
+        # Phase 13 (PB13-03/LNA-039): campaign facts and their local evidence.
+        # Read-only — Operations keeps campaign execution.
+        intel_campaign_router.set_session_factory(self._session_factory)
+        app.include_router(intel_campaign_router.router)
+
         # Phase 6: Local economic fact snapshot seam
         local_economic_router.set_state_manager(self._state)
         app.include_router(local_economic_router.router)
 
         # Phase 6 extension: field-rich local context backplane snapshot
         local_context_router.set_state_manager(self._state)
+        local_context_router.set_commander_memory_service(self._commander_memory)
         app.include_router(local_context_router.router)
+
+        # Phase 11: private local observed-history service and privacy lifecycle.
+        commander_memory_router.set_commander_memory_service(self._commander_memory)
+        app.include_router(commander_memory_router.router)
+
+        # LNA-004: Commander-authored system notes. Separate from Memory on
+        # purpose — a Memory rebuild must never destroy authored text.
+        if self._session_factory is not None:
+            system_note_service = SystemNoteService(
+                self._session_factory, self._confirmation_activity_log
+            )
+            system_notes_router.set_system_note_service(system_note_service)
+            intel_history_router.set_system_note_service(system_note_service)
+            knowledge_graph_router.set_system_note_service(system_note_service)
+        app.include_router(system_notes_router.router)
+
+        # LNA-028 / LNA-022: one readiness computation for Operations,
+        # Dashboard, and Engineering, so no surface grows a rival derivation.
+        readiness_router.set_state_manager(self._state)
+        app.include_router(readiness_router.router)
+
+        # LNA-006: read-only traversal over what the recorder already holds.
+        knowledge_graph_router.set_session_factory(self._session_factory)
+        app.include_router(knowledge_graph_router.router)
 
         # Phase 5 PB05-02: Source routing API seam
         app.include_router(source_api.router)
@@ -258,12 +443,27 @@ class ApiBridge:
         navigation_bookmarks_router.set_activity_log(self._confirmation_activity_log)
         app.include_router(navigation_bookmarks_router.router)
 
+        # Phase 15 slice: commander-observed jump timeline (read-only).
+        navigation_history_router.set_session_factory(self._session_factory)
+        app.include_router(navigation_history_router.router)
+
+        # GKI-06: Galactic Expeditions in Navigation's Plan mode.
+        expeditions_router.set_service(self.expeditions)
+        app.include_router(expeditions_router.router)
+
         # Phase 5 PB05-08: Operations exploration/exobiology active objectives
         # PB09-03: Phase 9 campaign persistence injections
+        # PB14-R1: Commander objective lifecycle persistence
         operations_router.set_state_manager(self._state)
         operations_router.set_session_factory(self._session_factory)
         operations_router.set_activity_log(self._confirmation_activity_log)
         operations_router.set_confirmation_gate(self._gate)
+        if self._session_factory is not None:
+            operations_router.set_objective_service(
+                OperationsObjectiveService(
+                    self._session_factory, self._confirmation_activity_log
+                )
+            )
         app.include_router(operations_router.router)
 
         # Phase 4 (PB04-06): Combat session, mission, rewards/rank, loadout readiness
@@ -288,6 +488,22 @@ class ApiBridge:
         engineering_router.set_activity_log(self._confirmation_activity_log)
         app.include_router(engineering_router.router)
 
+        # GKI-01: read-only Galactic Knowledge Core and technology unlock planner
+        galactic_knowledge_router.set_state_manager(self._state)
+        galactic_knowledge_router.set_session_factory(self._session_factory)
+        # GKI-04: Commander Context, preferences and briefings (one service)
+        galactic_knowledge_router.set_intelligence(self.galactic_intelligence)
+        app.include_router(galactic_knowledge_router.router)
+
+        # GKI-07: the Living Galactic Historian and the Commander Chronicle.
+        galactic_historian_router.set_service(self.chronicle)
+        galactic_historian_router.set_intelligence(self.galactic_intelligence)
+        app.include_router(galactic_historian_router.router)
+
+        # Activity Log export authorization + staged export proof.
+        activity_log_router.set_activity_log(self._confirmation_activity_log)
+        app.include_router(activity_log_router.router)
+
         @app.get("/health")  # type: ignore[misc,untyped-decorator,unused-ignore]
         async def health() -> dict[str, Any]:
             """Liveness probe + runtime stats."""
@@ -296,6 +512,12 @@ class ApiBridge:
                 uptime = time.monotonic() - self._started_at
             return {
                 "status": "ok",
+                # Identity fields. The native launcher will only adopt an
+                # already-listening local bridge when `app` and
+                # `bridge_protocol` match, so a foreign or incompatible
+                # listener on a recycled port is never silently adopted.
+                "app": BRIDGE_APP_IDENTITY,
+                "bridge_protocol": BRIDGE_PROTOCOL_VERSION,
                 "version": "0.1.0",
                 "uptime_seconds": int(uptime),
                 "events_processed": self._events_counter,
@@ -359,7 +581,8 @@ class ApiBridge:
         async def get_jump_range() -> dict[str, Any]:
             """Jump range (Feature 5) -- max jump range from most recent Loadout.
 
-            The value is sourced directly from Loadout.MaxJumpRange and is NOT
+            The value is sourced directly from Loadout.MaxJumpRange (zero cargo,
+            enough fuel for one jump per the Journal manual) and is NOT
             recomputed from physics. First-principles jump math is Pillar 3
             (Exploration, Phase 5) work.
 
@@ -415,6 +638,11 @@ class ApiBridge:
             try:
                 await websocket.send_json(
                     {"type": "initial_state", "state": self._state.public_snapshot()}
+                )
+                # Reconnecting clients learn the current owner and slot before
+                # any event, so they never double-render a migrated alert.
+                await websocket.send_json(
+                    self.notification_shadow.presentation_snapshot()
                 )
                 while True:
                     await websocket.receive_text()
@@ -590,6 +818,12 @@ class ApiBridge:
                 "category": category,
             }
         )
+        # Pure observational enqueue after the unchanged production broadcast.
+        # A failed observer cannot fail an otherwise successful production push.
+        try:
+            self.notification_shadow.observe_bridge(event)
+        except Exception:
+            logger.warning("Notification shadow bridge observer failed")
 
     def _summarize_typed(
         self,
@@ -669,6 +903,14 @@ class ApiBridge:
             return "Combat state changed"
         if event_type == COMBAT_SESSION_STATE_CHANGED:
             return "Combat session state changed"
+        if event_type == BRIEFING_EVENT:
+            return f"Galactic Intelligence briefing: {payload.get('title', '?')}"
+        if event_type == CLEARED_EVENT:
+            return "Galactic Intelligence cleared for a forgotten commander"
+        if event_type == commander_chronicle.RECORDED_EVENT:
+            return "Commander Chronicle updated"
+        if event_type == commander_chronicle.CLEARED_EVENT:
+            return "Commander Chronicle cleared for a forgotten commander"
 
         # Raw journal event fallbacks
         if event_type == "FSDJump":
@@ -683,6 +925,7 @@ class ApiBridge:
 
     async def start(self) -> None:
         """Launch the uvicorn server in the background."""
+        await self.notification_shadow.start()
         import uvicorn
 
         config = uvicorn.Config(
@@ -719,6 +962,7 @@ class ApiBridge:
 
     async def stop(self) -> None:
         """Stop the server gracefully."""
+        await self.notification_shadow.stop()
         if self._server_task is not None:
             self._server_task.cancel()
             try:

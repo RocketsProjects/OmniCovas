@@ -221,13 +221,13 @@
   padding: var(--space-3) var(--space-4);
   border-radius: 6px;
   border: 1px solid var(--color-border);
-  background: var(--color-accent-dim);
+  background: var(--color-surface);
 }
 .primary-action-kicker {
   font-size: var(--font-size-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-telemetry-label);
   margin: 0;
 }
 .primary-action-button {
@@ -550,7 +550,7 @@
 }
 .intel-search-results-item:last-child { border-bottom: none; }
 .intel-search-results-label { color: var(--color-fg); }
-.intel-search-results-value { color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.intel-search-results-value { color: var(--color-fg); font-variant-numeric: tabular-nums; }
 .intel-search-results-context { color: var(--color-fg-muted); font-size: var(--font-size-sm); }
 
 .intel-known-facts-list {
@@ -647,7 +647,7 @@
 }
 .operations-detail-cargo-item:last-child { border-bottom: none; }
 .operations-detail-cargo-name  { color: var(--color-fg); }
-.operations-detail-cargo-count { color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.operations-detail-cargo-count { color: var(--color-fg); font-variant-numeric: tabular-nums; }
 
 .operations-proof p {
   margin: 0 0 var(--space-2) 0;
@@ -1121,7 +1121,7 @@
 }
 
 .local-market-field-value {
-  color: var(--color-accent);
+  color: var(--color-fg);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1287,6 +1287,34 @@
 
 /* Secondary/utility controls: quiet at rest, orange accent only on hover.
    Reduces orange density on non-primary interactive surfaces. */
+.quick-tool,
+.support-card-action,
+.local-context-action:not(:disabled),
+.navigation-library-btn,
+.navigation-spansh-link,
+.secondary-button,
+.operations-selector-back,
+.intel-proof-link,
+.privacy-secondary-button {
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-fg);
+}
+
+.quick-tool:hover,
+.support-card-action:hover,
+.local-context-action:not(:disabled):hover,
+.navigation-library-btn:hover,
+.navigation-spansh-link:hover,
+.secondary-button:hover,
+.operations-selector-back:hover,
+.intel-proof-link:hover,
+.privacy-secondary-button:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-telemetry-border);
+  color: var(--color-fg);
+}
+
 .quick-tool,
 .support-card-action,
 .local-context-action:not(:disabled),

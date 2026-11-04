@@ -26,12 +26,20 @@ function safeEl(tag, className, text) {
 
 function detailDrawer(summary, content, className = 'local-detail-drawer') {
   const drawer = safeEl('details', className);
-  const summaryEl = safeEl('summary', 'local-detail-summary', summary);
+  const summaryEl = safeEl('summary', 'local-detail-summary', disclosureLabel(summary));
   const body = safeEl('div', 'local-detail-body');
   if (content instanceof Node) body.appendChild(content);
   else if (content !== undefined && content !== null) body.textContent = String(content);
   drawer.append(summaryEl, body);
   return drawer;
+}
+
+function disclosureLabel(summary) {
+  const value = String(summary || '').toLowerCase();
+  if (value.includes('proof') || value.includes('raw')) return 'Proof';
+  if (value.includes('source') || value.includes('evidence')) return 'Source';
+  if (value.includes('why')) return 'Why?';
+  return 'Details';
 }
 
 function row(label, value, className = 'local-field-row') {
@@ -289,8 +297,11 @@ export function createMarketSearchSurface(model, options = {}) {
     input.type = 'search';
     input.id = id;
     input.name = id;
-    input.setAttribute('aria-label', 'Search current local market snapshot');
-    input.setAttribute('placeholder', 'Search current local market snapshot');
+    /* R0-1: the accessible name must not assert currency a stale snapshot
+       does not have — screen-reader users get no visual caveat to offset it. */
+    const scopeLabel = market.searchScopeLabel || 'Search local market snapshot';
+    input.setAttribute('aria-label', scopeLabel);
+    input.setAttribute('placeholder', scopeLabel);
     if (options.initialQuery) input.value = String(options.initialQuery);
     const submit = safeEl('button', 'local-market-search-submit', 'Search');
     submit.type = 'button';
@@ -311,6 +322,72 @@ export function createMarketSearchSurface(model, options = {}) {
     } else {
       renderMarketRows(results, market, initialQuery, false);
     }
+  }
+
+  surface.appendChild(detailDrawer('Market detail', listRows(market.detailRows || [], 'local-detail-list')));
+  surface.appendChild(detailDrawer('Market proof', proofPanel([market.proof]), 'local-proof-drawer'));
+  return surface;
+}
+
+/* Market context for a WORKFLOW surface (Phase 14 R2-4).
+ *
+ * Intel owns commodity search. Operations previously rendered
+ * `createMarketSearchSurface` with no options, which gave it a live
+ * `<input type="search">`, a Search button and the full commodity results
+ * table — a second implementation of an Intel-owned tool sitting on the
+ * Operations route, next to a link offering to open the real one.
+ *
+ * This surface keeps what Operations legitimately needs — which snapshot is
+ * loaded, how current it is, what is on board that could be sold — and hands
+ * every actual search to Intel. It renders no input and no results table.
+ *
+ * `onSearchHandoff(query)` receives the commodity for a cargo-aware handoff;
+ * `onOpenSearch()` receives the unfiltered one. Both are supplied by the
+ * caller, so this component owns no routing.
+ */
+export function createMarketContextSurface(model, options = {}) {
+  const market = model || {};
+  const surface = briefShell(
+    'market-context',
+    'Market Context',
+    market.statusLine,
+    { id: options.id, kicker: 'Market Intel' },
+  );
+  surface.classList.add('local-market-context');
+
+  surface.appendChild(safeEl('p', 'local-scope-line', market.scopeLine));
+
+  /* R0-1 provenance vocabulary, unchanged: a historical snapshot is never
+     described as this station's current market. */
+  if (market.rowsPhrase) {
+    surface.appendChild(safeEl('p', 'local-market-context-rows', market.rowsPhrase));
+  }
+
+  const cargoQueries = Array.isArray(market.cargoQueries) ? market.cargoQueries : [];
+  if (cargoQueries.length > 0 && typeof options.onSearchHandoff === 'function') {
+    const bar = safeEl('nav', 'local-market-cargo-bar');
+    bar.setAttribute('aria-label', 'Look up cargo prices in Intel');
+    bar.appendChild(safeEl('span', 'local-market-cargo-label', 'Look up in Intel'));
+    cargoQueries.slice(0, 5).forEach((entry) => {
+      const button = safeEl('button', 'local-market-cargo-query',
+        `${entry.label} (${entry.count})`);
+      button.type = 'button';
+      button.setAttribute('data-commodity', String(entry.query || entry.label || ''));
+      button.setAttribute('aria-label', `Search Intel for ${entry.label}`);
+      button.addEventListener('click', () => options.onSearchHandoff(entry.query, entry));
+      bar.appendChild(button);
+    });
+    surface.appendChild(bar);
+  }
+
+  if (typeof options.onOpenSearch === 'function') {
+    const bar = safeEl('div', 'local-action-bar');
+    const open = safeEl('button', 'local-context-action', 'Open Market Search in Intel');
+    open.type = 'button';
+    open.setAttribute('data-action', 'open-market-search');
+    open.addEventListener('click', () => options.onOpenSearch());
+    bar.appendChild(open);
+    surface.appendChild(bar);
   }
 
   surface.appendChild(detailDrawer('Market detail', listRows(market.detailRows || [], 'local-detail-list')));

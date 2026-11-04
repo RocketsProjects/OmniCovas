@@ -65,6 +65,7 @@ MAX_URL_LENGTH: Final[int] = 2048
 GOAL_TARGET_KINDS: Final[frozenset[str]] = frozenset(
     {
         "module_engineering",
+        "ship_build_engineering",
         "ship_unlock",
         "engineer_unlock",
         "guardian_tech",
@@ -81,6 +82,8 @@ PRIORITIES: Final[frozenset[str]] = frozenset({"low", "normal", "high", "unsorte
 BUILD_SOURCES: Final[frozenset[str]] = frozenset(
     {
         "commander_defined",
+        "commander_designed_from_observed_loadout",
+        "commander_designed_from_reference_pack",
         "intel_current_loadout_reference",
         "imported_edsy",
         "imported_coriolis",
@@ -1273,6 +1276,35 @@ def _route_intent(
     target_route: Literal["/navigation", "/operations"],
     target_section: str,
 ) -> JsonDict:
+    materials = [
+        item
+        for item in _json_list(plan.target_materials_json)
+        if isinstance(item, dict)
+    ]
+    destination = next(
+        (
+            str(item.get("destination")).strip()
+            for item in materials
+            if item.get("destination") and str(item.get("destination")).strip()
+        ),
+        "",
+    )
+    material_summary = ", ".join(
+        "{}: {}".format(
+            item.get("display_name") or item.get("material_id"),
+            item.get("quantity_needed")
+            if item.get("quantity_needed") is not None
+            else "unknown needed",
+        )
+        for item in materials[:5]
+    )
+    linked_build_ids = _json_string_list(plan.linked_build_plan_ids_json)
+    linked_goal_ids = _json_string_list(plan.linked_goal_ids_json)
+    context_summary = material_summary or (
+        f"Engineering build: {linked_build_ids[0]}"
+        if linked_build_ids
+        else "Engineering acquisition plan"
+    )
     return {
         "originRoute": "/engineering",
         "originPackage": "Phase 8 Engineering",
@@ -1281,7 +1313,21 @@ def _route_intent(
         "targetSectionId": target_section,
         "targetEntityId": plan.acquisition_plan_id,
         "targetLabel": plan.title,
-        "reason": "Engineering acquisition handoff intent.",
+        "targetDestination": destination,
+        "targetContext": context_summary,
+        "sharedContext": {
+            "acquisitionPlanId": plan.acquisition_plan_id,
+            "linkedBuildPlanIds": linked_build_ids,
+            "linkedGoalIds": linked_goal_ids,
+            "targetMaterials": materials,
+            "destination": destination or None,
+            "truthClass": "commander_planned",
+        },
+        "reason": (
+            "Review this Engineering acquisition destination and context."
+            if destination
+            else "Engineering acquisition needs a Commander-selected destination."
+        ),
         "returnLabel": "Return to Engineering",
         "returnTarget": {
             "route": "/engineering",

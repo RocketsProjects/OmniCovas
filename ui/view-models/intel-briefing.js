@@ -140,6 +140,10 @@ export function deriveEconomicSummary(economicSnapshot, localContext = null) {
         available: true,
         itemCount: market.itemCount,
         stationName: market.stationName,
+        /* R0-1: carried so summaries cannot present a historical snapshot as
+           the current station's market. */
+        isStale: market.isStale === true,
+        provenanceLabel: market.provenanceLabel,
         line: market.stationName
           ? `${market.itemCount} local market rows at ${market.stationName}.`
           : `${market.itemCount} local market rows loaded.`,

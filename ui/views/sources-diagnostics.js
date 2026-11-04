@@ -8,6 +8,15 @@
 (function () {
   'use strict';
 
+  let freshnessVocabulary = null;
+  const freshnessVocabularyPromise = import('../utils/freshness.js').then((mod) => {
+    freshnessVocabulary = mod;
+    return mod;
+  }).catch((err) => {
+    console.error('[sources-diagnostics] Failed to load freshness vocabulary:', err);
+    return null;
+  });
+
   function safeEl(tag, className, text) {
     const el = document.createElement(tag);
     if (className) el.className = className;
@@ -39,7 +48,7 @@
   function section(title, id) {
     const card = safeEl('section', 'sources-section');
     if (id) card.id = id;
-    card.appendChild(safeEl('h2', 'sources-section-title', title));
+    card.appendChild(safeEl('h2', 'sources-section-title section-title', title));
     return card;
   }
 
@@ -58,14 +67,17 @@
   }
 
   function freshness(node) {
-    return node?.freshness || (node ? 'loaded' : 'not_loaded');
+    const input = node && typeof node === 'object'
+      ? node
+      : { freshness: node ? 'loaded' : 'not_loaded' };
+    return freshnessVocabulary?.freshnessLabel(input) || 'Unknown';
   }
 
   function isLoaded(node, extra = false) {
     if (extra) return true;
     if (!node || typeof node !== 'object') return false;
     if (node.fallback) return false;
-    return freshness(node) !== 'not_loaded';
+    return freshnessVocabulary?.describeFreshness(node).key !== 'not_loaded';
   }
 
   function statusFor(loaded) {
@@ -81,12 +93,61 @@
     return card;
   }
 
+  const STARTUP_STAGE_LABELS = Object.freeze({
+    starting: 'Starting',
+    local_sources_locating: 'Locating local sources',
+    hydrating_local_state: 'Hydrating local state',
+    ready_live: 'Ready — live local data',
+    ready_limited: 'Ready — limited mode',
+    blocked_local_setup: 'Local setup blocked',
+  });
+
+  function buildStartupOutcomeSection() {
+    const card = section('Startup Outcome', 'sources-startup-outcome');
+    const outcome = window.Shell?.startupOutcome || null;
+    if (!outcome) {
+      appendRow(card, 'Lifecycle outcome', 'Not recorded this app session', 'unknown');
+      appendRow(card, 'Proof lifetime', 'Session only');
+      appendRow(card, 'Next action', 'Re-open OmniCOVAS to capture a new startup outcome.');
+      return card;
+    }
+
+    const stage = String(outcome.stage || 'unknown');
+    const stageLabel = STARTUP_STAGE_LABELS[stage] || 'Unknown';
+    const state = stage === 'ready_live' ? 'loaded'
+      : (stage === 'ready_limited' || stage === 'blocked_local_setup' ? 'not-loaded' : 'unknown');
+    appendRow(card, 'Lifecycle outcome', stageLabel, state);
+    appendRow(card, 'Bridge', String(outcome.bridge || 'unknown').replace(/_/g, ' '));
+    appendRow(card, 'Local sources', String(outcome.local_sources || 'unknown').replace(/_/g, ' '));
+    appendRow(card, 'Session hydration', String(outcome.session_state || 'unknown').replace(/_/g, ' '));
+    appendRow(card, 'Proof lifetime', 'Session only — not restart-persistent');
+    const note = safeEl('p', 'sources-startup-note');
+    note.textContent = (
+      'This outcome records readiness classes only. It intentionally excludes Commander names, ' +
+      'source filenames, file paths, and payload contents.'
+    );
+    card.appendChild(note);
+    return card;
+  }
+
+  const LOCAL_PATH_POSTURE_LABELS = Object.freeze({
+    present: ['Found', 'loaded'],
+    missing: ['Not found', 'not-loaded'],
+    unknown: ['Unknown', 'unknown'],
+  });
+
   function buildSessionSection(snapshot) {
     const card = section('Elite Session / Journal Watcher', 'sources-elite-session');
     const activity = snapshot?.session_activity || {};
     const rawState = activity.state || activity.elite_session_state || 'unknown';
     const stateLabel = String(rawState).replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
     appendRow(card, 'Elite session', stateLabel, rawState === 'active' ? 'loaded' : 'unknown');
+    /* Startup exit criterion 3: an absent Elite folder and an empty one both
+       produce zero files, but only one of them is worth waiting on. */
+    const [postureLabel, postureState] = LOCAL_PATH_POSTURE_LABELS[
+      String(activity.local_path_posture || 'unknown')
+    ] || LOCAL_PATH_POSTURE_LABELS.unknown;
+    appendRow(card, 'Elite folder', postureLabel, postureState);
     appendRow(card, 'Last journal event', activity.last_journal_event_type || 'Unknown');
     appendRow(card, 'Last journal file', activity.last_journal_file || 'Unknown');
     appendRow(card, 'Last game activity', activity.last_game_activity_at || 'Unknown');
@@ -148,7 +209,11 @@
     appendRow(card, 'Market snapshot', freshness(snapshot?.market_snapshot));
     appendRow(card, 'Cargo hold', freshness(snapshot?.cargo_hold));
     appendRow(card, 'Module loadout', freshness(snapshot?.module_loadout));
-    appendRow(card, 'Nav route', navSnapshot?.active_route?.route_state || 'not_loaded');
+    appendRow(card, 'Nav route', freshnessVocabulary?.freshnessLabel({
+      freshness: navSnapshot?.active_route?.freshness_label || 'not_loaded',
+      source: navSnapshot?.active_route?.source_id,
+      truthClass: navSnapshot?.active_route?.truth_class,
+    }) || 'Unknown');
     return card;
   }
 
@@ -268,6 +333,7 @@
       fetchJson('/intel/local-context/snapshot'),
       fetchJson('/navigation/snapshot'),
       fetchJson('/source/health'),
+      freshnessVocabularyPromise,
     ]);
 
     const ardentSource = Array.isArray(sourceHealth?.sources)
@@ -277,6 +343,7 @@
     const layout = safeEl('section', 'sources-diagnostics-grid');
     layout.setAttribute('aria-label', 'Sources and diagnostics summary');
     layout.appendChild(buildBridgeSection());
+    layout.appendChild(buildStartupOutcomeSection());
     layout.appendChild(buildSessionSection(snapshot));
     layout.appendChild(buildEndpointSection(snapshot));
     layout.appendChild(buildSourceFilesSection(snapshot, navSnapshot));
@@ -319,5 +386,6 @@
 
   globalThis.__sourcesDiagnosticsExports = {
     renderSourcesDiagnostics: render,
+    buildStartupOutcomeSection,
   };
 })();

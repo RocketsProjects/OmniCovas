@@ -24,6 +24,8 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter
 
+from omnicovas.features.readiness import shield_generator_fitted
+
 if TYPE_CHECKING:
     from omnicovas.config.vault import ConfigVault
     from omnicovas.core.state_manager import StateManager
@@ -104,6 +106,7 @@ async def get_ship_state() -> dict[str, Any]:
         ship_ident: commander-assigned ident tag, or null
         hull_health: 0.0–100.0 percent, or null
         shield_up: True/False/null
+        shield_generator_fitted: True/False/null (null = loadout not observed)
         shield_strength_pct: 0.0–100.0 percent, or null
         fuel_main: current main-tank fuel in tonnes, or null
         fuel_capacity: main-tank capacity in tonnes, or null
@@ -139,6 +142,12 @@ async def get_ship_state() -> dict[str, Any]:
         "ship_ident": s.current_ship_ident,
         "hull_health": hull_pct,
         "shield_up": s.shield_up,
+        # R0-3: `shield_up` is False both for downed shields and for a ship
+        # with no generator. Every renderer of this payload needs to tell
+        # those apart, so the observed-loadout answer is served alongside it
+        # rather than re-derived (differently) in each surface. None means the
+        # loadout has not been observed — not that the module is absent.
+        "shield_generator_fitted": shield_generator_fitted(s),
         "shield_strength_pct": s.shield_strength_pct,
         "fuel_main": s.fuel_main,
         "fuel_capacity": s.fuel_capacity_main,
@@ -164,6 +173,7 @@ def _empty_ship_state() -> dict[str, Any]:
         "ship_ident": None,
         "hull_health": None,
         "shield_up": None,
+        "shield_generator_fitted": None,
         "shield_strength_pct": None,
         "fuel_main": None,
         "fuel_capacity": None,
@@ -380,21 +390,40 @@ async def get_modules_summary() -> dict[str, Any]:
     Returns counts of modules in each health band — enough for the dashboard
     card without sending the full module list.
 
+    Module health comes from Loadout, which is not observed until the
+    Commander's first loadout event. Before that this returns nulls, never
+    zeros: a ship always has modules, so "0 modules, 0 warning, 0 critical"
+    is not a quiet no-data state — it is a positive claim that nothing is
+    damaged, asserted from a source that has not been read (Law 5).
+    `local-context.module_loadout` already reports this correctly as
+    `not_loaded`; this endpoint is the same fact and must agree.
+
     Returns:
-        total: number of modules tracked
-        ok: modules at >= 80% health
-        warning: modules at >= 20% and < 80% health
-        critical: modules at < 20% health
+        loadout_observed: whether any module health has been read
+        total: number of modules tracked, or null when unobserved
+        ok: modules at >= 80% health, or null when unobserved
+        warning: modules at >= 20% and < 80% health, or null when unobserved
+        critical: modules at < 20% health, or null when unobserved
     """
+    unobserved: dict[str, Any] = {
+        "loadout_observed": False,
+        "total": None,
+        "ok": None,
+        "warning": None,
+        "critical": None,
+    }
+
     s = _snap()
     if s is None:
-        return {"total": 0, "ok": 0, "warning": 0, "critical": 0}
+        return unobserved
 
     ok = warning = critical = 0
+    observed = False
     for mod in (s.modules or {}).values():
         h = mod.health
         if h is None:
             continue
+        observed = True
         if h < 0.20:
             critical += 1
         elif h < 0.80:
@@ -402,7 +431,11 @@ async def get_modules_summary() -> dict[str, Any]:
         else:
             ok += 1
 
+    if not observed:
+        return unobserved
+
     return {
+        "loadout_observed": True,
         "total": ok + warning + critical,
         "ok": ok,
         "warning": warning,
@@ -426,7 +459,7 @@ _OVERLAY_EVENT_DEFAULTS: dict[str, bool] = {
     "HEAT_DAMAGE": True,
 }
 
-_VALID_ANCHORS = {"tl", "tr", "bl", "br", "center"}
+_VALID_ANCHORS = {"tl", "tr", "tc", "bl", "br", "center"}
 
 
 @router.get("/overlay/settings")

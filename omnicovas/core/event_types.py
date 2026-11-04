@@ -90,6 +90,44 @@ CRITICAL_RESPONSE_PROPOSAL_CONFIRMED: Final[str] = (
 CRITICAL_RESPONSE_PROPOSAL_CANCELED: Final[str] = "CRITICAL_RESPONSE_PROPOSAL_CANCELED"
 CRITICAL_RESPONSE_PROPOSAL_BLOCKED: Final[str] = "CRITICAL_RESPONSE_PROPOSAL_BLOCKED"
 
+# --- Commander-controlled local configuration audit ------------------------
+ONBOARDING_COMPLETED: Final[str] = "ONBOARDING_COMPLETED"
+ONBOARDING_RESET: Final[str] = "ONBOARDING_RESET"
+LICENSE_ACCEPTED: Final[str] = "LICENSE_ACCEPTED"
+LICENSE_ACCEPTANCE_RESET: Final[str] = "LICENSE_ACCEPTANCE_RESET"
+PRIVACY_TOGGLE_CHANGED: Final[str] = "PRIVACY_TOGGLE_CHANGED"
+PRIVACY_CONFIGURATION_EXPORTED: Final[str] = "PRIVACY_CONFIGURATION_EXPORTED"
+PRIVACY_CONFIGURATION_VAULT_CLEARED: Final[str] = "PRIVACY_CONFIGURATION_VAULT_CLEARED"
+# Activity Log export — commander confirmation stages. Reuses the canonical
+# *_PROPOSAL_SHOWN / _CONFIRMED / _CANCELED / _BLOCKED pattern established for
+# Critical Response (Engineering Standards §15).
+ACTIVITY_LOG_EXPORT_PROPOSAL_SHOWN: Final[str] = "ACTIVITY_LOG_EXPORT_PROPOSAL_SHOWN"
+ACTIVITY_LOG_EXPORT_PROPOSAL_CONFIRMED: Final[str] = (
+    "ACTIVITY_LOG_EXPORT_PROPOSAL_CONFIRMED"
+)
+ACTIVITY_LOG_EXPORT_PROPOSAL_CANCELED: Final[str] = (
+    "ACTIVITY_LOG_EXPORT_PROPOSAL_CANCELED"
+)
+ACTIVITY_LOG_EXPORT_PROPOSAL_BLOCKED: Final[str] = (
+    "ACTIVITY_LOG_EXPORT_PROPOSAL_BLOCKED"
+)
+
+# Activity Log export proof stages. No stage claims completion: the backend
+# cannot observe a browser download reaching disk, so the strongest honest
+# statement is that the download was initiated.
+ACTIVITY_LOG_EXPORT_REQUESTED: Final[str] = "ACTIVITY_LOG_EXPORT_REQUESTED"
+ACTIVITY_LOG_EXPORT_DOWNLOAD_INITIATED: Final[str] = (
+    "ACTIVITY_LOG_EXPORT_DOWNLOAD_INITIATED"
+)
+ACTIVITY_LOG_EXPORT_FAILED: Final[str] = "ACTIVITY_LOG_EXPORT_FAILED"
+# An authorized export whose outcome was never reported. Whether a file was
+# written is genuinely unknown, and the wording says exactly that.
+ACTIVITY_LOG_EXPORT_ABANDONED: Final[str] = "ACTIVITY_LOG_EXPORT_ABANDONED"
+SETTINGS_UPDATED: Final[str] = "SETTINGS_UPDATED"
+SETTINGS_RESET_TO_DEFAULT: Final[str] = "SETTINGS_RESET_TO_DEFAULT"
+SETTINGS_EXPORTED: Final[str] = "SETTINGS_EXPORTED"
+SETTINGS_IMPORTED: Final[str] = "SETTINGS_IMPORTED"
+
 # --- Phase 4 -- PvP encounter local audit (E1A) ----------------------------
 # Local-only commander note writes. These are Activity Log audit records, not
 # external reputation claims.
@@ -244,6 +282,8 @@ ENGINEERING_READINESS_COMMANDER_NOTE_SET: Final[str] = (
 )
 ENGINEERING_IMPORT_FORMAT_VERIFIED: Final[str] = "engineering.import.format_verified"
 ENGINEERING_IMPORT_FORMAT_REJECTED: Final[str] = "engineering.import.format_rejected"
+ENGINEERING_CATALOG_IMPORTED: Final[str] = "engineering.catalog.imported"
+ENGINEERING_CATALOG_ACTIVATED: Final[str] = "engineering.catalog.activated"
 ENGINEERING_IMPORT_SOURCE_STATE_CREATED: Final[str] = (
     "engineering.import_source_state.created"
 )
@@ -260,6 +300,14 @@ ENGINEERING_HANDOFF_TO_OPERATIONS: Final[str] = "engineering.handoff_to_operatio
 ENGINEERING_HANDOFF_TO_SETTINGS: Final[str] = "engineering.handoff_to_settings"
 ENGINEERING_HANDOFF_TO_ACTIVITY_LOG: Final[str] = "engineering.handoff_to_activity_log"
 ENGINEERING_AI_DRAFT_EMITTED: Final[str] = "engineering.ai.draft_emitted"
+
+# Exobiology Rule Sentinel (Phase 13). Raised when a confirmed ScanOrganic
+# contradicts the community-derived occurrence rules, which means an exclusion
+# predicate is false. Emitted once per newly detected contradiction; repeat scans
+# of the same colony increment a count and stay silent.
+EXOBIOLOGY_RULE_CONTRADICTION_DETECTED: Final[str] = (
+    "exobiology.rule.contradiction_detected"
+)
 
 # --- Phase 9 -- Intel BGS / Powerplay local fact projection -----------------
 # PB09-07 canonical Activity Log proof taxonomy. Observation-specific events are
@@ -290,6 +338,48 @@ PHASE_9_POWERPLAY_MICRO_RESOURCE_REQUESTED: Final[str] = (
 PHASE_9_POWERPLAY_MICRO_RESOURCE_DELIVERED: Final[str] = (
     "phase_9.powerplay.micro_resource_delivered"
 )
+
+# --- Phase 14 -- Operations Commander objective proof events (PB14-R1) ------
+# Commander intent, not telemetry. Every payload is redacted: it carries the
+# objective identity, the mode it belongs to, the lifecycle transition and the
+# TEXT LENGTH only. The authored sentence itself is private local state and is
+# never copied into the log — proving the write happened does not require
+# repeating what was written.
+OPERATIONS_OBJECTIVE_CREATED: Final[str] = "operations.objective.created"
+OPERATIONS_OBJECTIVE_CHANGED: Final[str] = "operations.objective.changed"
+OPERATIONS_OBJECTIVE_COMPLETED: Final[str] = "operations.objective.completed"
+OPERATIONS_OBJECTIVE_CLEARED: Final[str] = "operations.objective.cleared"
+OPERATIONS_OBJECTIVE_EXPORTED: Final[str] = "operations.objective.exported"
+OPERATIONS_OBJECTIVE_PURGED: Final[str] = "operations.objective.purged"
+# Gate lifecycle. `proposal_shown` proves a decision was requested and
+# authorizes nothing; the outcome events are emitted by the Week 13 queue the
+# instant the Commander decides.
+OPERATIONS_OBJECTIVE_PROPOSAL_SHOWN: Final[str] = "operations.objective.proposal_shown"
+OPERATIONS_OBJECTIVE_PROPOSAL_CONFIRMED: Final[str] = (
+    "operations.objective.proposal_confirmed"
+)
+OPERATIONS_OBJECTIVE_PROPOSAL_CANCELED: Final[str] = (
+    "operations.objective.proposal_canceled"
+)
+OPERATIONS_OBJECTIVE_PROPOSAL_BLOCKED: Final[str] = (
+    "operations.objective.proposal_blocked"
+)
+
+# --- Phase 14 R8 -- Operations cross-route workflow handoff proof -----------
+# ONE canonical event for every purposeful Operations handoff that is not a
+# Phase 9 campaign handoff (those reuse `phase_9.campaign.handoff_to_*`). It
+# exists so a new workflow does not need a new event type to be provable, and
+# so the taxonomy does not fork into trade_handoff / combat_handoff / etc.
+#
+# Emitted once, when the RouteTransferIntent is committed to the shell. NOT on
+# destination render, arrival highlight, refresh or banner re-render. Ordinary
+# tab navigation never reaches it: the Activity Log is a record of application
+# actions, not a clickstream.
+#
+# The payload is a whitelist of structured slugs and ids only. Commander
+# objective text, campaign titles and notes, AI prompt/response text and
+# Squadron notes cannot appear in it — see `features/operations_handoff.py`.
+OPERATIONS_WORKFLOW_HANDOFF: Final[str] = "operations.workflow.handoff"
 
 # --- Phase 9 -- Campaign objective proof events (PB09-03) -------------------
 # Canonical Activity Log payload shape is owned by PB09-07.
@@ -333,6 +423,27 @@ PHASE_9_CAMPAIGN_AI_DRAFT_REQUESTED_GATE_SHOWN: Final[str] = (
 PHASE_9_CAMPAIGN_AI_DRAFT_REJECTED_VALIDATION: Final[str] = (
     "phase_9.campaign.ai_draft_rejected_validation"
 )
+# --- Phase 14 R8 -- campaign protected-action gate lifecycle ---------------
+# Mirrors `operations.objective.proposal_*` so Operations holds ONE gate policy
+# for one class of action, which is the inconsistency `P14-O02` recorded. Named
+# to match the Phase 9 AI-draft gate convention above rather than the Phase 14
+# objective convention, because these are campaign events.
+#
+# `action_gate_shown` proves a decision was requested and authorizes nothing.
+# The outcome events are emitted by the Week 13 queue when the Commander
+# decides. Payloads carry campaign_id, workflow_type and the action slug only —
+# never the campaign title, description or notes.
+PHASE_9_CAMPAIGN_ACTION_GATE_SHOWN: Final[str] = "phase_9.campaign.action_gate_shown"
+PHASE_9_CAMPAIGN_ACTION_CONFIRMED_GATE: Final[str] = (
+    "phase_9.campaign.action_confirmed_gate"
+)
+PHASE_9_CAMPAIGN_ACTION_CANCELED_GATE: Final[str] = (
+    "phase_9.campaign.action_canceled_gate"
+)
+PHASE_9_CAMPAIGN_ACTION_BLOCKED_GATE: Final[str] = (
+    "phase_9.campaign.action_blocked_gate"
+)
+
 PHASE_9_CAMPAIGN_HANDOFF_TO_INTEL: Final[str] = "phase_9.campaign.handoff_to_intel"
 PHASE_9_CAMPAIGN_HANDOFF_TO_NAVIGATION: Final[str] = (
     "phase_9.campaign.handoff_to_navigation"
@@ -396,6 +507,37 @@ PHASE_9_SOURCE_ATTEMPT_NO_VERIFIED_SOURCE: Final[str] = (
     "phase_9.source_attempt_no_verified_source"
 )
 
+# --- Phase 11 -- private Commander Memory proof lifecycle ------------------
+COMMANDER_MEMORY_PAUSED: Final[str] = "COMMANDER_MEMORY_PAUSED"
+COMMANDER_MEMORY_RESUMED: Final[str] = "COMMANDER_MEMORY_RESUMED"
+COMMANDER_MEMORY_PROFILE_PAUSED: Final[str] = "COMMANDER_MEMORY_PROFILE_PAUSED"
+COMMANDER_MEMORY_PROFILE_RESUMED: Final[str] = "COMMANDER_MEMORY_PROFILE_RESUMED"
+COMMANDER_MEMORY_CLEARED: Final[str] = "COMMANDER_MEMORY_CLEARED"
+COMMANDER_MEMORY_CATEGORY_DELETED: Final[str] = "COMMANDER_MEMORY_CATEGORY_DELETED"
+COMMANDER_MEMORY_PROFILE_FORGOTTEN: Final[str] = "COMMANDER_MEMORY_PROFILE_FORGOTTEN"
+COMMANDER_MEMORY_REBUILT: Final[str] = "COMMANDER_MEMORY_REBUILT"
+COMMANDER_MEMORY_EXPORT_STAGED: Final[str] = "COMMANDER_MEMORY_EXPORT_STAGED"
+COMMANDER_MEMORY_ACTION_FAILED: Final[str] = "COMMANDER_MEMORY_ACTION_FAILED"
+COMMANDER_MEMORY_PROPOSAL_SHOWN: Final[str] = "COMMANDER_MEMORY_PROPOSAL_SHOWN"
+COMMANDER_MEMORY_PROPOSAL_CONFIRMED: Final[str] = "COMMANDER_MEMORY_PROPOSAL_CONFIRMED"
+COMMANDER_MEMORY_PROPOSAL_CANCELED: Final[str] = "COMMANDER_MEMORY_PROPOSAL_CANCELED"
+COMMANDER_MEMORY_PROPOSAL_BLOCKED: Final[str] = "COMMANDER_MEMORY_PROPOSAL_BLOCKED"
+COMMANDER_MEMORY_EXPORT_DOWNLOAD_INITIATED: Final[str] = (
+    "COMMANDER_MEMORY_EXPORT_DOWNLOAD_INITIATED"
+)
+COMMANDER_MEMORY_EXPORT_FAILED: Final[str] = "COMMANDER_MEMORY_EXPORT_FAILED"
+COMMANDER_MEMORY_EXPORT_ABANDONED: Final[str] = "COMMANDER_MEMORY_EXPORT_ABANDONED"
+
+# --- LNA-004 -- Commander-authored system notes ---------------------------
+SYSTEM_NOTE_WRITTEN: Final[str] = "SYSTEM_NOTE_WRITTEN"
+SYSTEM_NOTE_DELETED: Final[str] = "SYSTEM_NOTE_DELETED"
+SYSTEM_NOTE_CLEARED_ALL: Final[str] = "SYSTEM_NOTE_CLEARED_ALL"
+SYSTEM_NOTE_EXPORTED: Final[str] = "SYSTEM_NOTE_EXPORTED"
+SYSTEM_NOTE_PROPOSAL_SHOWN: Final[str] = "SYSTEM_NOTE_PROPOSAL_SHOWN"
+SYSTEM_NOTE_PROPOSAL_CONFIRMED: Final[str] = "SYSTEM_NOTE_PROPOSAL_CONFIRMED"
+SYSTEM_NOTE_PROPOSAL_CANCELED: Final[str] = "SYSTEM_NOTE_PROPOSAL_CANCELED"
+SYSTEM_NOTE_PROPOSAL_BLOCKED: Final[str] = "SYSTEM_NOTE_PROPOSAL_BLOCKED"
+
 
 # Audit aid: every constant exported by this module. Used by the Week 9
 # Critical Event Broadcaster audit test to guarantee no event-type
@@ -430,6 +572,25 @@ ALL_EVENT_TYPES: Final[frozenset[str]] = frozenset(
         CRITICAL_RESPONSE_PROPOSAL_CONFIRMED,
         CRITICAL_RESPONSE_PROPOSAL_CANCELED,
         CRITICAL_RESPONSE_PROPOSAL_BLOCKED,
+        ONBOARDING_COMPLETED,
+        ONBOARDING_RESET,
+        LICENSE_ACCEPTED,
+        LICENSE_ACCEPTANCE_RESET,
+        PRIVACY_TOGGLE_CHANGED,
+        PRIVACY_CONFIGURATION_EXPORTED,
+        PRIVACY_CONFIGURATION_VAULT_CLEARED,
+        ACTIVITY_LOG_EXPORT_PROPOSAL_SHOWN,
+        ACTIVITY_LOG_EXPORT_PROPOSAL_CONFIRMED,
+        ACTIVITY_LOG_EXPORT_PROPOSAL_CANCELED,
+        ACTIVITY_LOG_EXPORT_PROPOSAL_BLOCKED,
+        ACTIVITY_LOG_EXPORT_REQUESTED,
+        ACTIVITY_LOG_EXPORT_DOWNLOAD_INITIATED,
+        ACTIVITY_LOG_EXPORT_FAILED,
+        ACTIVITY_LOG_EXPORT_ABANDONED,
+        SETTINGS_UPDATED,
+        SETTINGS_RESET_TO_DEFAULT,
+        SETTINGS_EXPORTED,
+        SETTINGS_IMPORTED,
         PVP_ENCOUNTER_CREATED,
         PVP_ENCOUNTER_UPDATED,
         PVP_ENCOUNTER_DELETED,
@@ -512,6 +673,8 @@ ALL_EVENT_TYPES: Final[frozenset[str]] = frozenset(
         ENGINEERING_READINESS_COMMANDER_NOTE_SET,
         ENGINEERING_IMPORT_FORMAT_VERIFIED,
         ENGINEERING_IMPORT_FORMAT_REJECTED,
+        ENGINEERING_CATALOG_IMPORTED,
+        ENGINEERING_CATALOG_ACTIVATED,
         ENGINEERING_IMPORT_SOURCE_STATE_CREATED,
         ENGINEERING_IMPORT_SOURCE_STATE_UPDATED,
         ENGINEERING_PRIVACY_CONSENT_CHANGED,
@@ -524,6 +687,7 @@ ALL_EVENT_TYPES: Final[frozenset[str]] = frozenset(
         ENGINEERING_HANDOFF_TO_SETTINGS,
         ENGINEERING_HANDOFF_TO_ACTIVITY_LOG,
         ENGINEERING_AI_DRAFT_EMITTED,
+        EXOBIOLOGY_RULE_CONTRADICTION_DETECTED,
         PHASE_9_BGS_FACTS_PROJECTED,
         PHASE_9_BGS_FACTION_OBSERVATION_RECORDED,
         PHASE_9_BGS_FACTION_EFFECTS_PROJECTED,
@@ -539,6 +703,17 @@ ALL_EVENT_TYPES: Final[frozenset[str]] = frozenset(
         PHASE_9_POWERPLAY_FAST_TRACK_OBSERVED,
         PHASE_9_POWERPLAY_MICRO_RESOURCE_REQUESTED,
         PHASE_9_POWERPLAY_MICRO_RESOURCE_DELIVERED,
+        OPERATIONS_OBJECTIVE_CREATED,
+        OPERATIONS_OBJECTIVE_CHANGED,
+        OPERATIONS_OBJECTIVE_COMPLETED,
+        OPERATIONS_OBJECTIVE_CLEARED,
+        OPERATIONS_OBJECTIVE_EXPORTED,
+        OPERATIONS_OBJECTIVE_PURGED,
+        OPERATIONS_WORKFLOW_HANDOFF,
+        OPERATIONS_OBJECTIVE_PROPOSAL_SHOWN,
+        OPERATIONS_OBJECTIVE_PROPOSAL_CONFIRMED,
+        OPERATIONS_OBJECTIVE_PROPOSAL_CANCELED,
+        OPERATIONS_OBJECTIVE_PROPOSAL_BLOCKED,
         PHASE_9_CAMPAIGN_OBJECTIVE_CREATED,
         PHASE_9_CAMPAIGN_OBJECTIVE_UPDATED,
         PHASE_9_CAMPAIGN_OBJECTIVE_STATE_CHANGED,
@@ -553,6 +728,10 @@ ALL_EVENT_TYPES: Final[frozenset[str]] = frozenset(
         PHASE_9_CAMPAIGN_AI_DRAFT_EMITTED,
         PHASE_9_CAMPAIGN_AI_DRAFT_CONFIRMED_GATE,
         PHASE_9_CAMPAIGN_AI_DRAFT_CANCELED_GATE,
+        PHASE_9_CAMPAIGN_ACTION_GATE_SHOWN,
+        PHASE_9_CAMPAIGN_ACTION_CONFIRMED_GATE,
+        PHASE_9_CAMPAIGN_ACTION_CANCELED_GATE,
+        PHASE_9_CAMPAIGN_ACTION_BLOCKED_GATE,
         PHASE_9_CAMPAIGN_AI_DRAFT_VALIDATION_FAILED,
         PHASE_9_CAMPAIGN_HANDOFF_TO_INTEL,
         PHASE_9_CAMPAIGN_HANDOFF_TO_NAVIGATION,
@@ -578,6 +757,31 @@ ALL_EVENT_TYPES: Final[frozenset[str]] = frozenset(
         PHASE_9_SOURCE_ATTEMPT_REQUIRES_AUTH,
         PHASE_9_SOURCE_ATTEMPT_UNSUPPORTED,
         PHASE_9_SOURCE_ATTEMPT_NO_VERIFIED_SOURCE,
+        COMMANDER_MEMORY_PAUSED,
+        COMMANDER_MEMORY_RESUMED,
+        COMMANDER_MEMORY_PROFILE_PAUSED,
+        COMMANDER_MEMORY_PROFILE_RESUMED,
+        COMMANDER_MEMORY_CLEARED,
+        COMMANDER_MEMORY_CATEGORY_DELETED,
+        COMMANDER_MEMORY_PROFILE_FORGOTTEN,
+        COMMANDER_MEMORY_REBUILT,
+        COMMANDER_MEMORY_EXPORT_STAGED,
+        COMMANDER_MEMORY_ACTION_FAILED,
+        COMMANDER_MEMORY_PROPOSAL_SHOWN,
+        COMMANDER_MEMORY_PROPOSAL_CONFIRMED,
+        COMMANDER_MEMORY_PROPOSAL_CANCELED,
+        COMMANDER_MEMORY_PROPOSAL_BLOCKED,
+        COMMANDER_MEMORY_EXPORT_DOWNLOAD_INITIATED,
+        COMMANDER_MEMORY_EXPORT_FAILED,
+        COMMANDER_MEMORY_EXPORT_ABANDONED,
+        SYSTEM_NOTE_WRITTEN,
+        SYSTEM_NOTE_DELETED,
+        SYSTEM_NOTE_CLEARED_ALL,
+        SYSTEM_NOTE_EXPORTED,
+        SYSTEM_NOTE_PROPOSAL_SHOWN,
+        SYSTEM_NOTE_PROPOSAL_CONFIRMED,
+        SYSTEM_NOTE_PROPOSAL_CANCELED,
+        SYSTEM_NOTE_PROPOSAL_BLOCKED,
     }
 )
 

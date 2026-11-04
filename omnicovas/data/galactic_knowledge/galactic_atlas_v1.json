@@ -1,0 +1,2457 @@
+{
+  "schema": "galactic-knowledge-v1",
+  "pack_id": "omnicovas-galactic-atlas",
+  "version": "2026-10-31-1",
+  "reviewed_at": "2026-10-31",
+  "title": "Galactic Atlas",
+  "scope": "GKI-03 initial Atlas: Jameson Memorial and Shinrarta Dezhra, Jameson's Crash Site in HIP 12099, three rediscovered INRA bases, the Generation Ship Lycaon and Hutton Orbital, with the people, organisations, events and discoveries that connect them, and the crash site's encoded-material scanning.",
+  "game_version": "Lore records are not tied to a game version. The crash site's nine data points and position reflect the 2025 site update as reported on 2026-10-29. Identifiers were read from EDSM on 2026-10-29.",
+  "rights_basis": "Original OmniCOVAS records of Elite Dangerous game facts and lore: names, dates, identifiers, coordinates, relationships and short factual summaries written in OmniCOVAS's own words. No wiki prose, quotations, images or tables are reproduced; sources are credited per claim.",
+  "distribution": {
+    "class": "original_facts",
+    "basis": "GKI-03 content audit (2026-10-29): every record is an original OmniCOVAS statement of game facts or lore, checked with the curator expression check against the cited wiki revisions and the community guide.",
+    "decision_record": "docs/gki-03-galactic-atlas-20261029.md"
+  },
+  "sources": [
+    {
+      "id": "edw-jameson-memorial",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Jameson Memorial",
+      "url": "https://elite-dangerous.fandom.com/wiki/Jameson_Memorial",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Station type, system, documented services, the unnamed Jameson namesake and the 3310 attack.",
+      "revision": {
+        "page_id": 27651,
+        "revision_id": 174205,
+        "timestamp": "2026-10-26T12:09:39Z"
+      }
+    },
+    {
+      "id": "edw-john-jameson",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: John Jameson",
+      "url": "https://elite-dangerous.fandom.com/wiki/John_Jameson",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "John Jameson's life, final mission, crash on HIP 12099 1 B, the 3303 discovery and the site's data points.",
+      "revision": {
+        "page_id": 52247,
+        "revision_id": 171617,
+        "timestamp": "2026-08-13T05:05:56Z"
+      }
+    },
+    {
+      "id": "edw-shinrarta-dezhra",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Shinrarta Dezhra",
+      "url": "https://elite-dangerous.fandom.com/wiki/Shinrarta_Dezhra",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "System access, controlling organisation, layout, the 3310 Thargoid attack and naming notes.",
+      "revision": {
+        "page_id": 27623,
+        "revision_id": 174166,
+        "timestamp": "2026-10-26T04:25:11Z"
+      }
+    },
+    {
+      "id": "edw-founders-world",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Founders World",
+      "url": "https://elite-dangerous.fandom.com/wiki/Founders_World",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Founders World as the Pilots Federation headquarters world in Shinrarta Dezhra.",
+      "revision": {
+        "page_id": 27625,
+        "revision_id": 145239,
+        "timestamp": "2021-06-09T02:10:33Z"
+      }
+    },
+    {
+      "id": "edw-jameson-family",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Jameson family",
+      "url": "https://elite-dangerous.fandom.com/wiki/Jameson_family",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Known members of the Jameson family and their relationships.",
+      "revision": {
+        "page_id": 62937,
+        "revision_id": 162099,
+        "timestamp": "2024-10-06T18:13:12Z"
+      }
+    },
+    {
+      "id": "edw-peter-jameson",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Peter Jameson",
+      "url": "https://elite-dangerous.fandom.com/wiki/Peter_Jameson",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Peter Jameson as the first Elite-ranked pilot and his place in the family.",
+      "revision": {
+        "page_id": 52328,
+        "revision_id": 173194,
+        "timestamp": "2026-10-07T22:21:31Z"
+      }
+    },
+    {
+      "id": "edw-inra",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Intergalactic Naval Reserve Arm",
+      "url": "https://elite-dangerous.fandom.com/wiki/Intergalactic_Naval_Reserve_Arm",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "INRA's history, the mycoid programme, John Jameson's mission and the table of rediscovered INRA bases with surface positions.",
+      "revision": {
+        "page_id": 49071,
+        "revision_id": 165462,
+        "timestamp": "2025-04-09T23:47:54Z"
+      }
+    },
+    {
+      "id": "edw-mycoid",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Mycoid",
+      "url": "https://elite-dangerous.fandom.com/wiki/Mycoid",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Development, testing and deployment of the mycoid weapon.",
+      "revision": {
+        "page_id": 51167,
+        "revision_id": 162214,
+        "timestamp": "2024-10-20T15:27:04Z"
+      }
+    },
+    {
+      "id": "edw-first-thargoid-war",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: First Thargoid War",
+      "url": "https://elite-dangerous.fandom.com/wiki/First_Thargoid_War",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Dates, sides and outcome of the First Thargoid War.",
+      "revision": {
+        "page_id": 67675,
+        "revision_id": 170042,
+        "timestamp": "2026-05-07T19:49:01Z"
+      }
+    },
+    {
+      "id": "edw-league-of-reparation",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: League of Reparation",
+      "url": "https://elite-dangerous.fandom.com/wiki/League_of_Reparation",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "The League's purpose, exposure in 3304, leader and dismantling.",
+      "revision": {
+        "page_id": 55947,
+        "revision_id": 165670,
+        "timestamp": "2025-04-26T23:31:46Z"
+      }
+    },
+    {
+      "id": "edw-pilots-federation",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Pilots Federation",
+      "url": "https://elite-dangerous.fandom.com/wiki/Pilots_Federation",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "The Pilots Federation's founding, purpose and headquarters.",
+      "revision": {
+        "page_id": 4759,
+        "revision_id": 174221,
+        "timestamp": "2026-10-27T05:13:55Z"
+      }
+    },
+    {
+      "id": "edw-data-point",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Data point",
+      "url": "https://elite-dangerous.fandom.com/wiki/Data_point",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "What data points are and that scanning them yields encoded materials.",
+      "revision": {
+        "page_id": 30966,
+        "revision_id": 141847,
+        "timestamp": "2021-04-12T08:24:57Z"
+      }
+    },
+    {
+      "id": "edw-generation-ship",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Generation Ship",
+      "url": "https://elite-dangerous.fandom.com/wiki/Generation_Ship",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Generation ship history, how to find them, and the Lycaon's discovery and position.",
+      "revision": {
+        "page_id": 43030,
+        "revision_id": 173400,
+        "timestamp": "2026-10-12T11:02:25Z"
+      }
+    },
+    {
+      "id": "edw-hutton-orbital",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Hutton Orbital",
+      "url": "https://elite-dangerous.fandom.com/wiki/Hutton_Orbital",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Hutton Orbital's location, distance from arrival, rare goods and community history.",
+      "revision": {
+        "page_id": 27987,
+        "revision_id": 169888,
+        "timestamp": "2026-04-27T20:11:15Z"
+      }
+    },
+    {
+      "id": "edblackbox-jameson-crash-site",
+      "kind": "community_research",
+      "name": "E:D Black Box: Jameson Crash Site farming guide",
+      "url": "https://edblackbox.com/guides/engineering/materials-and-farming/jameson-crash-site.html",
+      "licence": "Licence not stated; facts restated, no text copied",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Current surface position, the 2025 site update to nine data points, the four direct drops and their grades, and community-reported farming practice."
+    },
+    {
+      "id": "edsm-identifiers",
+      "kind": "community_dataset",
+      "name": "EDSM public system, body and station records",
+      "url": "https://www.edsm.net/en/api-v1",
+      "licence": "Licence not reviewed; only game identifiers recorded",
+      "accessed": "2026-10-29",
+      "reuse": "facts_restated",
+      "role": "Read once at curation time for game identifiers only: SystemAddress (id64), StarPos coordinates, MarketID and BodyID. Not used at runtime; EDSM remains an unverified provider in the Source Verification Register."
+    },
+    {
+      "id": "edsm-body-radii",
+      "kind": "community_dataset",
+      "name": "EDSM public body records (radius)",
+      "url": "https://www.edsm.net/en/api-system-v1",
+      "licence": "Licence not reviewed; only game facts recorded",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Read once at curation time for the radius of the three bodies that hold an exactly placed site (HIP 12099 1 a and 1 b, Hermitage 4 a), so a landing's distance from a site can be measured in kilometres. Not used at runtime; EDSM remains an unverified provider in the Source Verification Register."
+    },
+    {
+      "id": "fdevids-encoded-crosscheck",
+      "kind": "community_dataset",
+      "name": "EDCD/FDevIDs material table (encoded materials)",
+      "url": "https://github.com/EDCD/FDevIDs/blob/master/material.csv",
+      "licence": "No dataset licence stated",
+      "accessed": "2026-10-29",
+      "reuse": "cross_check_only",
+      "role": "Read to confirm the Journal symbols, grades and categories of the four encoded materials. Nothing is copied."
+    },
+    {
+      "id": "omnicovas-local-data-surface",
+      "kind": "omnicovas_reference",
+      "name": "OmniCOVAS Elite Local Data Surface Reference",
+      "url": "authority_files/documents/03_backend_source_compliance/OmniCOVAS_Elite_Local_Data_Surface_Reference_v1_0_AI_Reference.md",
+      "licence": "Project record",
+      "accessed": "2026-10-29",
+      "reuse": "internal_reference",
+      "role": "Which local Journal and companion records carry SystemAddress, StarPos and MarketID, so Atlas identities use the same meanings."
+    },
+    {
+      "id": "galnet-inra-league",
+      "kind": "frontier_documentation",
+      "name": "GalNet articles cited by the wiki (INRA condemnation, League of Reparation)",
+      "url": "https://www.elitedangerous.com/news/galnet",
+      "licence": "Frontier content; not retrieved",
+      "accessed": "2026-10-29",
+      "reuse": "not_retrieved",
+      "role": "The archived article links now redirect to the GalNet index, so the articles were not read. Listed because the wiki cites them; no claim rests on them alone."
+    },
+    {
+      "id": "reddit-jj386-discovery",
+      "kind": "community_research",
+      "name": "r/EliteDangerous discovery thread for Jameson's Cobra (cited by the wiki)",
+      "url": "https://www.reddit.com/r/EliteDangerous/comments/7ff8ln/cmdr_jameson_cobra_mk3_found/",
+      "licence": "Licence not reviewed; not retrieved",
+      "accessed": "2026-10-29",
+      "reuse": "not_retrieved",
+      "role": "The site refused the request, so it was not read. Listed because the wiki cites it for the discovery; no claim rests on it alone."
+    },
+    {
+      "id": "canonn-inra",
+      "kind": "community_research",
+      "name": "Canonn Research codex (INRA bases)",
+      "url": "https://canonn.science/codex/",
+      "licence": "Licence not reviewed; not retrieved",
+      "accessed": "2026-10-29",
+      "reuse": "not_retrieved",
+      "role": "Canonn did not answer during this review. Listed because the wiki cites it for INRA's history; no claim rests on it alone."
+    }
+  ],
+  "entities": [
+    {
+      "id": "shinrarta-dezhra",
+      "kind": "star_system",
+      "name": "Shinrarta Dezhra",
+      "aliases": [
+        "HIP 59296",
+        "Founders World system"
+      ],
+      "summary": "Permit-locked home system of the Pilots Federation, entered only with the Founders World permit.",
+      "attributes": {
+        "significance": "Headquarters of the Pilots Federation and home of Jameson Memorial, the station most veteran commanders aim to reach.",
+        "permit": "Founders World"
+      },
+      "location": {
+        "system": "Shinrarta Dezhra",
+        "system_address": 3932277478106,
+        "star_pos": [
+          55.71875,
+          17.59375,
+          27.15625
+        ],
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers",
+          "edw-shinrarta-dezhra"
+        ]
+      },
+      "claims": [
+        {
+          "id": "access",
+          "topic": "gameplay",
+          "text": "Entry needs the Founders World permit. The usual route is an Elite rank in any of the five ranked careers; Kickstarter backers held it from the start.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-shinrarta-dezhra"
+          ]
+        },
+        {
+          "id": "headquarters",
+          "topic": "history",
+          "text": "The system is the seat of the Pilots Federation, and Elite pilots may retire here.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-shinrarta-dezhra",
+            "edw-founders-world"
+          ]
+        },
+        {
+          "id": "name",
+          "topic": "history",
+          "text": "A tie-in novel explains the name as a shortened blend of Russian and Arabic words for life, she saw and hope.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-shinrarta-dezhra"
+          ]
+        },
+        {
+          "id": "powerplay",
+          "topic": "gameplay",
+          "text": "Powerplay cannot take control of this system or exploit it.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-shinrarta-dezhra"
+          ]
+        },
+        {
+          "id": "residents",
+          "topic": "history",
+          "text": "The Dark Wheel keeps a presence here, and the Engineer Lori Jameson works from Jameson Base on Shinrarta Dezhra A 1.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-shinrarta-dezhra",
+            "edw-jameson-family"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "founders-world",
+      "kind": "body",
+      "name": "Founders World",
+      "aliases": [],
+      "summary": "Terraformed Earth-like world in Shinrarta Dezhra holding the Pilots Federation headquarters.",
+      "attributes": {
+        "significance": "The world that gives the system permit its name and the place where Elite pilots are said to retire."
+      },
+      "location": {
+        "system": "Shinrarta Dezhra",
+        "system_address": 3932277478106,
+        "star_pos": [
+          55.71875,
+          17.59375,
+          27.15625
+        ],
+        "body": "Founders World",
+        "body_id": 14,
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers",
+          "edw-founders-world"
+        ]
+      },
+      "claims": [
+        {
+          "id": "world",
+          "topic": "identity",
+          "text": "A terraformed Earth-like world with a breathable atmosphere and native life, orbiting the star Shinrarta Dezhra.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-founders-world",
+            "edsm-identifiers"
+          ]
+        },
+        {
+          "id": "permit-name",
+          "topic": "history",
+          "text": "The Founders World permit is named after this planet, itself a nod to the game's Kickstarter founders.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-founders-world"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hip-12099",
+      "kind": "star_system",
+      "name": "HIP 12099",
+      "aliases": [],
+      "summary": "Remote system holding the wreck of John Jameson's Cobra and the abandoned INRA base Stack.",
+      "attributes": {
+        "significance": "Where the story of John Jameson's last flight ends, and a well-known encoded-material stop."
+      },
+      "location": {
+        "system": "HIP 12099",
+        "system_address": 560216394075,
+        "star_pos": [
+          -101.90625,
+          -95.46875,
+          -165.59375
+        ],
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers",
+          "edw-john-jameson"
+        ]
+      },
+      "claims": [
+        {
+          "id": "crash",
+          "topic": "history",
+          "text": "John Jameson's sabotaged Cobra came down on the moon HIP 12099 1 B.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-john-jameson",
+            "edw-inra"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "stack",
+          "topic": "history",
+          "text": "INRA also ran a base called Stack on the neighbouring moon 1 A, where captured Thargoid specimens were studied.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-mycoid"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hip-12099-1-b",
+      "kind": "body",
+      "name": "HIP 12099 1 b",
+      "aliases": [
+        "HIP 12099 1 B"
+      ],
+      "summary": "Landable moon of HIP 12099 where Jameson's Cobra crashed.",
+      "attributes": {
+        "significance": "The body a commander must land on to visit Jameson's Crash Site."
+      },
+      "location": {
+        "system": "HIP 12099",
+        "system_address": 560216394075,
+        "star_pos": [
+          -101.90625,
+          -95.46875,
+          -165.59375
+        ],
+        "body": "HIP 12099 1 b",
+        "body_id": 16,
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers",
+          "edw-john-jameson"
+        ],
+        "note": "The wiki writes the moon as 1 B; the game names it with a lower-case letter."
+      },
+      "claims": [
+        {
+          "id": "moon",
+          "topic": "identity",
+          "text": "The second moon of the first planet in HIP 12099, and landable.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edsm-identifiers",
+            "edblackbox-jameson-crash-site"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jamesons-crash-site",
+      "kind": "landmark",
+      "name": "Jameson's Crash Site",
+      "aliases": [
+        "Jameson Crash Site",
+        "JJ-386 crash site",
+        "John Jameson crash site"
+      ],
+      "summary": "Surface site on HIP 12099 1 b where the wreck of John Jameson's Cobra Mk III lies among data points.",
+      "attributes": {
+        "significance": "The resting place of a legendary pilot betrayed by INRA, and one of the best-known places to gather high-grade encoded materials.",
+        "landmark_type": "crash_site",
+        "period": "Crash during the First Thargoid War; found 25 November 3303",
+        "significance_spoiler": true
+      },
+      "location": {
+        "system": "HIP 12099",
+        "system_address": 560216394075,
+        "star_pos": [
+          -101.90625,
+          -95.46875,
+          -165.59375
+        ],
+        "body": "HIP 12099 1 b",
+        "body_id": 16,
+        "latitude": -54.37,
+        "longitude": -50.35,
+        "body_radius_km": 575.8,
+        "surface_resolution_deg": 0.01,
+        "precision": "exact",
+        "sources": [
+          "edblackbox-jameson-crash-site",
+          "edw-john-jameson",
+          "edsm-identifiers",
+          "edsm-body-radii"
+        ],
+        "note": "Position as given for the current game after the 2025 site update. The wiki's earlier figure, -54.3, -50.3, agrees to one decimal place."
+      },
+      "claims": [
+        {
+          "id": "wreck",
+          "topic": "history",
+          "text": "The wreck is John Jameson's own Cobra Mk III, registration JJ-386, which INRA sent on a collision course with this moon.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-john-jameson",
+            "edw-inra"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "The crash site was located on 25 November 3303, roughly 150 years after Jameson disappeared.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-john-jameson",
+            "reddit-jj386-discovery"
+          ]
+        },
+        {
+          "id": "mystery",
+          "topic": "uncertainty",
+          "text": "No body can be seen through the canopy and nobody knows who placed the beacons around the wreck, so whether Jameson survived the impact remains open.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "data-points",
+          "topic": "gameplay",
+          "text": "Nine data points surround the wreck since a 2025 update (four before). Scanning them gives encoded materials of grades 2 to 5.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edblackbox-jameson-crash-site",
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "nav-panel",
+          "topic": "gameplay",
+          "text": "After the first visit the site stays listed in the ship's navigation panel, so the coordinates are only needed once.",
+          "evidence": "community_reference",
+          "sources": [
+            "edblackbox-jameson-crash-site"
+          ]
+        },
+        {
+          "id": "safe",
+          "topic": "gameplay",
+          "text": "The site is abandoned and has no defences; an SRV is enough and no weapons, shields or cargo space are needed.",
+          "evidence": "community_reference",
+          "sources": [
+            "edblackbox-jameson-crash-site"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inra-stack",
+      "kind": "settlement",
+      "name": "Stack",
+      "aliases": [
+        "INRA base Stack"
+      ],
+      "summary": "Abandoned INRA research base on HIP 12099 1 a where living Thargoid specimens were studied.",
+      "attributes": {
+        "significance": "Shows how far INRA's experiments went, in the same system where Jameson's Cobra fell.",
+        "settlement_type": "abandoned_inra_base",
+        "period": "First Thargoid War era; found 24 November 3303"
+      },
+      "location": {
+        "system": "HIP 12099",
+        "system_address": 560216394075,
+        "star_pos": [
+          -101.90625,
+          -95.46875,
+          -165.59375
+        ],
+        "body": "HIP 12099 1 a",
+        "body_id": 15,
+        "latitude": -72.62,
+        "longitude": -67.52,
+        "body_radius_km": 860.5,
+        "surface_resolution_deg": 0.01,
+        "precision": "exact",
+        "sources": [
+          "edw-inra",
+          "edsm-identifiers",
+          "edsm-body-radii"
+        ],
+        "note": "The wiki lists the moon as 1 A; EDSM gives the game's body name 1 a with BodyID 15."
+      },
+      "claims": [
+        {
+          "id": "role",
+          "topic": "history",
+          "text": "INRA built a secure octagonal pit here to hold and test a captured Thargoid, which records show tried to escape several times.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-mycoid",
+            "edw-inra"
+          ]
+        },
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Rediscovered by commanders on 24 November 3303 during the search for INRA's bases.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-inra"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inra-taylor-keep",
+      "kind": "settlement",
+      "name": "Taylor Keep",
+      "aliases": [
+        "INRA base Taylor Keep"
+      ],
+      "summary": "Abandoned INRA base in 12 Trianguli where Jameson's Cobra was armed for his final mission.",
+      "attributes": {
+        "significance": "The last place John Jameson stopped before the mission that ended the First Thargoid War and his life.",
+        "settlement_type": "abandoned_inra_base",
+        "period": "First Thargoid War; found 25 November 3303"
+      },
+      "location": {
+        "system": "12 Trianguli",
+        "system_address": 181695145132,
+        "star_pos": [
+          -77.15625,
+          -76.8125,
+          -120.6875
+        ],
+        "body": "12 Trianguli 1 A",
+        "latitude": -51.57,
+        "longitude": 130.66,
+        "precision": "approximate",
+        "sources": [
+          "edw-inra",
+          "edsm-identifiers"
+        ],
+        "note": "The wiki names the body 1 A, but the game's body list for 12 Trianguli has no body of that name (the nearest is 12 Trianguli A 1). Until that is resolved the base is matched to the system only."
+      },
+      "claims": [
+        {
+          "id": "mission",
+          "topic": "history",
+          "text": "INRA loaded mycoid-armed missiles from Klatt Enterprises onto Jameson's own Cobra here, after modifying the ship for the mission.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-mycoid"
+          ]
+        },
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Rediscovered on 25 November 3303, the same day Jameson's wreck was found.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "body-name",
+          "topic": "uncertainty",
+          "text": "The documented body name does not match the game's naming for this system, so OmniCOVAS does not claim an exact landing position.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-inra",
+            "edsm-identifiers"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inra-hollis-gateway",
+      "kind": "settlement",
+      "name": "Hollis Gateway",
+      "aliases": [
+        "INRA base Hollis Gateway"
+      ],
+      "summary": "Derelict INRA research site where work on Thargoid technology first revealed the mycoid effect.",
+      "attributes": {
+        "significance": "Where the weapon that won the First Thargoid War was first noticed, and the first INRA base to be found again.",
+        "settlement_type": "abandoned_inra_base",
+        "period": "First Thargoid War; found 9 October 3303"
+      },
+      "location": {
+        "system": "Hermitage",
+        "system_address": 5363877956440,
+        "star_pos": [
+          -28.75,
+          25.0,
+          10.4375
+        ],
+        "body": "Hermitage 4 a",
+        "body_id": 12,
+        "latitude": -53.75,
+        "longitude": 157.61,
+        "body_radius_km": 905.7,
+        "surface_resolution_deg": 0.01,
+        "precision": "exact",
+        "sources": [
+          "edw-inra",
+          "edsm-identifiers",
+          "edsm-body-radii"
+        ]
+      },
+      "claims": [
+        {
+          "id": "discovery",
+          "topic": "history",
+          "text": "A junior researcher studying farming uses of Thargoid technology noticed that a fungus damaged it, and took the finding over the head of a dismissive superior.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-mycoid"
+          ]
+        },
+        {
+          "id": "tanks",
+          "topic": "history",
+          "text": "Corroded tanks on the base carry mycohazard warnings and have leaked what may be the weapon itself.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-inra"
+          ]
+        },
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Its rediscovery on 9 October 3303 began the hunt for INRA's other bases.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-inra"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generation-ship-lycaon",
+      "kind": "landmark",
+      "name": "Generation Ship Lycaon",
+      "aliases": [
+        "Lycaon"
+      ],
+      "summary": "Derelict generation ship drifting in the Alaunus system, the first of the lost generation ships to be found.",
+      "attributes": {
+        "significance": "Opened the search for humanity's lost colony ships; its logs tell how an alien illness ended the voyage.",
+        "landmark_type": "generation_ship",
+        "period": "Pre-hyperdrive era voyage; found 23 April 3303",
+        "significance_spoiler": true
+      },
+      "location": {
+        "system": "Alaunus",
+        "system_address": 18263140345249,
+        "star_pos": [
+          -0.65625,
+          -52.28125,
+          -5.96875
+        ],
+        "precision": "historical",
+        "sources": [
+          "edw-generation-ship",
+          "edsm-identifiers"
+        ],
+        "note": "Recorded when found as about 22,000 ls from the 10th planet towards Horae. Generation ships drift, so locate its present signal with the FSS."
+      },
+      "claims": [
+        {
+          "id": "first",
+          "topic": "history",
+          "text": "Found on 23 April 3303, ahead of every other lost generation ship.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship"
+          ]
+        },
+        {
+          "id": "fate",
+          "topic": "history",
+          "text": "Its logs describe a flu-like microorganism, picked up while surveying an asteroid and untouched by any vaccine, that killed everyone aboard before the ship lost power.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "finding",
+          "topic": "gameplay",
+          "text": "The Full Spectrum System Scanner identifies a generation ship's signal from anywhere in its system; listening posts give clues to where to look.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship"
+          ]
+        },
+        {
+          "id": "ships",
+          "topic": "history",
+          "text": "Generation ships were sub-light colony arks launched from 2097 onwards, made obsolete once hyperdrives arrived; a small share never reached their destinations.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alpha-centauri",
+      "kind": "star_system",
+      "name": "Alpha Centauri",
+      "aliases": [],
+      "summary": "Neighbouring star system to Sol, with Hutton Orbital orbiting far out near Proxima Centauri.",
+      "attributes": {
+        "significance": "Home of Hutton Orbital, one of the best-known pilgrimages in human space."
+      },
+      "location": {
+        "system": "Alpha Centauri",
+        "system_address": 1178708478315,
+        "star_pos": [
+          3.03125,
+          -0.09375,
+          3.15625
+        ],
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers",
+          "edw-hutton-orbital"
+        ]
+      },
+      "claims": [
+        {
+          "id": "hutton",
+          "topic": "identity",
+          "text": "Hutton Orbital orbits Eden, a world circling Proxima Centauri, far from the system's arrival star.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-hutton-orbital",
+            "edsm-identifiers"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hutton-orbital",
+      "kind": "station",
+      "name": "Hutton Orbital",
+      "aliases": [],
+      "summary": "Outpost in Alpha Centauri famous for lying about 0.22 light years from the system's arrival point.",
+      "attributes": {
+        "significance": "A rite of passage for new pilots and the origin of the Hutton Mug, a rare good created through a community vote.",
+        "station_type": "Outpost"
+      },
+      "location": {
+        "system": "Alpha Centauri",
+        "system_address": 1178708478315,
+        "star_pos": [
+          3.03125,
+          -0.09375,
+          3.15625
+        ],
+        "station": "Hutton Orbital",
+        "market_id": 3228728832,
+        "body": "Eden",
+        "body_id": 10,
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers",
+          "edw-hutton-orbital"
+        ]
+      },
+      "claims": [
+        {
+          "id": "distance",
+          "topic": "gameplay",
+          "text": "It lies about 6.78 million light seconds from the arrival star, roughly an hour and a half of supercruise at full throttle; the SCO frame shift drive shortens the trip at a higher fuel cost.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-hutton-orbital"
+          ]
+        },
+        {
+          "id": "rares",
+          "topic": "service",
+          "text": "Documented rare goods: the Hutton Mug and Centauri Mega Gin.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-hutton-orbital"
+          ]
+        },
+        {
+          "id": "mug",
+          "topic": "history",
+          "text": "Players chose the Hutton Mug in a vote on a new rare good; production began after a community goal delivered scrap here, despite a blockade by other players.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-hutton-orbital"
+          ]
+        },
+        {
+          "id": "anaconda",
+          "topic": "community_report",
+          "text": "A long-running joke promises a free Anaconda on arrival. The station has no shipyard or large pads, so the offer is not real.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-hutton-orbital"
+          ]
+        },
+        {
+          "id": "pads",
+          "topic": "service",
+          "text": "An outpost without large landing pads or a shipyard, as documented at review.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-hutton-orbital"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cobra-jj-386",
+      "kind": "vessel",
+      "name": "Cobra Mk III JJ-386",
+      "aliases": [
+        "Jameson's Cobra",
+        "JJ-386"
+      ],
+      "summary": "John Jameson's personal Cobra Mk III, now a wreck at Jameson's Crash Site.",
+      "attributes": {
+        "significance": "The ship that carried mycoid to the Thargoids, and the source of Jameson's last recorded words.",
+        "significance_spoiler": true
+      },
+      "claims": [
+        {
+          "id": "design",
+          "topic": "history",
+          "text": "Built long before today's Cobra Mk III: its canopy is smaller, it has one forward hardpoint hatch and its thrusters are laid out differently. Older than the frame shift drive, it most likely flew with an earlier hyperspace drive.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "logs",
+          "topic": "gameplay",
+          "text": "Scanning the wreck itself plays Jameson's final logs, recorded for his son.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edblackbox-jameson-crash-site",
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "modified",
+          "topic": "history",
+          "text": "INRA modified the ship for the mission, including a program that shut its systems down once the missiles were away.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-john-jameson"
+          ],
+          "spoiler": true
+        }
+      ]
+    },
+    {
+      "id": "john-jameson",
+      "kind": "person",
+      "name": "John Jameson",
+      "aliases": [
+        "Commander John Jameson",
+        "CMDR Jameson"
+      ],
+      "summary": "Celebrated independent pilot of the 3100s who delivered INRA's mycoid weapon and never came home.",
+      "attributes": {
+        "significance": "His mission ended the First Thargoid War, and the truth about it, found in 3303, turned INRA from a heroic memory into a scandal.",
+        "period": "3100s; lost during the First Thargoid War",
+        "person_type": "historical_pilot",
+        "significance_spoiler": true
+      },
+      "claims": [
+        {
+          "id": "pilot",
+          "topic": "history",
+          "text": "Renowned for both exploration and combat, he became a model for generations of pilots.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "recruited",
+          "topic": "history",
+          "text": "INRA hired him to deliver the mycoid weapon, telling him it would only disable Thargoid hyperdrives.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-john-jameson",
+            "edw-inra"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "strike",
+          "topic": "history",
+          "text": "He got through a Thargoid hive ship's defences, fired the missiles and got away, only for his scans to show the weapon killing those aboard.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-john-jameson",
+            "edw-inra"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "betrayal",
+          "topic": "history",
+          "text": "INRA's hidden program then shut his ship down on a course into HIP 12099 1 B, so he could not report what the weapon did. He recorded a last log for his son.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-john-jameson",
+            "edw-inra"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "fate",
+          "topic": "uncertainty",
+          "text": "Whether he died on impact or survived for a while is not known.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "namesake",
+          "topic": "uncertainty",
+          "text": "Jameson Memorial is named for a Jameson, but no source says it is John. OmniCOVAS does not link him to the station as its namesake.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-jameson-memorial",
+            "edw-jameson-family"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "peter-jameson",
+      "kind": "person",
+      "name": "Peter Jameson",
+      "aliases": [
+        "Commander Peter Jameson"
+      ],
+      "summary": "The earliest known Jameson and the first pilot awarded the Pilots Federation's Elite rank.",
+      "attributes": {
+        "significance": "Began the Jameson family's place in Pilots Federation history around 3100.",
+        "period": "Elite rank around 3100",
+        "person_type": "historical_pilot"
+      },
+      "claims": [
+        {
+          "id": "elite",
+          "topic": "history",
+          "text": "Received the Elite rank around 3100, the first pilot to do so, and carried the badge on his Cobra Mk III.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-peter-jameson",
+            "edw-jameson-family"
+          ]
+        },
+        {
+          "id": "reshas",
+          "topic": "history",
+          "text": "A fragment of his Cobra from a fight with pirates in Reshas is kept in a local museum there.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-peter-jameson"
+          ]
+        },
+        {
+          "id": "father",
+          "topic": "uncertainty",
+          "text": "He is John Jameson's ancestor. One wiki page calls him John's likely father, but the only source for that, an older game manual, is not treated as canon.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-peter-jameson",
+            "edw-jameson-family"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lori-jameson",
+      "kind": "person",
+      "name": "Lori Jameson",
+      "aliases": [],
+      "summary": "John Jameson's great-granddaughter, an Engineer working from Jameson Base in Shinrarta Dezhra.",
+      "attributes": {
+        "significance": "No other living Jameson is known.",
+        "period": "34th century",
+        "person_type": "engineer"
+      },
+      "claims": [
+        {
+          "id": "family",
+          "topic": "history",
+          "text": "Great-granddaughter of John Jameson and the only known living Jameson.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-jameson-family",
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "work",
+          "topic": "history",
+          "text": "Her engineering workshop is Jameson Base in Shinrarta Dezhra; its details live in the Engineering workspace.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-jameson-family",
+            "edw-shinrarta-dezhra"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "riri-mcallister",
+      "kind": "person",
+      "name": "Riri McAllister",
+      "aliases": [
+        "Nexus"
+      ],
+      "summary": "Founder and coordinator of the League of Reparation, known by the codename Nexus.",
+      "attributes": {
+        "significance": "Built the League to avenge John Jameson, believing herself his descendant.",
+        "period": "3304",
+        "person_type": "historical_figure"
+      },
+      "claims": [
+        {
+          "id": "league",
+          "topic": "history",
+          "text": "Founded the League of Reparation and directed it as Nexus until her arrest in July 3304.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-league-of-reparation",
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "descent",
+          "topic": "uncertainty",
+          "text": "She claimed John Jameson as an ancestor. Investigators could not check the claim because her records list her as an orphan with no known parents.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-league-of-reparation",
+            "edw-john-jameson",
+            "edw-jameson-family"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cmdr-robbie-junior",
+      "kind": "person",
+      "name": "CMDR Robbie Junior",
+      "aliases": [],
+      "summary": "Commander credited with finding Jameson's crashed Cobra in 3303.",
+      "attributes": {
+        "significance": "Credited by the wiki with locating the crash site.",
+        "person_type": "player_commander"
+      },
+      "claims": [
+        {
+          "id": "credit",
+          "topic": "history",
+          "text": "Named by the wiki as the commander who located the crash site on 25 November 3303.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-john-jameson",
+            "reddit-jj386-discovery"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inra",
+      "kind": "organization",
+      "name": "Intergalactic Naval Reserve Arm",
+      "aliases": [
+        "INRA"
+      ],
+      "summary": "Covert joint Federal and Imperial organisation that fought the Thargoids and created the mycoid weapon.",
+      "attributes": {
+        "significance": "Ended the First Thargoid War by means its leaders hid, including the deliberate loss of John Jameson.",
+        "org_type": "paramilitary",
+        "period": "First Thargoid War to 3253"
+      },
+      "claims": [
+        {
+          "id": "founded",
+          "topic": "history",
+          "text": "Set up jointly by the Federation and the Empire to counter Thargoid incursions; it became public in 3193 and disbanded in 3253 after losing public and political support.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-inra",
+            "canonn-inra"
+          ]
+        },
+        {
+          "id": "dates",
+          "topic": "uncertainty",
+          "text": "Older lore gives different founding dates and even a different name, so the founding year is not settled.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-inra"
+          ]
+        },
+        {
+          "id": "mycoid",
+          "topic": "history",
+          "text": "Its research turned a fungus that damaged Thargoid technology into the mycoid weapon, tested it on captured Thargoids and mass-produced it.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-mycoid"
+          ]
+        },
+        {
+          "id": "bases",
+          "topic": "history",
+          "text": "From October 3303 commanders found a network of its abandoned bases, whose records revealed the programme and Jameson's fate.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-mycoid"
+          ]
+        },
+        {
+          "id": "condemned",
+          "topic": "history",
+          "text": "In December 3303 the Emperor and the Alliance Prime Minister publicly condemned INRA's conduct, including how it used Jameson.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-inra",
+            "galnet-inra-league"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pilots-federation",
+      "kind": "organization",
+      "name": "Pilots Federation",
+      "aliases": [
+        "Pilots' Federation",
+        "The Pilots Federation"
+      ],
+      "summary": "Politically neutral organisation of independent pilots, founded in 2805, that issues every commander's licence and rank.",
+      "attributes": {
+        "significance": "The organisation every commander belongs to; it governs Shinrarta Dezhra.",
+        "org_type": "association",
+        "period": "Since 2805"
+      },
+      "claims": [
+        {
+          "id": "founded",
+          "topic": "history",
+          "text": "Formed in 2805, when private starship ownership boomed, to let pilots share trade-route information and protect each other from pirates.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-pilots-federation"
+          ]
+        },
+        {
+          "id": "ranks",
+          "topic": "gameplay",
+          "text": "Rates pilots in several careers; an Elite rank is the usual way to earn the Founders World permit.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-pilots-federation",
+            "edw-shinrarta-dezhra"
+          ]
+        },
+        {
+          "id": "hq",
+          "topic": "history",
+          "text": "Its headquarters is on Founders World in Shinrarta Dezhra.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-pilots-federation",
+            "edw-founders-world"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jameson-family",
+      "kind": "organization",
+      "name": "Jameson family",
+      "aliases": [
+        "The Jamesons"
+      ],
+      "summary": "Family of famous pilots tied to the Pilots Federation, from Peter Jameson to the Engineer Lori Jameson.",
+      "attributes": {
+        "significance": "Two of its members rank among the most renowned pilots in human history, and Jameson Memorial honours one of them.",
+        "org_type": "family"
+      },
+      "claims": [
+        {
+          "id": "members",
+          "topic": "history",
+          "text": "Known members are Peter Jameson, John Jameson, John's unnamed son, Dan Jameson and Lori Jameson.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-jameson-family"
+          ]
+        },
+        {
+          "id": "memorial",
+          "topic": "uncertainty",
+          "text": "Jameson Memorial is named for a member of the family, but the sources do not say which one.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-jameson-memorial",
+            "edw-jameson-family",
+            "edw-shinrarta-dezhra"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "league-of-reparation",
+      "kind": "organization",
+      "name": "League of Reparation",
+      "aliases": [],
+      "summary": "Terrorist group that killed descendants of INRA staff in the name of INRA's victims, dismantled in 3304.",
+      "attributes": {
+        "significance": "Showed how the INRA revelations, and Jameson's story above all, still drew blood 150 years later.",
+        "org_type": "terrorist_organisation",
+        "period": "Exposed May 3304; dismantled 27 July 3304"
+      },
+      "claims": [
+        {
+          "id": "aim",
+          "topic": "history",
+          "text": "Hunted the descendants of INRA personnel, leaving the words For Jameson at its killings.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-league-of-reparation",
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "end",
+          "topic": "history",
+          "text": "A taskforce of the three superpowers declared it dismantled on 27 July 3304 after capturing or killing every member.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-league-of-reparation",
+            "edw-john-jameson",
+            "galnet-inra-league"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "first-thargoid-war",
+      "kind": "event",
+      "name": "First Thargoid War",
+      "aliases": [],
+      "summary": "Humanity's first war with the Thargoids, fought from 3125 to 3151 and largely forgotten afterwards.",
+      "attributes": {
+        "significance": "Ended with the Thargoids leaving human space after INRA's mycoid strike, and helped bring down the Galactic Cooperative.",
+        "event_type": "conflict",
+        "period": "3125 to 3151"
+      },
+      "claims": [
+        {
+          "id": "sides",
+          "topic": "history",
+          "text": "The Galactic Cooperative and INRA defended human space; INRA tracked the Thargoids and built the means to stop them.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-first-thargoid-war"
+          ]
+        },
+        {
+          "id": "end",
+          "topic": "history",
+          "text": "The Thargoids withdrew from human space by 3151, which is credited to the mycoid weapon.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-first-thargoid-war",
+            "edw-mycoid"
+          ]
+        },
+        {
+          "id": "legacy",
+          "topic": "history",
+          "text": "Captured Thargoid ships later let the Alliance develop the frame shift drive.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-first-thargoid-war"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jameson-final-mission",
+      "kind": "event",
+      "name": "Jameson's final mission",
+      "aliases": [
+        "Mycoid deployment"
+      ],
+      "summary": "INRA's mycoid strike on a Thargoid hive ship, flown by John Jameson, which ended in his ship's sabotage and crash.",
+      "attributes": {
+        "significance": "The act credited with ending the First Thargoid War, and the betrayal its rediscovery exposed.",
+        "event_type": "mission",
+        "period": "Late in the First Thargoid War",
+        "significance_spoiler": true
+      },
+      "claims": [
+        {
+          "id": "prepared",
+          "topic": "history",
+          "text": "Prepared at Taylor Keep, where INRA armed Jameson's Cobra with mycoid missiles.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-mycoid"
+          ]
+        },
+        {
+          "id": "result",
+          "topic": "history",
+          "text": "The strike succeeded, the ship was shut down by INRA and fell on HIP 12099 1 B, where its final logs survived.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-john-jameson",
+            "edw-inra"
+          ],
+          "spoiler": true
+        }
+      ]
+    },
+    {
+      "id": "inra-bases-rediscovery",
+      "kind": "discovery",
+      "name": "Rediscovery of the INRA bases",
+      "aliases": [],
+      "summary": "The 3303 search in which commanders found abandoned INRA bases and the records of the mycoid programme.",
+      "attributes": {
+        "significance": "Brought the hidden history of the First Thargoid War back to light and led to Jameson's wreck.",
+        "event_type": "discovery",
+        "period": "9 October to 25 November 3303"
+      },
+      "claims": [
+        {
+          "id": "start",
+          "topic": "history",
+          "text": "Began with Hollis Gateway on 9 October 3303; Stack followed on 24 November and Taylor Keep on 25 November.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-inra"
+          ]
+        },
+        {
+          "id": "records",
+          "topic": "history",
+          "text": "Logs at the bases told the story of mycoid from discovery to deployment.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-mycoid"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crash-site-discovery",
+      "kind": "discovery",
+      "name": "Discovery of Jameson's crash site",
+      "aliases": [],
+      "summary": "The finding of John Jameson's Cobra on HIP 12099 1 B on 25 November 3303.",
+      "attributes": {
+        "significance": "Settled a century-and-a-half mystery and confirmed INRA's betrayal through Jameson's own logs.",
+        "event_type": "discovery",
+        "period": "25 November 3303"
+      },
+      "claims": [
+        {
+          "id": "when",
+          "topic": "history",
+          "text": "The wreck was located on 25 November 3303 at the coordinates now known as Jameson's Crash Site.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-john-jameson",
+            "reddit-jj386-discovery"
+          ]
+        },
+        {
+          "id": "aftermath",
+          "topic": "history",
+          "text": "Its logs fed the public condemnation of INRA in December 3303.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-mycoid"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "league-killings-3304",
+      "kind": "event",
+      "name": "League of Reparation killings",
+      "aliases": [
+        "For Jameson killings"
+      ],
+      "summary": "The 3304 campaign of assassinations, signed For Jameson, and the taskforce that ended it.",
+      "attributes": {
+        "significance": "Linked Jameson's name to a terror campaign within a year of his wreck being found.",
+        "event_type": "campaign",
+        "period": "Exposed May 3304; ended 27 July 3304"
+      },
+      "claims": [
+        {
+          "id": "cartesius",
+          "topic": "history",
+          "text": "Imperial Senator Nestor Cartesius was found murdered on 20 April 3304 beside a note reading For Jameson; the League was exposed two weeks later.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-league-of-reparation",
+            "edw-john-jameson"
+          ]
+        },
+        {
+          "id": "date-conflict",
+          "topic": "uncertainty",
+          "text": "The INRA page dates the Senator's murder to 3303; the League and Jameson pages give 3304, which OmniCOVAS follows.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-inra",
+            "edw-league-of-reparation",
+            "edw-john-jameson"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "thargoid-attack-shinrarta-3310",
+      "kind": "event",
+      "name": "Thargoid attack on Shinrarta Dezhra",
+      "aliases": [],
+      "summary": "Surprise Thargoid assault on the Pilots Federation's home system in September 3310, repelled by commanders.",
+      "attributes": {
+        "significance": "The only time the permit was lifted for every commander, who arrived in their hundreds to defend Jameson Memorial.",
+        "event_type": "attack",
+        "period": "19 to 23 September 3310"
+      },
+      "claims": [
+        {
+          "id": "attack",
+          "topic": "history",
+          "text": "The Thargoids struck the system on 19 September 3310; the assault was defeated by 23 September.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-shinrarta-dezhra",
+            "edw-jameson-memorial"
+          ]
+        },
+        {
+          "id": "station",
+          "topic": "history",
+          "text": "Jameson Memorial stayed largely operational, repairing and rearming defenders throughout.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-shinrarta-dezhra"
+          ]
+        },
+        {
+          "id": "permit",
+          "topic": "history",
+          "text": "The Pilots Federation suspended the permit requirement during the attack, then restored it.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-shinrarta-dezhra"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lycaon-discovery",
+      "kind": "discovery",
+      "name": "Discovery of the Generation Ship Lycaon",
+      "aliases": [],
+      "summary": "The first finding of a lost generation ship, in Alaunus on 23 April 3303.",
+      "attributes": {
+        "significance": "Started the search for the Missing that turned up sixteen generation ships.",
+        "event_type": "discovery",
+        "period": "23 April 3303"
+      },
+      "claims": [
+        {
+          "id": "when",
+          "topic": "history",
+          "text": "Found in Alaunus on 23 April 3303; the wiki credits CMDR Lexic Meise.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship"
+          ]
+        },
+        {
+          "id": "count",
+          "topic": "history",
+          "text": "Sixteen lost generation ships have been confirmed since then.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jameson-crash-site-data-scan",
+      "kind": "activity",
+      "name": "Scan the data points at Jameson's Crash Site",
+      "aliases": [],
+      "summary": "Land at the crash site and scan its data points from an SRV for encoded materials.",
+      "attributes": {
+        "context": "surface_site",
+        "yields": "four encoded materials, grades 2 to 5"
+      },
+      "steps": [
+        {
+          "id": "find",
+          "text": "Fly to HIP 12099 1 b. On a first visit map the moon with probes and head for -54.37, -50.35; later visits can pick the site from the navigation panel.",
+          "sources": [
+            "edblackbox-jameson-crash-site"
+          ]
+        },
+        {
+          "id": "land",
+          "text": "Land beside the wreck and deploy the SRV.",
+          "sources": [
+            "edblackbox-jameson-crash-site"
+          ]
+        },
+        {
+          "id": "scan",
+          "text": "Scan each data point with the SRV's data link scanner until all nine are done; the last one is the wreck itself.",
+          "sources": [
+            "edblackbox-jameson-crash-site",
+            "edw-data-point"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "id": "drops",
+          "topic": "gameplay",
+          "text": "Direct drops are Adaptive Encryptors Capture (grade 5), Atypical Encryption Archives (grade 4), Cracked Industrial Firmware (grade 3) and Modified Consumer Firmware (grade 2).",
+          "evidence": "community_reference",
+          "sources": [
+            "edblackbox-jameson-crash-site",
+            "fdevids-encoded-crosscheck"
+          ]
+        },
+        {
+          "id": "relog",
+          "topic": "community_report",
+          "text": "Community guides report resetting the points by returning to the main menu and reloading once the data store is full. This is a player technique, not a documented game feature.",
+          "evidence": "community_reference",
+          "sources": [
+            "edblackbox-jameson-crash-site"
+          ]
+        },
+        {
+          "id": "efficiency",
+          "topic": "community_report",
+          "text": "Guides report that collecting Adaptive Encryptors Capture here and converting it at an encoded Material Trader fills other encoded types faster than gathering them directly. This is a community efficiency estimate.",
+          "evidence": "community_reference",
+          "sources": [
+            "edblackbox-jameson-crash-site"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adaptive-encryptors-capture",
+      "kind": "material",
+      "name": "Adaptive Encryptors Capture",
+      "aliases": [],
+      "summary": "Grade 5 encoded material in the encryption files group.",
+      "inventory": {
+        "store": "materials",
+        "symbol": "adaptiveencryptors",
+        "category": "encoded",
+        "grade": 5
+      },
+      "attributes": {
+        "group": "Encryption files"
+      },
+      "claims": [
+        {
+          "id": "grade",
+          "text": "Encoded material, grade 5, encryption files group.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edblackbox-jameson-crash-site",
+            "fdevids-encoded-crosscheck"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atypical-encryption-archives",
+      "kind": "material",
+      "name": "Atypical Encryption Archives",
+      "aliases": [],
+      "summary": "Grade 4 encoded material in the encryption files group.",
+      "inventory": {
+        "store": "materials",
+        "symbol": "encryptionarchives",
+        "category": "encoded",
+        "grade": 4
+      },
+      "attributes": {
+        "group": "Encryption files"
+      },
+      "claims": [
+        {
+          "id": "grade",
+          "text": "Encoded material, grade 4, encryption files group.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edblackbox-jameson-crash-site",
+            "fdevids-encoded-crosscheck"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cracked-industrial-firmware",
+      "kind": "material",
+      "name": "Cracked Industrial Firmware",
+      "aliases": [],
+      "summary": "Grade 3 encoded material in the encoded firmware group.",
+      "inventory": {
+        "store": "materials",
+        "symbol": "industrialfirmware",
+        "category": "encoded",
+        "grade": 3
+      },
+      "attributes": {
+        "group": "Encoded firmware"
+      },
+      "claims": [
+        {
+          "id": "grade",
+          "text": "Encoded material, grade 3, encoded firmware group.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edblackbox-jameson-crash-site",
+            "fdevids-encoded-crosscheck"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "modified-consumer-firmware",
+      "kind": "material",
+      "name": "Modified Consumer Firmware",
+      "aliases": [],
+      "summary": "Grade 2 encoded material in the encoded firmware group.",
+      "inventory": {
+        "store": "materials",
+        "symbol": "consumerfirmware",
+        "category": "encoded",
+        "grade": 2
+      },
+      "attributes": {
+        "group": "Encoded firmware"
+      },
+      "claims": [
+        {
+          "id": "grade",
+          "text": "Encoded material, grade 2, encoded firmware group.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edblackbox-jameson-crash-site",
+            "fdevids-encoded-crosscheck"
+          ]
+        }
+      ]
+    }
+  ],
+  "extends": [
+    {
+      "id": "station-shinrarta-dezhra-jameson-memorial",
+      "kind": "station",
+      "name": "Jameson Memorial",
+      "aliases": [],
+      "summary": "Orbis starport in Shinrarta Dezhra, named for a member of the Jameson family, that sells every ship and almost every module.",
+      "attributes": {
+        "significance": "The Pilots Federation's showpiece starport, a goal for every commander chasing Elite, and a Guardian Technology Broker station.",
+        "station_type": "Orbis Starport"
+      },
+      "location": {
+        "system": "Shinrarta Dezhra",
+        "system_address": 3932277478106,
+        "star_pos": [
+          55.71875,
+          17.59375,
+          27.15625
+        ],
+        "station": "Jameson Memorial",
+        "market_id": 128666762,
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers",
+          "edw-jameson-memorial"
+        ],
+        "note": "Parent body not recorded: the wiki says the station orbits Founders World, while EDSM's current record names another body and a 3,286 ls arrival distance."
+      },
+      "claims": [
+        {
+          "id": "type",
+          "topic": "identity",
+          "text": "An Orbis starport in Shinrarta Dezhra.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-jameson-memorial",
+            "edsm-identifiers"
+          ]
+        },
+        {
+          "id": "namesake",
+          "topic": "uncertainty",
+          "text": "Named in honour of a member of the Jameson family; the sources do not say which one, so OmniCOVAS names no individual.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-jameson-memorial",
+            "edw-jameson-family",
+            "edw-shinrarta-dezhra"
+          ]
+        },
+        {
+          "id": "parent-body",
+          "topic": "uncertainty",
+          "text": "The wiki places the station in orbit of Founders World. EDSM's record, read on 2026-10-29, lists a different parent body and arrival distance. OmniCOVAS does not choose between them.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-jameson-memorial",
+            "edsm-identifiers"
+          ]
+        },
+        {
+          "id": "outfitting",
+          "topic": "service",
+          "text": "Documented as selling every ship and almost every module at a 10% discount. Not stocked: one-off human technology broker items, Enhanced Performance Thrusters and the smallest (class 1) Corrosion Resistant Cargo Rack. Live stock is not tracked here.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-jameson-memorial",
+            "edw-shinrarta-dezhra"
+          ]
+        },
+        {
+          "id": "rare",
+          "topic": "service",
+          "text": "The only seller of the rare good Waters of Shintara.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-jameson-memorial",
+            "edw-shinrarta-dezhra"
+          ]
+        },
+        {
+          "id": "broker",
+          "topic": "service",
+          "text": "Hosts a Guardian Technology Broker; Guardian modules unlocked there can be bought in its outfitting.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-jameson-memorial"
+          ]
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "type": "located_in",
+      "from": "founders-world",
+      "to": "shinrarta-dezhra",
+      "sources": [
+        "edw-founders-world",
+        "edsm-identifiers"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "station-shinrarta-dezhra-jameson-memorial",
+      "to": "shinrarta-dezhra",
+      "sources": [
+        "edw-jameson-memorial",
+        "edsm-identifiers"
+      ]
+    },
+    {
+      "type": "named_after",
+      "from": "station-shinrarta-dezhra-jameson-memorial",
+      "to": "jameson-family",
+      "sources": [
+        "edw-jameson-memorial",
+        "edw-jameson-family"
+      ],
+      "note": "Named for a member of the Jameson family. Which member is not specified."
+    },
+    {
+      "type": "historically_controlled_by",
+      "from": "shinrarta-dezhra",
+      "to": "pilots-federation",
+      "sources": [
+        "edw-shinrarta-dezhra"
+      ],
+      "role": "Through its local faction, the Pilots' Federation Local Branch",
+      "period": "As documented on the reviewed wiki revision (2026-10-29). Live faction control is not tracked."
+    },
+    {
+      "type": "historically_controlled_by",
+      "from": "station-shinrarta-dezhra-jameson-memorial",
+      "to": "pilots-federation",
+      "sources": [
+        "edw-jameson-memorial"
+      ],
+      "role": "Listed controlling faction",
+      "period": "As documented on the reviewed wiki revision (2026-10-29). Live faction control is not tracked."
+    },
+    {
+      "type": "associated_with",
+      "from": "pilots-federation",
+      "to": "founders-world",
+      "sources": [
+        "edw-pilots-federation",
+        "edw-founders-world"
+      ],
+      "note": "Headquarters"
+    },
+    {
+      "type": "located_in",
+      "from": "hip-12099-1-b",
+      "to": "hip-12099",
+      "sources": [
+        "edsm-identifiers",
+        "edw-john-jameson"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "jamesons-crash-site",
+      "to": "hip-12099-1-b",
+      "sources": [
+        "edblackbox-jameson-crash-site",
+        "edw-john-jameson"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "inra-stack",
+      "to": "hip-12099",
+      "sources": [
+        "edw-inra",
+        "edsm-identifiers"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "cobra-jj-386",
+      "to": "jamesons-crash-site",
+      "sources": [
+        "edw-john-jameson",
+        "edblackbox-jameson-crash-site"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "hutton-orbital",
+      "to": "alpha-centauri",
+      "sources": [
+        "edw-hutton-orbital",
+        "edsm-identifiers"
+      ]
+    },
+    {
+      "type": "associated_with",
+      "from": "john-jameson",
+      "to": "jamesons-crash-site",
+      "sources": [
+        "edw-john-jameson"
+      ],
+      "note": "His ship crashed here; whether he died here is not known."
+    },
+    {
+      "type": "associated_with",
+      "from": "john-jameson",
+      "to": "cobra-jj-386",
+      "sources": [
+        "edw-john-jameson"
+      ],
+      "note": "His personal ship"
+    },
+    {
+      "type": "member_of",
+      "from": "john-jameson",
+      "to": "jameson-family",
+      "sources": [
+        "edw-jameson-family"
+      ]
+    },
+    {
+      "type": "member_of",
+      "from": "peter-jameson",
+      "to": "jameson-family",
+      "sources": [
+        "edw-jameson-family",
+        "edw-peter-jameson"
+      ]
+    },
+    {
+      "type": "member_of",
+      "from": "lori-jameson",
+      "to": "jameson-family",
+      "sources": [
+        "edw-jameson-family"
+      ]
+    },
+    {
+      "type": "associated_with",
+      "from": "lori-jameson",
+      "to": "shinrarta-dezhra",
+      "sources": [
+        "edw-jameson-family",
+        "edw-shinrarta-dezhra"
+      ],
+      "note": "Works from Jameson Base on Shinrarta Dezhra A 1"
+    },
+    {
+      "type": "related_to",
+      "from": "peter-jameson",
+      "to": "john-jameson",
+      "sources": [
+        "edw-peter-jameson",
+        "edw-john-jameson"
+      ],
+      "note": "Ancestor; the exact generation is not settled",
+      "certainty": "uncertain"
+    },
+    {
+      "type": "related_to",
+      "from": "lori-jameson",
+      "to": "john-jameson",
+      "sources": [
+        "edw-jameson-family"
+      ],
+      "note": "Great-granddaughter"
+    },
+    {
+      "type": "member_of",
+      "from": "riri-mcallister",
+      "to": "league-of-reparation",
+      "sources": [
+        "edw-league-of-reparation"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "riri-mcallister",
+      "to": "john-jameson",
+      "sources": [
+        "edw-league-of-reparation",
+        "edw-john-jameson"
+      ],
+      "note": "Claimed descent that was never verified",
+      "certainty": "disputed"
+    },
+    {
+      "type": "participated_in",
+      "from": "john-jameson",
+      "to": "jameson-final-mission",
+      "sources": [
+        "edw-john-jameson",
+        "edw-inra"
+      ],
+      "role": "Pilot"
+    },
+    {
+      "type": "participated_in",
+      "from": "inra",
+      "to": "jameson-final-mission",
+      "sources": [
+        "edw-inra"
+      ],
+      "role": "Planned and armed the strike"
+    },
+    {
+      "type": "participated_in",
+      "from": "cobra-jj-386",
+      "to": "jameson-final-mission",
+      "sources": [
+        "edw-inra",
+        "edw-john-jameson"
+      ],
+      "role": "Strike ship"
+    },
+    {
+      "type": "participated_in",
+      "from": "john-jameson",
+      "to": "first-thargoid-war",
+      "sources": [
+        "edw-john-jameson"
+      ],
+      "role": "Pilot"
+    },
+    {
+      "type": "participated_in",
+      "from": "inra",
+      "to": "first-thargoid-war",
+      "sources": [
+        "edw-first-thargoid-war",
+        "edw-inra"
+      ],
+      "role": "Combatant and weapons developer"
+    },
+    {
+      "type": "related_to",
+      "from": "jameson-final-mission",
+      "to": "first-thargoid-war",
+      "sources": [
+        "edw-inra",
+        "edw-mycoid"
+      ],
+      "note": "Credited with ending the war"
+    },
+    {
+      "type": "occurred_at",
+      "from": "jameson-final-mission",
+      "to": "inra-taylor-keep",
+      "sources": [
+        "edw-inra"
+      ],
+      "note": "Ship armed here"
+    },
+    {
+      "type": "occurred_at",
+      "from": "jameson-final-mission",
+      "to": "jamesons-crash-site",
+      "sources": [
+        "edw-john-jameson",
+        "edw-inra"
+      ],
+      "note": "Mission ended here"
+    },
+    {
+      "type": "associated_with",
+      "from": "inra",
+      "to": "inra-stack",
+      "sources": [
+        "edw-inra"
+      ],
+      "note": "INRA base"
+    },
+    {
+      "type": "associated_with",
+      "from": "inra",
+      "to": "inra-taylor-keep",
+      "sources": [
+        "edw-inra"
+      ],
+      "note": "INRA base"
+    },
+    {
+      "type": "associated_with",
+      "from": "inra",
+      "to": "inra-hollis-gateway",
+      "sources": [
+        "edw-inra"
+      ],
+      "note": "INRA base"
+    },
+    {
+      "type": "occurred_at",
+      "from": "inra-bases-rediscovery",
+      "to": "inra-hollis-gateway",
+      "sources": [
+        "edw-inra"
+      ],
+      "note": "First base found, 9 October 3303"
+    },
+    {
+      "type": "occurred_at",
+      "from": "inra-bases-rediscovery",
+      "to": "inra-stack",
+      "sources": [
+        "edw-inra"
+      ],
+      "note": "Found 24 November 3303"
+    },
+    {
+      "type": "occurred_at",
+      "from": "inra-bases-rediscovery",
+      "to": "inra-taylor-keep",
+      "sources": [
+        "edw-inra"
+      ],
+      "note": "Found 25 November 3303"
+    },
+    {
+      "type": "related_to",
+      "from": "inra-bases-rediscovery",
+      "to": "inra",
+      "sources": [
+        "edw-inra"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "crash-site-discovery",
+      "to": "jamesons-crash-site",
+      "sources": [
+        "edw-john-jameson"
+      ]
+    },
+    {
+      "type": "discovered_by",
+      "from": "crash-site-discovery",
+      "to": "cmdr-robbie-junior",
+      "sources": [
+        "edw-john-jameson"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "crash-site-discovery",
+      "to": "inra-bases-rediscovery",
+      "sources": [
+        "edw-inra",
+        "edw-john-jameson"
+      ],
+      "note": "Same search, same day as Taylor Keep"
+    },
+    {
+      "type": "participated_in",
+      "from": "league-of-reparation",
+      "to": "league-killings-3304",
+      "sources": [
+        "edw-league-of-reparation"
+      ],
+      "role": "Perpetrator"
+    },
+    {
+      "type": "participated_in",
+      "from": "riri-mcallister",
+      "to": "league-killings-3304",
+      "sources": [
+        "edw-league-of-reparation"
+      ],
+      "role": "Leader, codename Nexus"
+    },
+    {
+      "type": "related_to",
+      "from": "league-of-reparation",
+      "to": "inra",
+      "sources": [
+        "edw-league-of-reparation",
+        "edw-inra"
+      ],
+      "note": "Targeted descendants of INRA staff"
+    },
+    {
+      "type": "related_to",
+      "from": "league-killings-3304",
+      "to": "john-jameson",
+      "sources": [
+        "edw-league-of-reparation",
+        "edw-john-jameson"
+      ],
+      "note": "Killings signed For Jameson"
+    },
+    {
+      "type": "occurred_at",
+      "from": "thargoid-attack-shinrarta-3310",
+      "to": "shinrarta-dezhra",
+      "sources": [
+        "edw-shinrarta-dezhra"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "thargoid-attack-shinrarta-3310",
+      "to": "station-shinrarta-dezhra-jameson-memorial",
+      "sources": [
+        "edw-jameson-memorial",
+        "edw-shinrarta-dezhra"
+      ],
+      "note": "Stayed operational under attack"
+    },
+    {
+      "type": "participated_in",
+      "from": "pilots-federation",
+      "to": "thargoid-attack-shinrarta-3310",
+      "sources": [
+        "edw-shinrarta-dezhra"
+      ],
+      "role": "Lifted the permit during the attack"
+    },
+    {
+      "type": "occurred_at",
+      "from": "lycaon-discovery",
+      "to": "generation-ship-lycaon",
+      "sources": [
+        "edw-generation-ship"
+      ]
+    },
+    {
+      "type": "located_at",
+      "from": "jameson-crash-site-data-scan",
+      "to": "jamesons-crash-site",
+      "sources": [
+        "edblackbox-jameson-crash-site",
+        "edw-john-jameson"
+      ]
+    },
+    {
+      "type": "obtained_from",
+      "from": "adaptive-encryptors-capture",
+      "to": "jameson-crash-site-data-scan",
+      "sources": [
+        "edblackbox-jameson-crash-site",
+        "edw-john-jameson"
+      ]
+    },
+    {
+      "type": "obtained_from",
+      "from": "atypical-encryption-archives",
+      "to": "jameson-crash-site-data-scan",
+      "sources": [
+        "edblackbox-jameson-crash-site",
+        "edw-john-jameson"
+      ]
+    },
+    {
+      "type": "obtained_from",
+      "from": "cracked-industrial-firmware",
+      "to": "jameson-crash-site-data-scan",
+      "sources": [
+        "edblackbox-jameson-crash-site",
+        "edw-john-jameson"
+      ]
+    },
+    {
+      "type": "obtained_from",
+      "from": "modified-consumer-firmware",
+      "to": "jameson-crash-site-data-scan",
+      "sources": [
+        "edblackbox-jameson-crash-site"
+      ]
+    }
+  ],
+  "unsupported": [
+    {
+      "subject": "Live faction control and station services",
+      "reason": "Control, services and stock are recorded as documented at review. OmniCOVAS has no live source for them in the Atlas."
+    },
+    {
+      "subject": "Taylor Keep's exact body",
+      "reason": "The documented body name 1 A does not match the game's body names in 12 Trianguli, so no BodyID or exact surface match is recorded."
+    },
+    {
+      "subject": "Generation ship positions",
+      "reason": "Generation ships drift; the Lycaon's position is historical and must be found with the Full Spectrum System Scanner."
+    },
+    {
+      "subject": "Jameson Memorial's parent body",
+      "reason": "The wiki and EDSM disagree, so the station is identified by MarketID and system only."
+    },
+    {
+      "subject": "Unreachable references",
+      "reason": "GalNet article links, the Reddit discovery thread and Canonn could not be read during review; no claim rests on them alone."
+    }
+  ]
+}

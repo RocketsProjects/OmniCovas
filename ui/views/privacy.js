@@ -7,7 +7,8 @@
 
 class PrivacyController {
   constructor() {
-    this.deleteConfirmStage = 0;
+    this.memoryStatus = null;
+    this.memoryActionInFlight = false;
     this._primitivesPromise = import('../components/command-primitives.js').catch(e => {
       console.error('[Privacy] Failed to load command primitives:', e);
       return null;
@@ -26,6 +27,23 @@ class PrivacyController {
     return base ? `${base}${path}` : null;
   }
 
+  async confirmProtectedAction(options) {
+    const gate = window.OmniConfirmationGate;
+    if (!gate?.confirmLocalAction) {
+      console.error('[Privacy] Shared Confirmation Gate is unavailable.');
+      return false;
+    }
+    return gate.confirmLocalAction(options);
+  }
+
+  notify(message, kind = 'info') {
+    if (window.OmniConfirmationGate?.announce) {
+      window.OmniConfirmationGate.announce(message, { kind });
+    } else {
+      console.info(`[Privacy] ${message}`);
+    }
+  }
+
   async init() {
     this.bindButtons();
     if (!this.apiBase) {
@@ -38,7 +56,7 @@ class PrivacyController {
 
   async _loadAndRender() {
     this.renderRouteHero();
-    await this.loadToggles();
+    await Promise.all([this.loadToggles(), this.loadMemoryStatus()]);
   }
 
   async renderRouteHero() {
@@ -49,6 +67,8 @@ class PrivacyController {
     if (!container) return;
 
     container.querySelector('.route-hero')?.remove();
+    container.querySelector('.page-header')?.remove();
+    container.querySelector('.ocv-page-header')?.remove();
 
     const hero = Primitives.createRouteHero({
       title: 'Privacy',
@@ -71,6 +91,7 @@ class PrivacyController {
     p.className = 'field-value unknown';
     p.textContent = 'Waiting for OmniCOVAS bridge…';
     list.replaceChildren(p);
+    this.renderMemoryUnavailable('Waiting for the local backend bridge.');
   }
 
   async loadToggles() {
@@ -92,6 +113,477 @@ class PrivacyController {
     } catch (err) {
       console.error("Failed to load privacy toggles:", err);
     }
+  }
+
+  async loadMemoryStatus(options = {}) {
+    const url = this.apiUrl('/memory/status');
+    if (!url) {
+      this.renderMemoryUnavailable('Waiting for the local backend bridge.');
+      return;
+    }
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      this.memoryStatus = data;
+      this.renderMemory(data, options);
+    } catch (err) {
+      console.error('[Privacy] Commander Memory status unavailable:', err);
+      this.memoryStatus = null;
+      this.renderMemoryUnavailable(
+        'Commander Memory is unavailable. Existing local data was not changed.',
+      );
+    }
+  }
+
+  renderMemoryUnavailable(message) {
+    const badge = document.getElementById('memory-status-badge');
+    if (badge) {
+      badge.className = 'status-badge status-badge--not-loaded';
+      badge.textContent = 'Unavailable';
+    }
+    this.setText('memory-total-records', '—');
+    this.setText('memory-profile-count', '—');
+    this.setText('memory-last-rebuild', 'Unknown');
+    for (const id of [
+      'memory-pause-btn',
+      'memory-rebuild-btn',
+      'memory-export-btn',
+      'memory-clear-btn',
+    ]) {
+      const button = document.getElementById(id);
+      if (button) button.disabled = true;
+    }
+    for (const id of ['memory-categories-list', 'memory-profiles-list']) {
+      const container = document.getElementById(id);
+      if (!container) continue;
+      const empty = document.createElement('p');
+      empty.className = 'field-value unknown memory-empty';
+      empty.textContent = message;
+      container.replaceChildren(empty);
+    }
+    this.setMemoryActionStatus(message, 'warning');
+  }
+
+  setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = String(value);
+  }
+
+  setMemoryActionStatus(message, kind = 'info') {
+    const status = document.getElementById('memory-action-status');
+    if (!status) return;
+    status.textContent = String(message || '');
+    status.dataset.kind = kind;
+  }
+
+  formatObservedTime(value) {
+    if (!value) return 'Never';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return 'Unknown';
+    return parsed.toLocaleString();
+  }
+
+  renderMemory(data, options = {}) {
+    const paused = Boolean(data?.paused);
+    const rebuilding = Boolean(data?.rebuilding);
+    const total = Number(data?.total_records || 0);
+    const profiles = Array.isArray(data?.profiles) ? data.profiles : [];
+    const badge = document.getElementById('memory-status-badge');
+    if (badge) {
+      badge.className = `status-badge status-badge--${
+        rebuilding ? 'stale' : paused ? 'disabled' : total > 0 ? 'available' : 'not-loaded'
+      }`;
+      badge.textContent = rebuilding
+        ? 'Rebuilding'
+        : paused
+          ? 'Paused'
+          : total > 0
+            ? 'Remembering locally'
+            : 'Ready — empty';
+    }
+
+    this.setText('memory-total-records', total.toLocaleString());
+    this.setText('memory-profile-count', profiles.length.toLocaleString());
+    this.setText('memory-last-rebuild', this.formatObservedTime(data?.last_rebuild_at));
+
+    const busy = this.memoryActionInFlight || rebuilding;
+    const pauseButton = document.getElementById('memory-pause-btn');
+    if (pauseButton) {
+      pauseButton.disabled = busy;
+      pauseButton.textContent = paused ? 'Resume Memory' : 'Pause Memory';
+      pauseButton.setAttribute('aria-pressed', String(paused));
+    }
+    const rebuildButton = document.getElementById('memory-rebuild-btn');
+    if (rebuildButton) rebuildButton.disabled = busy;
+    const exportButton = document.getElementById('memory-export-btn');
+    if (exportButton) exportButton.disabled = busy;
+    const clearButton = document.getElementById('memory-clear-btn');
+    if (clearButton) clearButton.disabled = busy || total === 0;
+
+    this.renderMemoryCategories(data?.categories || {}, busy);
+    this.renderMemoryProfiles(profiles, busy);
+    if (!this.memoryActionInFlight && !options.preserveMessage) {
+      this.setMemoryActionStatus(
+        paused
+          ? 'Acquisition is paused. Existing remembered records remain available.'
+          : rebuilding
+            ? 'Rebuilding from retained local history. Current sources still outrank Memory.'
+            : 'Commander Memory is local-only and records observed history, never current truth.',
+        paused || rebuilding ? 'warning' : 'info',
+      );
+    }
+  }
+
+  renderMemoryCategories(categories, busy) {
+    const container = document.getElementById('memory-categories-list');
+    if (!container) return;
+    container.replaceChildren();
+    const labels = {
+      systems: 'Systems',
+      stations: 'Stations',
+      market: 'Market snapshots',
+      outfitting: 'Outfitting snapshots',
+      shipyard: 'Shipyard snapshots',
+    };
+    for (const [category, label] of Object.entries(labels)) {
+      const count = Number(categories?.[category] || 0);
+      const row = document.createElement('article');
+      row.className = 'memory-record';
+      row.dataset.memoryCategory = category;
+
+      const header = document.createElement('div');
+      header.className = 'memory-record-header';
+      const title = document.createElement('span');
+      title.className = 'memory-record-title';
+      title.textContent = label;
+      const countElement = document.createElement('span');
+      countElement.className = 'status-badge status-badge--cached';
+      countElement.textContent = `${count.toLocaleString()} remembered`;
+      header.append(title, countElement);
+
+      const actions = document.createElement('div');
+      actions.className = 'memory-record-actions';
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'privacy-danger-button cmd-btn cmd-btn--danger';
+      remove.textContent = `Delete ${label}`;
+      remove.disabled = busy || count === 0;
+      remove.addEventListener('click', () => {
+        this.runProtectedMemoryAction('delete_category', { category });
+      });
+      actions.appendChild(remove);
+      row.append(header, actions);
+      container.appendChild(row);
+    }
+  }
+
+  renderMemoryProfiles(profiles, busy) {
+    const container = document.getElementById('memory-profiles-list');
+    if (!container) return;
+    container.replaceChildren();
+    if (profiles.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'field-value unknown memory-empty';
+      empty.textContent = 'No local Commander profile has been observed yet.';
+      container.appendChild(empty);
+      return;
+    }
+    for (const profile of profiles) {
+      const forgotten = Boolean(profile?.forgotten);
+      const paused = Boolean(profile?.paused);
+      const row = document.createElement('article');
+      row.className = 'memory-record';
+      row.dataset.memoryProfile = String(profile?.profile_key || '');
+
+      const header = document.createElement('div');
+      header.className = 'memory-record-header';
+      const title = document.createElement('span');
+      title.className = 'memory-record-title';
+      title.textContent = forgotten
+        ? 'Forgotten local profile'
+        : String(profile?.display_name || 'Local Commander profile');
+      const state = document.createElement('span');
+      state.className = `status-badge status-badge--${forgotten || paused ? 'disabled' : 'local-only'}`;
+      state.textContent = forgotten ? 'Forgotten' : paused ? 'Paused' : 'Active';
+      header.append(title, state);
+
+      const meta = document.createElement('p');
+      meta.className = 'memory-record-meta';
+      meta.textContent = forgotten
+        ? 'Display name removed; paused tombstone prevents silent rebuild.'
+        : `First seen ${this.formatObservedTime(profile?.first_seen_at)} · Last seen ${this.formatObservedTime(profile?.last_seen_at)}`;
+
+      const actions = document.createElement('div');
+      actions.className = 'memory-record-actions';
+      if (!forgotten) {
+        const pause = document.createElement('button');
+        pause.type = 'button';
+        pause.className = 'privacy-secondary-button cmd-btn cmd-btn--quiet';
+        pause.textContent = paused ? 'Resume Profile' : 'Pause Profile';
+        pause.disabled = busy;
+        pause.addEventListener('click', () => {
+          this.setMemoryProfilePaused(profile.profile_key, !paused);
+        });
+        const forget = document.createElement('button');
+        forget.type = 'button';
+        forget.className = 'privacy-danger-button cmd-btn cmd-btn--danger';
+        forget.textContent = 'Forget Profile';
+        forget.disabled = busy;
+        forget.addEventListener('click', () => {
+          this.runProtectedMemoryAction('forget_profile', {
+            profile_key: profile.profile_key,
+          });
+        });
+        actions.append(pause, forget);
+      }
+      row.append(header, meta, actions);
+      container.appendChild(row);
+    }
+  }
+
+  async setMemoryPaused(paused) {
+    const url = this.apiUrl('/memory/pause');
+    if (!url || this.memoryActionInFlight) return;
+    this.memoryActionInFlight = true;
+    this.renderMemory(this.memoryStatus || {});
+    this.setMemoryActionStatus(paused ? 'Pausing Memory acquisition…' : 'Resuming Memory acquisition…');
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paused: Boolean(paused) }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      this.memoryStatus = await res.json();
+      this.setMemoryActionStatus(
+        paused
+          ? 'Memory acquisition paused. Existing records were not deleted.'
+          : 'Memory acquisition resumed for new local observations.',
+        'success',
+      );
+    } catch (err) {
+      console.error('[Privacy] Failed to change Memory pause state:', err);
+      this.setMemoryActionStatus('Could not change Memory acquisition state.', 'error');
+    } finally {
+      this.memoryActionInFlight = false;
+      await this.loadMemoryStatus({ preserveMessage: true });
+    }
+  }
+
+  async setMemoryProfilePaused(profileKey, paused) {
+    const encoded = encodeURIComponent(String(profileKey || ''));
+    const url = this.apiUrl(`/memory/profiles/${encoded}/pause`);
+    if (!url || this.memoryActionInFlight) return;
+    this.memoryActionInFlight = true;
+    this.renderMemory(this.memoryStatus || {});
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paused: Boolean(paused) }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      this.setMemoryActionStatus(
+        paused
+          ? 'Profile acquisition paused. Existing records remain available.'
+          : 'Profile acquisition resumed.',
+        'success',
+      );
+    } catch (err) {
+      console.error('[Privacy] Failed to change profile pause state:', err);
+      this.setMemoryActionStatus('Could not change the profile pause state.', 'error');
+    } finally {
+      this.memoryActionInFlight = false;
+      await this.loadMemoryStatus({ preserveMessage: true });
+    }
+  }
+
+  async runProtectedMemoryAction(action, parameters = {}) {
+    if (this.memoryActionInFlight) return;
+    const gate = window.OmniConfirmationGate;
+    const proposeUrl = this.apiUrl('/memory/actions/propose');
+    const authorizeUrl = this.apiUrl('/memory/actions/authorize');
+    if (!gate?.delay || !proposeUrl || !authorizeUrl) {
+      this.setMemoryActionStatus(
+        'The shared Confirmation Gate or local backend is unavailable. Nothing changed.',
+        'error',
+      );
+      return;
+    }
+
+    this.memoryActionInFlight = true;
+    this.renderMemory(this.memoryStatus || {});
+    let confirmationId = null;
+    try {
+      const proposal = await fetch(proposeUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...parameters }),
+      });
+      if (!proposal.ok) throw await this.memoryHttpError(proposal);
+      const proposed = await proposal.json();
+      confirmationId = proposed?.confirmation_id || null;
+      if (!confirmationId) throw new Error('No confirmation id was returned.');
+      this.setMemoryActionStatus(
+        'Awaiting your decision in the shared Confirmation Gate. Nothing has changed yet.',
+        'warning',
+      );
+      const result = await this.awaitMemoryAuthorization(authorizeUrl, confirmationId);
+      if (action === 'export') {
+        await this.downloadMemoryExport(result);
+      } else {
+        this.setMemoryActionStatus(this.memoryActionSuccessMessage(action, result), 'success');
+      }
+    } catch (err) {
+      console.error('[Privacy] Protected Memory action did not complete:', err);
+      this.setMemoryActionStatus(
+        err?.commanderMessage || 'The Memory action did not complete. Existing data is unchanged unless a success was reported.',
+        'error',
+      );
+    } finally {
+      this.memoryActionInFlight = false;
+      await this.loadMemoryStatus({ preserveMessage: true });
+    }
+  }
+
+  async awaitMemoryAuthorization(authorizeUrl, confirmationId) {
+    const gate = window.OmniConfirmationGate;
+    for (let attempt = 0; attempt < 300; attempt += 1) {
+      const res = await fetch(authorizeUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation_id: confirmationId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.authorized) return data;
+        await gate.delay(1000);
+        continue;
+      }
+      throw await this.memoryHttpError(res);
+    }
+    const error = new Error('Commander Memory confirmation wait timed out.');
+    error.commanderMessage = 'The confirmation timed out. No Memory action was authorized.';
+    throw error;
+  }
+
+  async memoryHttpError(response) {
+    let detail = '';
+    try {
+      detail = String((await response.json())?.detail || '');
+    } catch (_error) {
+      detail = '';
+    }
+    const error = new Error(`HTTP ${response.status}: ${detail}`);
+    error.commanderMessage = /declin/i.test(detail)
+      ? 'You declined the Memory action. Nothing changed.'
+      : /expired|timed out/i.test(detail)
+        ? 'The confirmation expired. No Memory action was authorized.'
+        : detail || 'The local backend refused the Memory action.';
+    return error;
+  }
+
+  memoryActionSuccessMessage(action, result) {
+    const count = Number(result?.deleted_records || 0).toLocaleString();
+    const messages = {
+      clear: `Commander Memory cleared — ${count} derived records removed. The flight recorder was preserved.`,
+      delete_category: `Remembered category deleted — ${count} derived records removed.`,
+      forget_profile: `Profile forgotten — ${count} derived records removed and acquisition left paused.`,
+      rebuild: `Commander Memory rebuilt from ${Number(result?.events_scanned || 0).toLocaleString()} retained local events.`,
+    };
+    return messages[action] || 'Commander Memory action completed.';
+  }
+
+  async downloadMemoryExport(result) {
+    const resultUrl = this.apiUrl('/memory/export/result');
+    const exportId = result?.export_id;
+    if (!resultUrl || !exportId || !result?.payload) {
+      throw new Error('The backend returned an incomplete export ticket.');
+    }
+    let filename = null;
+    try {
+      const json = JSON.stringify(result.payload, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const blobUrl = URL.createObjectURL(blob);
+      filename = `omnicovas-commander-memory-${new Date().toISOString().slice(0, 10)}.json`;
+      const anchor = document.createElement('a');
+      anchor.href = blobUrl;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      await this.reportMemoryExportResult(resultUrl, exportId, 'failed');
+      throw err;
+    }
+    const recorded = await this.reportMemoryExportResult(
+      resultUrl,
+      exportId,
+      'download_initiated',
+    );
+    this.setMemoryActionStatus(
+      recorded
+        ? `Commander Memory download initiated as ${filename}. Completion cannot be observed.`
+        : `Download initiated as ${filename}, but the proof result could not be recorded.`,
+      recorded ? 'success' : 'warning',
+    );
+  }
+
+  async reportMemoryExportResult(url, exportId, outcome) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ export_id: exportId, outcome }),
+        });
+        if (res.ok) return true;
+        if (res.status < 500) return false;
+      } catch (err) {
+        console.error('[Privacy] Memory export result report failed:', err);
+      }
+    }
+    return false;
+  }
+
+  openMemoryProof() {
+    if (typeof window.Shell?.startRouteTransfer !== 'function') {
+      window.location.hash = '#/activity-log';
+      return;
+    }
+    window.Shell.startRouteTransfer({
+      originRoute: '/privacy',
+      originPackage: 'Privacy',
+      originSectionId: 'commander-memory-section',
+      targetRoute: '/activity-log',
+      targetSectionId: 'log-search',
+      targetEntityId: 'commander-memory',
+      targetLabel: 'Commander Memory proof',
+      reason: 'Review Commander Memory actions and confirmation evidence.',
+      returnLabel: 'Return to Commander Memory controls',
+      returnTarget: { route: '/privacy', sectionId: 'commander-memory-section' },
+    });
+  }
+
+  openObservedGalaxy() {
+    if (typeof window.Shell?.startRouteTransfer !== 'function') {
+      window.location.hash = '#/intel';
+      return;
+    }
+    window.Shell.startRouteTransfer({
+      originRoute: '/privacy',
+      originPackage: 'Privacy',
+      originSectionId: 'commander-memory-section',
+      targetRoute: '/intel',
+      targetSectionId: 'intel-domain-memory',
+      targetEntityId: 'commander-memory',
+      targetLabel: 'Observed Galaxy',
+      reason: 'Explore private remembered systems, stations, and local snapshots.',
+      returnLabel: 'Return to Commander Memory controls',
+      returnTarget: { route: '/privacy', sectionId: 'commander-memory-section' },
+    });
   }
 
   createToggleCard(key, info, Primitives) {
@@ -372,7 +864,79 @@ class PrivacyController {
       container.appendChild(card);
     }
 
-    document.getElementById("data-flows-modal").style.display = "flex";
+    this.openDataFlowsModal();
+  }
+
+  /* FU-013 (C1): the outbound-posture dialog is visually modal but had no
+     focus management — no aria-modal, no focus moved in, no trap, no Escape,
+     and no restoration on close. A keyboard or screen-reader commander opened
+     a blocking dialog while their focus stayed behind it, able to tab into
+     content the dialog was covering. */
+  openDataFlowsModal() {
+    const modal = document.getElementById("data-flows-modal");
+    if (!modal) return;
+    this.flowsModalReturnFocus = document.activeElement;
+    modal.setAttribute("aria-modal", "true");
+    modal.style.display = "flex";
+
+    if (!this.flowsModalKeydown) {
+      this.flowsModalKeydown = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          this.closeDataFlowsModal();
+          return;
+        }
+        if (event.key !== "Tab") return;
+        const focusable = this.focusableWithin(modal);
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement;
+        if (event.shiftKey && (active === first || !modal.contains(active))) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      };
+    }
+    document.addEventListener("keydown", this.flowsModalKeydown, true);
+
+    const focusable = this.focusableWithin(modal);
+    (focusable[0] || modal).focus?.();
+  }
+
+  closeDataFlowsModal() {
+    const modal = document.getElementById("data-flows-modal");
+    if (!modal) return;
+    modal.style.display = "none";
+    modal.removeAttribute("aria-modal");
+    if (this.flowsModalKeydown) {
+      document.removeEventListener("keydown", this.flowsModalKeydown, true);
+    }
+    /* Return the commander to the control they opened it from, not to the
+       top of the document. */
+    const target = this.flowsModalReturnFocus;
+    this.flowsModalReturnFocus = null;
+    if (target && typeof target.focus === "function" && document.contains(target)) {
+      target.focus();
+    }
+  }
+
+  focusableWithin(root) {
+    const selector = [
+      "button:not([disabled])",
+      "a[href]",
+      "input:not([disabled])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(",");
+    return Array.from(root.querySelectorAll(selector)).filter((el) => {
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
   }
 
   createFlowCard(flow) {
@@ -414,13 +978,35 @@ class PrivacyController {
   }
 
   bindButtons() {
+    document.getElementById('memory-refresh-btn')?.addEventListener('click', () => {
+      this.loadMemoryStatus();
+    });
+    document.getElementById('memory-observed-galaxy-btn')?.addEventListener('click', () => {
+      this.openObservedGalaxy();
+    });
+    document.getElementById('memory-pause-btn')?.addEventListener('click', () => {
+      this.setMemoryPaused(!Boolean(this.memoryStatus?.paused));
+    });
+    document.getElementById('memory-rebuild-btn')?.addEventListener('click', () => {
+      this.runProtectedMemoryAction('rebuild');
+    });
+    document.getElementById('memory-export-btn')?.addEventListener('click', () => {
+      this.runProtectedMemoryAction('export');
+    });
+    document.getElementById('memory-clear-btn')?.addEventListener('click', () => {
+      this.runProtectedMemoryAction('clear');
+    });
+    document.getElementById('memory-proof-btn')?.addEventListener('click', () => {
+      this.openMemoryProof();
+    });
+
     // Data Flows
     document.getElementById("view-data-flows-btn")?.addEventListener("click", () => {
       this.showDataFlowsModal();
     });
 
     document.getElementById("close-flows-modal-btn")?.addEventListener("click", () => {
-      document.getElementById("data-flows-modal").style.display = "none";
+      this.closeDataFlowsModal();
     });
 
     // Export Data
@@ -428,39 +1014,22 @@ class PrivacyController {
       this.exportData();
     });
 
-    // Delete Data (Two-stage confirmation)
+    // Delete Data — two stages rendered by the shared Confirmation Gate.
     document.getElementById("delete-data-btn")?.addEventListener("click", () => {
       this.showDeleteConfirmModal();
     });
-
-    document.getElementById("delete-confirm-cancel-btn")?.addEventListener("click", () => {
-      this.deleteConfirmStage = 0;
-      document.getElementById("delete-confirm-modal").style.display = "none";
-    });
-
-    document.getElementById("delete-confirm-1st-btn")?.addEventListener("click", () => {
-      this.deleteConfirmStage = 1;
-      document.getElementById("delete-confirm-buttons").style.display = "none";
-      document.getElementById("delete-confirm-2nd-buttons").style.display = "block";
-    });
-
-    document.getElementById("delete-confirm-cancel-2nd-btn")?.addEventListener("click", () => {
-      this.deleteConfirmStage = 0;
-      document.getElementById("delete-confirm-modal").style.display = "none";
-      document.getElementById("delete-confirm-buttons").style.display = "block";
-      document.getElementById("delete-confirm-2nd-buttons").style.display = "none";
-    });
-
-    document.getElementById("delete-confirm-2nd-btn")?.addEventListener("click", () => {
-      this.permanentlyDeleteData();
-    });
   }
 
-  showDeleteConfirmModal() {
-    this.deleteConfirmStage = 0;
-    document.getElementById("delete-confirm-buttons").style.display = "flex";
-    document.getElementById("delete-confirm-2nd-buttons").style.display = "none";
-    document.getElementById("delete-confirm-modal").style.display = "flex";
+  async showDeleteConfirmModal() {
+    const confirmed = await this.confirmProtectedAction({
+      title: 'Reset configuration vault?',
+      message: 'This clears vault-backed settings and privacy preferences. Activity Log and local database records are not deleted.',
+      confirmLabel: 'I understand',
+      secondMessage: 'Confirm the final configuration-vault reset.',
+      finalConfirmLabel: 'Reset configuration vault',
+      danger: true,
+    });
+    if (confirmed) await this.permanentlyDeleteData();
   }
 
   async exportData() {
@@ -489,7 +1058,7 @@ class PrivacyController {
       console.log("Configuration snapshot exported successfully");
     } catch (err) {
       console.error("Failed to export data:", err);
-      alert("Failed to export configuration snapshot. See console for details.");
+      this.notify('Failed to export configuration snapshot. See console for details.', 'error');
     }
   }
 
@@ -500,18 +1069,20 @@ class PrivacyController {
     try {
       const res = await fetch(url, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmed: true }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       // Close modal
-      document.getElementById("delete-confirm-modal").style.display = "none";
-
-      // Show success message and reload
-      alert("Configuration vault reset. Activity Log and local database records were not deleted. Please restart the app.");
+      this.notify(
+        'Configuration vault reset. Activity Log and local database records were not deleted. Please restart the app.',
+        'success',
+      );
       window.location.reload();
     } catch (err) {
       console.error("Failed to delete data:", err);
-      alert("Failed to reset configuration vault. See console for details.");
+      this.notify('Failed to reset configuration vault. See console for details.', 'error');
     }
   }
 }

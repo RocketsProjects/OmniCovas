@@ -148,6 +148,155 @@
   line-height: var(--line-height);
 }
 
+/* ── Phase 11 Commander Memory ─────────────────────────────────────────── */
+
+.memory-section-header,
+.memory-danger-zone,
+.memory-record-header,
+.memory-record-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.memory-section-header h2,
+.memory-danger-zone h3,
+.memory-management-panel h3 {
+  margin: 0;
+}
+
+.memory-kicker {
+  margin: 0 0 var(--space-1) 0 !important;
+  color: var(--color-command) !important;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.memory-boundary-note {
+  padding: var(--space-3);
+  border-left: 3px solid var(--color-border);
+  background: var(--color-bg);
+  font-size: var(--font-size-sm);
+}
+
+.memory-action-status {
+  min-height: 1.5em;
+  margin-bottom: var(--space-4);
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+
+.memory-action-status[data-kind="success"] {
+  color: var(--color-ok);
+}
+
+.memory-action-status[data-kind="warning"] {
+  color: var(--color-warn);
+}
+
+.memory-action-status[data-kind="error"] {
+  color: var(--color-critical);
+}
+
+.memory-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.memory-stat,
+.memory-management-panel,
+.memory-record {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.memory-stat {
+  padding: var(--space-3);
+}
+
+.memory-stat-label {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+
+.memory-primary-controls,
+.memory-record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.memory-primary-controls {
+  margin-bottom: var(--space-4);
+}
+
+.memory-management-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.memory-management-panel {
+  padding: var(--space-4);
+}
+
+.memory-management-panel h3 {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-base);
+}
+
+.memory-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.memory-record {
+  padding: var(--space-3);
+}
+
+.memory-record-title {
+  font-weight: var(--font-weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.memory-record-meta {
+  margin: var(--space-1) 0 0 0 !important;
+  font-size: var(--font-size-sm);
+}
+
+.memory-record-actions {
+  justify-content: flex-start;
+  margin-top: var(--space-3);
+}
+
+.memory-record-actions button {
+  font-size: var(--font-size-sm);
+}
+
+.memory-danger-zone {
+  align-items: flex-end;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.memory-danger-zone p {
+  margin-bottom: 0 !important;
+}
+
+.memory-empty {
+  margin: 0 !important;
+  font-size: var(--font-size-sm);
+}
+
 /* ── Data flows grid ────────────────────────────────────────────────────── */
 
 .flows-grid {
@@ -180,7 +329,7 @@
 
 .flow-status.active {
   background: var(--color-surface);
-  color: var(--color-accent);
+  color: var(--color-telemetry-label);
 }
 
 .flow-status.disabled {
@@ -346,8 +495,16 @@
   }
 
   .privacy-toggles-grid,
-  .flows-grid {
+  .flows-grid,
+  .memory-summary,
+  .memory-management-grid {
     grid-template-columns: 1fr;
+  }
+
+  .memory-section-header,
+  .memory-danger-zone {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .privacy-modal-content {

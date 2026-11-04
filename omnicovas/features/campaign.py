@@ -366,6 +366,28 @@ def _append_activity(
 # ---------------------------------------------------------------------------
 
 
+def log_gate_proof(
+    activity_log: ActivityLog | None,
+    *,
+    event_type: str,
+    summary: str,
+    payload: JsonDict | None = None,
+) -> str | None:
+    """Record a campaign gate-lifecycle event through the Phase 9 sanitiser.
+
+    Exposed for Phase 14 R8's protected-transition gate, which lives in the API
+    layer. Routing it here rather than letting the API append directly keeps
+    every campaign event going through `normalize_phase9_payload`, so a gate
+    payload cannot become the one place raw private text reaches the log.
+    """
+    return _append_activity(
+        activity_log,
+        event_type=event_type,
+        summary=summary,
+        payload=payload,
+    )
+
+
 async def create_campaign(
     session_factory: async_sessionmaker[AsyncSession],
     payload: CampaignCreate,

@@ -19,6 +19,7 @@ import {
   normalizeSourceLabel,
   normalizeTruthClass,
 } from '../utils/display-names.js';
+import { freshnessLabel } from '../utils/freshness.js';
 
 export const LOCAL_CONTEXT_SNAPSHOT_PATH = '/intel/local-context/snapshot';
 
@@ -124,6 +125,12 @@ function displayToken(value) {
   if (/[<>]/.test(text)) return UNKNOWN;
   let working = text.replace(/^\$/, '').replace(/;$/, '');
   working = working
+    /* PB10-R7: Frontier writes system security as
+       `$GAlAXY_MAP_INFO_state_anarchy;` (note the irregular casing, which is
+       Frontier's, not a typo). Without this rule the generic title-caser
+       rendered "Galaxy Map Info State Anarchy" on Intel and Navigation —
+       a raw internal token leaking into a Commander-facing fact. */
+    .replace(/^galaxy_map_info_state_/i, '')
     .replace(/^system_security_/i, '')
     .replace(/^security_/i, '')
     .replace(/^economy_/i, '')
@@ -159,6 +166,11 @@ function proofFrom(id, label, sourceNode) {
     let value = source[key];
     if (key === 'source') value = normalizeSourceLabel(value).display;
     if (key === 'truth_class') value = normalizeTruthClass(value).display;
+    if (key === 'freshness') value = freshnessLabel({
+      freshness: value,
+      source: source.source,
+      truthClass: source.truth_class,
+    });
     if (key === 'caveat' && typeof value === 'string' && /global market truth/i.test(value)) {
       value = value.replace(/not live and not global market truth/ig, 'not live beyond the current station snapshot');
     }
@@ -176,7 +188,7 @@ function proofFrom(id, label, sourceNode) {
     source: normalizeSourceLabel(source.source).display,
     event: displayValue(source.source_event),
     timestamp: displayValue(source.event_timestamp),
-    freshness: displayValue(source.freshness),
+    freshness: freshnessLabel(source),
     truthClass: normalizeTruthClass(source.truth_class).display,
     caveat: displayValue(
       typeof source.caveat === 'string' && /global market truth/i.test(source.caveat)
@@ -300,11 +312,22 @@ function deriveCargoHold(payload, marketAvailable) {
   const used = cleanNumber(cargo.total_count) ?? inventory.reduce((sum, item) => sum + item.count, 0);
   const remaining = capacity === null ? null : Math.max(capacity - used, 0);
   const loaded = sourceLoaded(cargo) || Array.isArray(cargo.inventory);
-  const hasCargo = inventory.length > 0 && used > 0;
+  const inventoryComplete = cargo.inventory_complete === undefined
+    ? Array.isArray(cargo.inventory)
+    : cargo.inventory_complete === true;
+  const hasCargo = used > 0;
+  const hasManifest = inventoryComplete && inventory.length > 0;
+  const emptyMessage = !loaded
+    ? 'No local cargo context loaded. Open Cargo in Elite Dangerous to build a Cargo Hold.'
+    : (hasCargo && !inventoryComplete)
+      ? 'Cargo total observed, but the latest journal event did not include an item breakdown. Open Cargo in Elite Dangerous to refresh Cargo.json.'
+      : 'Cargo hold empty.';
 
   return {
     available: loaded,
     hasCargo,
+    hasManifest,
+    inventoryComplete,
     vessel: displayValue(cargo.vessel),
     capacity,
     used,
@@ -314,30 +337,33 @@ function deriveCargoHold(payload, marketAvailable) {
     remainingLabel: remaining === null ? UNKNOWN : `${displayInt(remaining)} t`,
     inventory,
     topRows: inventory.slice(0, 6),
-    emptyMessage: loaded
-      ? 'Cargo hold empty.'
-      : 'No local cargo context loaded. Open Cargo in Elite Dangerous to build a Cargo Hold.',
+    emptyMessage,
     actions: [
       {
         id: 'search-sell-prices',
         label: 'Search sell prices',
         enabled: true,
-        reason: hasCargo
+        reason: hasManifest
           ? 'Stages Market Search with cargo context.'
-          : 'Stages Market Search; cargo is currently empty or not loaded.',
+          : hasCargo
+            ? 'Stages Market Search; the cargo item breakdown is not loaded.'
+            : 'Stages Market Search; cargo is currently empty or not loaded.',
       },
       {
         id: 'open-market-search',
         label: 'Open Market Search',
         enabled: true,
-        reason: 'Searches the current local market snapshot when loaded.',
+        /* R0-1: this derivation only knows whether the station offers a market
+           service, not whether the loaded snapshot is current. It must not
+           assert currency on the snapshot's behalf. */
+        reason: 'Searches the local market snapshot when loaded.',
       },
       {
         id: 'compare-current-station',
         label: 'Compare current station',
         enabled: marketAvailable,
         reason: marketAvailable
-          ? 'Uses only the current local station snapshot.'
+          ? 'Uses only the loaded local station snapshot.'
           : 'No local market snapshot loaded for comparison.',
       },
     ],
@@ -391,6 +417,8 @@ function deriveMarketSearch(payload, cargoHold) {
   const stationName = cleanString(market.station_name);
   const starSystem = cleanString(market.star_system);
   const marketId = market.market_id ?? null;
+  const freshness = cleanString(market.freshness);
+  const isStale = freshness === 'stale';
   const cargoQueries = asArray(cargoHold?.inventory)
     .filter((item) => item.count > 0)
     .map((item) => ({
@@ -399,18 +427,48 @@ function deriveMarketSearch(payload, cargoHold) {
       count: item.count,
     }));
 
+  /* R0-1 provenance vocabulary. Market provenance is owned here so that every
+     consumer says the same true thing. A snapshot is only describable as
+     "current" when the backend has not flagged it stale — staleness already
+     covers a different station, a different system, and having undocked. When
+     it is stale the snapshot station must be named, and when the station is
+     unknown no locality may be claimed at all. */
+  const provenanceLabel = !available
+    ? 'no local market snapshot'
+    : (isStale
+      ? (stationName ? `${stationName} (historical)` : 'a historical snapshot (station unknown)')
+      : (stationName ? `${stationName} (this station)` : 'this station'));
+  const rowsPhrase = !available
+    ? 'No local market snapshot loaded'
+    : (isStale
+      ? `${items.length} market rows observed at ${stationName || 'an unknown station'} (historical)`
+      : `${items.length} current local market rows`);
+  const searchScopeLabel = !available
+    ? 'Search local market snapshot'
+    : (isStale
+      ? `Search historical market snapshot from ${stationName || 'an unknown station'}`
+      : 'Search current local market snapshot');
+
   return {
     available,
     stationName,
     starSystem,
     marketId,
+    freshness,
+    eventTimestamp: cleanString(market.event_timestamp),
+    isStale,
+    provenanceLabel,
+    rowsPhrase,
+    searchScopeLabel,
     itemCount: items.length,
     items,
     cargoQueries,
     statusLine: available
-      ? `Current local market snapshot: ${items.length} commodities observed${stationName ? ` at ${stationName}` : ''}.`
+      ? `${isStale ? 'Historical local market snapshot' : 'Current local market snapshot'}: ${items.length} commodities observed${stationName ? ` at ${stationName}` : ''}.`
       : 'No local market snapshot loaded. Open the Commodities Market at a station to load Market.json.',
-    scopeLine: available ? 'Observed at this station. Known from Market.json.' : 'Local station market data only.',
+    scopeLine: available
+      ? `${isStale ? 'Historical observation' : 'Observed at this station'}. Known from Market.json.`
+      : 'Local station market data only.',
     detailRows: [
       { label: 'Station', value: displayValue(stationName) },
       { label: 'System', value: displayValue(starSystem) },
@@ -466,9 +524,15 @@ function deriveModuleSearch(payload, stationServices) {
 
 function deriveStationBrief(payload, stationServices, marketSearch, cargoHold) {
   const station = objectOrNull(payload?.station_context) || {};
-  const name = cleanString(station.station_name)
-    || cleanString(marketSearch.stationName);
-  const system = cleanString(station.star_system) || cleanString(marketSearch.starSystem);
+  /* R0-6: station identity comes from the station context alone. It used to
+     fall back to the market snapshot's station, which meant an unloaded
+     station context would present the snapshot's station as where the
+     Commander is — and the snapshot can be a different station in a different
+     system (observed: Paxton Landing / Einheriar while docked at Jaques
+     Station / Colonia). Identity is never inherited across sources; when the
+     station context has not been read, the station is Unknown. */
+  const name = cleanString(station.station_name);
+  const system = cleanString(station.star_system);
   const stationFaction = namedObject(station.station_faction);
   const economies = economyRows(station.station_economies);
   const available = sourceLoaded(station) && Boolean(name || system);
@@ -479,7 +543,9 @@ function deriveStationBrief(payload, stationServices, marketSearch, cargoHold) {
       id: 'open-market-intel',
       label: 'Open Market Intel',
       enabled: true,
-      reason: 'Stages Market Search for the current local station snapshot.',
+      /* R0-1: name the snapshot's provenance rather than asserting it is the
+         current station's market. */
+      reason: `Stages Market Search for the local snapshot from ${marketSearch.provenanceLabel}.`,
     };
   } else if (cargoHold.hasCargo) {
     primaryAction = {
@@ -504,6 +570,8 @@ function deriveStationBrief(payload, stationServices, marketSearch, cargoHold) {
      known — say so explicitly and explain when the full context refreshes. */
   const partialFromMarket = station.context_kind === 'market_snapshot_only'
     || (!available && (marketSearch.available || Boolean(name)));
+  const freshness = cleanString(station.freshness);
+  const isStale = freshness === 'stale';
 
   return {
     available,
@@ -511,11 +579,16 @@ function deriveStationBrief(payload, stationServices, marketSearch, cargoHold) {
     systemName: system,
     contextKind: cleanString(station.context_kind),
     isDocked: station.is_docked === true ? true : (station.is_docked === false ? false : null),
+    freshness,
+    eventTimestamp: cleanString(station.event_timestamp),
+    caveat: cleanString(station.caveat),
+    isStale,
+    currentEligible: station.is_docked === true && !isStale,
     missingFields: asArray(station.missing_fields).map((entry) => cleanString(entry)).filter(Boolean),
     partialFromMarket,
     title: name || 'Station Brief',
     headline: partialFromMarket
-      ? 'Station known from local market snapshot. Full station event context not loaded in this app session.'
+      ? `${isStale ? 'Historical station' : 'Station'} known from local market snapshot. Full station event context not loaded in this app session.`
       : available
         ? `${name || 'Station'}${system ? ` in ${system}` : ''}`
         : 'Dock at a station to load local context.',

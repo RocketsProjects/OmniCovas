@@ -33,7 +33,7 @@ body.uiv3-cockpit-frame {
 }
 
 .uiv3-data-label {
-  color: var(--uiv3-accent-cyan);
+  color: var(--uiv3-text-muted);
   font-family: var(--uiv3-font-mono);
   letter-spacing: 0;
   text-transform: uppercase;
@@ -53,6 +53,18 @@ body.uiv3-cockpit-frame {
   min-height: 32px;
   padding: 0 12px;
   text-transform: uppercase;
+}
+
+.uiv3-command-button.cmd-btn--primary {
+  background: var(--color-command);
+  border-color: var(--color-command);
+  color: var(--color-bg);
+}
+
+.uiv3-command-button.cmd-btn--quiet {
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-fg);
 }
 
 .uiv3-command-button:focus-visible,
@@ -353,9 +365,9 @@ body.uiv3-cockpit-frame {
 
 .uiv3-last-known-chip {
   align-items: center;
-  background: rgba(68, 153, 255, 0.08);
-  border: 1px solid var(--uiv3-border-cyan);
-  color: var(--uiv3-accent-cyan);
+  background: var(--uiv3-panel);
+  border: 1px solid var(--uiv3-border);
+  color: var(--uiv3-text-muted);
   display: inline-flex;
   font-family: var(--uiv3-font-mono);
   font-size: 10px;
@@ -491,9 +503,9 @@ a.uiv3-watch-item--link:focus-visible {
 .uiv3-tab-badge {
   align-items: center;
   align-self: center;
-  background: var(--uiv3-area-card-active-bg);
-  border: 1px solid var(--uiv3-border-active);
-  color: var(--uiv3-accent-orange);
+  background: var(--uiv3-panel);
+  border: 1px solid var(--uiv3-border);
+  color: var(--uiv3-text-muted);
   display: inline-flex;
   flex: 0 0 auto;
   font-family: var(--uiv3-font-mono);
@@ -526,7 +538,8 @@ a.uiv3-watch-item--link:focus-visible {
   flex-direction: column;
   gap: 18px;
   left: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 18px;
   position: fixed;
   top: calc(var(--uiv3-topbar-height) + var(--uiv3-identity-height) + var(--uiv3-watch-height) + var(--uiv3-tabs-height));
@@ -544,6 +557,7 @@ a.uiv3-watch-item--link:focus-visible {
   background: var(--uiv3-panel);
   border: 1px solid var(--uiv3-border);
   border-radius: 4px;
+  flex: 0 0 auto;
   min-height: 96px;
   padding: 14px;
 }
@@ -764,5 +778,157 @@ a.uiv3-watch-item--link:focus-visible {
   .uiv3-tab {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* --- Skip link (accessibility; FU-013c hardening) ------------------------ */
+
+.uiv3-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+  padding: 8px 14px;
+  background: var(--ocv-bg-raised, #14181d);
+  color: var(--ocv-fg, #e8e9eb);
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.25));
+  border-radius: 0 0 6px 0;
+  text-decoration: none;
+}
+
+.uiv3-skip-link:focus {
+  left: 0;
+}
+
+/* --- PB11-01 startup readiness curtain ----------------------------------- */
+
+.uiv3-boot-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at 50% 38%,
+      rgba(28, 36, 44, 0.97) 0%,
+      rgba(10, 13, 16, 0.99) 70%);
+  opacity: 1;
+  transition: opacity 0.25s ease-out;
+}
+
+.uiv3-boot-curtain.is-dismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Dismissal is content-first, background-second.
+
+   The curtain background fades over 0.25s. If the boot card faded with it,
+   every cold load would pass through frames where boot text and the workspace
+   underneath were both legible — the double-exposure defect. Dropping the card
+   in the same frame the class lands means the text is gone before the
+   background starts revealing anything, so no frame can contain both. */
+.uiv3-boot-curtain.is-dismissed .uiv3-boot-card {
+  opacity: 0;
+  visibility: hidden;
+  transition: none;
+}
+
+.uiv3-boot-card {
+  min-width: 340px;
+  max-width: 460px;
+  padding: 26px 30px;
+  border: 1px solid var(--ocv-border, rgba(255, 178, 76, 0.35));
+  border-radius: 10px;
+  background: var(--ocv-bg-raised, rgba(16, 20, 25, 0.92));
+  text-align: left;
+}
+
+.uiv3-boot-brand {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--ocv-accent, #ffb24c);
+}
+
+.uiv3-boot-title {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.75;
+}
+
+.uiv3-boot-stage {
+  margin: 14px 0 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.uiv3-boot-checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.uiv3-boot-check {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  font-size: 0.85rem;
+}
+
+.uiv3-boot-check-label {
+  opacity: 0.85;
+}
+
+.uiv3-boot-check-status {
+  text-align: right;
+  opacity: 0.75;
+}
+
+.uiv3-boot-check[data-boot-status="pending"] .uiv3-boot-check-status {
+  animation: uiv3-boot-pulse 1.6s ease-in-out infinite;
+}
+
+.uiv3-boot-check[data-boot-status="ok"] .uiv3-boot-check-status {
+  color: var(--ocv-ok, #6fd17c);
+  opacity: 1;
+}
+
+.uiv3-boot-check[data-boot-status="limited"] .uiv3-boot-check-status {
+  color: var(--ocv-warn, #e0a437);
+  opacity: 1;
+}
+
+.uiv3-boot-note {
+  margin: 16px 0 6px;
+  font-size: 0.72rem;
+  opacity: 0.6;
+}
+
+.uiv3-boot-diagnostics {
+  font-size: 0.78rem;
+  color: var(--ocv-accent, #ffb24c);
+  text-decoration: underline;
+}
+
+@keyframes uiv3-boot-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uiv3-boot-curtain {
+    transition: none;
+  }
+
+  .uiv3-boot-check[data-boot-status="pending"] .uiv3-boot-check-status {
+    animation: none;
   }
 }

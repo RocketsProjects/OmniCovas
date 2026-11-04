@@ -6,12 +6,15 @@
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: var(--space-4);
-  transition: border-color var(--transition-fast);
 }
 
-.card:hover { border-color: var(--color-border-active); }
+.card.is-interactive:hover,
+a.card:hover,
+button.card:hover {
+  border-color: var(--color-telemetry-border);
+}
 
 .card.warn     { border-color: var(--color-warn);     box-shadow: 0 0 8px rgba(255,204,0,0.15); }
 .card.critical { border-color: var(--color-critical); box-shadow: 0 0 10px rgba(255,51,51,0.20); }
@@ -21,11 +24,31 @@
   font-size: var(--font-size-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-telemetry-label);
   margin-bottom: var(--space-3);
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.section-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card-eyebrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ── Field row ── */
@@ -218,25 +241,23 @@ canvas.sparkline {
  * on these patterns. All values reference tokens (no hard-coded colors).
  * ────────────────────────────────────────────────────────────────────── */
 
-/* ── RouteHero ── visually dominant landing band */
+/* ── Route header ── common route identity band. route-hero is retained as an
+   alias for existing renderers/tests. */
+.route-header,
 .route-hero {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-5) var(--space-4);
-  background: linear-gradient(
-    135deg,
-    rgba(15, 16, 32, 0.95) 0%,
-    rgba(20, 24, 48, 0.85) 60%,
-    rgba(15, 16, 32, 0.95) 100%
-  );
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
   margin-bottom: var(--space-5);
   position: relative;
   overflow: hidden;
 }
 
+.route-header::before,
 .route-hero::before {
   content: "";
   position: absolute;
@@ -244,15 +265,17 @@ canvas.sparkline {
   left: 0;
   bottom: 0;
   width: 3px;
-  background: var(--color-accent);
+  background: var(--color-telemetry-border);
 }
 
+.route-header-top,
 .route-hero-top {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
 
+.route-header-kicker,
 .route-hero-kicker {
   font-size: var(--font-size-xs);
   letter-spacing: 0.18em;
@@ -260,6 +283,7 @@ canvas.sparkline {
   color: var(--color-telemetry-label);
 }
 
+.route-header-title,
 .route-hero-title {
   font-size: var(--font-size-2xl);
   color: var(--color-fg);
@@ -268,12 +292,14 @@ canvas.sparkline {
   line-height: 1.15;
 }
 
+.route-header-status,
 .route-hero-status {
   font-size: var(--font-size-sm);
   color: var(--color-fg-muted);
   margin-top: var(--space-1);
 }
 
+.route-header-values,
 .route-hero-values {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -281,6 +307,7 @@ canvas.sparkline {
   margin-top: var(--space-2);
 }
 
+.route-header-value,
 .route-hero-value {
   display: flex;
   flex-direction: column;
@@ -289,6 +316,7 @@ canvas.sparkline {
   border-left: 2px solid var(--color-telemetry-border);
 }
 
+.route-header-value-label,
 .route-hero-value-label {
   font-size: var(--font-size-xs);
   letter-spacing: 0.10em;
@@ -296,6 +324,7 @@ canvas.sparkline {
   color: var(--color-telemetry-label);
 }
 
+.route-header-value-figure,
 .route-hero-value-figure {
   font-size: var(--font-size-xl);
   color: var(--color-fg);
@@ -303,13 +332,14 @@ canvas.sparkline {
   font-weight: var(--font-weight-bold);
 }
 
+.route-header-action,
 .route-hero-action {
   align-self: flex-start;
   padding: var(--space-2) var(--space-4);
-  background: var(--color-accent-dim);
-  border: 1px solid var(--color-border-active);
-  border-radius: var(--radius-md);
-  color: var(--color-accent);
+  background: var(--color-command);
+  border: 1px solid var(--color-command);
+  border-radius: var(--radius-sm);
+  color: var(--color-bg);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.06em;
@@ -319,15 +349,59 @@ canvas.sparkline {
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
+.route-header-action:hover,
+.route-header-action:focus-visible,
 .route-hero-action:hover,
 .route-hero-action:focus-visible {
-  background: var(--color-accent);
+  background: var(--color-command-hover);
+  border-color: var(--color-command-hover);
   color: var(--color-bg);
 }
 
+.route-header-action:focus-visible,
 .route-hero-action:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-command);
   outline-offset: 2px;
+}
+
+.route-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin: 0 0 var(--space-4);
+}
+
+.route-subnav > button,
+.route-subnav > a,
+.route-subnav [role="tab"] {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  padding: var(--space-2) var(--space-3);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.route-subnav > button:hover,
+.route-subnav > a:hover,
+.route-subnav [role="tab"]:hover {
+  color: var(--color-fg);
+  background: var(--color-surface-hover);
+}
+
+.route-subnav > button[aria-selected="true"],
+.route-subnav > button[aria-current="true"],
+.route-subnav > a[aria-current="page"],
+.route-subnav [role="tab"][aria-selected="true"],
+.route-subnav .is-active {
+  border-bottom-color: var(--color-command);
+  color: var(--color-command);
 }
 
 /* ── CommandCard ── summary-first card */
@@ -342,9 +416,7 @@ canvas.sparkline {
   transition: border-color var(--transition-fast);
 }
 
-.command-card:hover {
-  border-color: var(--color-border);
-}
+.command-card.is-interactive:hover { border-color: var(--color-telemetry-border); }
 
 .command-card-header {
   display: flex;
@@ -375,7 +447,7 @@ canvas.sparkline {
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  color: var(--color-accent);
+  color: var(--color-fg);
   font-size: var(--font-size-xs);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -386,7 +458,8 @@ canvas.sparkline {
 
 .command-card-action:hover,
 .command-card-action:focus-visible {
-  background: var(--color-accent-dim);
+  background: var(--color-surface-hover);
+  border-color: var(--color-telemetry-border);
 }
 
 .command-card-action:focus-visible {
@@ -440,7 +513,8 @@ canvas.sparkline {
 .status-badge--disabled,
 .status-badge--not-loaded,
 .status-badge--locked,
-.status-badge--reserved {
+.status-badge--reserved,
+.status-badge--future {
   background: rgba(136, 136, 170, 0.08);
   color: var(--color-fg-muted);
   border-color: rgba(136, 136, 170, 0.20);
@@ -461,7 +535,7 @@ canvas.sparkline {
   background: transparent;
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-sm);
-  color: var(--color-accent);
+  color: var(--color-fg);
   font-size: var(--font-size-sm);
   letter-spacing: 0.04em;
   text-decoration: none;
@@ -471,10 +545,12 @@ canvas.sparkline {
 
 .action-link:hover,
 .action-link:focus-visible {
-  border-color: var(--color-border);
-  background: var(--color-accent-dim);
+  background: var(--color-surface-hover);
+  border-color: var(--color-telemetry-border);
+  color: var(--color-fg);
 }
 
+.action-link:hover,
 .action-link:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
@@ -513,7 +589,7 @@ canvas.sparkline {
   content: "+";
   display: inline-block;
   width: 10px;
-  color: var(--color-accent);
+  color: var(--color-fg-muted);
 }
 
 .detail-drawer[open] .detail-drawer-summary::before {
@@ -565,11 +641,16 @@ canvas.sparkline {
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  color: var(--color-accent);
+  color: var(--color-fg);
   font-size: var(--font-size-xs);
   text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
+}
+
+.empty-state-action:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-telemetry-border);
 }
 
 .empty-state-action:focus-visible {
@@ -757,8 +838,8 @@ canvas.sparkline {
 .omni-source-chip--local-telemetry,
 .omni-source-chip--local-event-history,
 .omni-source-chip--local-snapshot {
-  border-color: var(--color-accent-dim);
-  color: var(--color-accent);
+  border-color: var(--color-telemetry-border);
+  color: var(--color-telemetry-label);
 }
 
 .omni-source-chip--stale {

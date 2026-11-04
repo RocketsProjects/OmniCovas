@@ -11,25 +11,16 @@ Law 1 (Confirmation Gate):
     scripts, or any other mechanism. Every AI-suggested action passes
     through this middleware before reaching any output.
 
-Architecture:
-    AI Recommendation
-        → ConfirmationGate.require_confirmation(action_type, details)
-            → Logs the action intent
-            → Phase 1: Auto-confirms (allows testing of the full pipeline)
-            → Phase 3: Blocks pending UI confirmation from commander
-            → Returns bool: True if approved, False if rejected/pending
-    Action proceeds only if gate returns True.
-
-Phase 1 Scope:
-    The gate is wired into the critical path RIGHT NOW.
-    Phase 1 auto-confirms so we can test the full pipeline end-to-end.
-    Phase 3 replaces auto-confirmation with real UI prompts.
-    The gate interface does not change between phases — only the
-    _await_commander_response() implementation.
+Current scope:
+    This class is a fail-closed policy boundary for two advisory production
+    callers. It may approve producing a draft, never a Commander-impacting
+    action. ``REQUIRE_COMMANDER`` is not wired to the Week 13 queue and safely
+    rejects until that integration exists. The protected Activity Log export
+    is the reference two-step Commander confirmation flow.
 
 Law 8 (Sovereignty & Transparency):
-    Every confirmation request is logged to the Activity Log
-    (added in Week 6) for full audit trail.
+    This object retains process-lifetime diagnostic records. Durable proof is
+    owned by the shared Activity Log / Week 13 lifecycle, not this list.
 
 See: Master Blueprint v4.0 Section 0 (Law 1)
 See: Phase 1 Development Guide Week 4, Part C
@@ -91,7 +82,7 @@ class ConfirmationDecision(str, Enum):
     """
     Result of a confirmation request.
 
-    APPROVED:  commander explicitly confirmed (or Phase 1 auto-confirm)
+    APPROVED:  the configured policy approved producing an advisory draft
     REJECTED:  commander explicitly declined
     TIMED_OUT: no response within the allowed window
     """
@@ -106,7 +97,8 @@ class ConfirmationRecord:
     """
     Full audit record of one confirmation event.
 
-    Immutable — every record is a permanent part of the audit trail.
+    Immutable after creation, but retained only for this gate object's lifetime.
+    This record is not persistent Activity Log evidence.
     """
 
     action_type: ActionType
@@ -116,35 +108,104 @@ class ConfirmationRecord:
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class GatePolicy(Enum):
+    """How a `ConfirmationGate` instance resolves a confirmation request.
+
+    There is deliberately no "approve anything" policy. Phase 10 reconciliation
+    (PB10-R6) removed the previous `auto_approve: bool = True` default, under
+    which omitting a constructor argument silently approved every request while
+    the class docstring still promised non-bypassable confirmation.
+    """
+
+    #: Fail closed. The default for any gate whose policy was not stated.
+    DENY = "deny"
+
+    #: The request is an advisory, non-side-effecting step — drafting or
+    #: labelling text that performs no action on the Commander's behalf, in the
+    #: game, on local state, or against any external service. Approving it
+    #: authorises *producing the draft*, never performing an action.
+    ADVISORY_NO_SIDE_EFFECT = "advisory_no_side_effect"
+
+    #: The request would change something for the Commander and therefore needs
+    #: a real decision. This class cannot obtain one: commander-facing
+    #: confirmation is owned by the Week 13 confirmation queue
+    #: (`omnicovas/api/week13.py`) and its two-step propose/authorize flow (see
+    #: `omnicovas/api/activity_log.py` export lifecycle). A gate configured this
+    #: way fails closed until it is wired to that queue.
+    REQUIRE_COMMANDER = "require_commander"
+
+
 class ConfirmationGate:
     """
-    Middleware that blocks every AI-suggested action until the commander approves.
+    Confirmation boundary for AI-suggested steps (Law 1).
 
-    Phase 1 behavior: auto-approves, logs the event, returns True.
-    Phase 3 behavior: presents the request to the commander via UI,
-                      waits for explicit yes/no, returns the result.
+    Scope, stated precisely:
 
-    The interface is stable across phases. Downstream code does not change.
+    - This class resolves *advisory* steps — AI drafting and proposal
+      labelling — and records process-lifetime diagnostics. Both production
+      call sites are advisory and perform no action: the Phase 9 campaign AI
+      draft (`omnicovas/features/campaign.py`, `is_fact=False`) and the
+      route-activation *review* proposal (`omnicovas/features/navigation.py`,
+      "review only, no in-game action").
+
+    - Genuine Commander-impacting confirmation is **not** owned here. It is
+      owned by the Week 13 confirmation queue and its two-step
+      propose → commander decision → authorize flow, which refuses declined,
+      expired, unknown, mismatched and already-consumed decisions. The Activity
+      Log export lifecycle is the reference implementation.
+
+    A gate with no stated policy denies. Constructing one and forgetting to say
+    what it is for can never approve anything.
 
     Usage:
-        gate = ConfirmationGate()
+        gate = ConfirmationGate.for_advisory_drafting()
         approved = await gate.require_confirmation(
             action_type=ActionType.PLOT_ROUTE,
-            summary="Plot route to Colonia",
-            details={"destination": "Colonia", "jumps_estimated": 22},
+            summary="Draft a route review to Colonia",
+            details={"destination": "Colonia"},
         )
         if approved:
-            # proceed with the action
+            # produce the draft; performing an action still requires the
+            # Week 13 commander confirmation queue
     """
 
-    def __init__(self, auto_approve: bool = True) -> None:
+    def __init__(self, policy: GatePolicy = GatePolicy.DENY) -> None:
         """
         Args:
-            auto_approve: Phase 1 default. Set False to simulate UI blocking
-                          (used in tests).
+            policy: What this gate is for. Defaults to `GatePolicy.DENY` so an
+                    unconfigured gate fails closed rather than approving.
         """
-        self._auto_approve = auto_approve
+        self._policy = policy
         self._audit_log: list[ConfirmationRecord] = []
+
+    @classmethod
+    def for_advisory_drafting(cls) -> ConfirmationGate:
+        """A gate for AI drafting / proposal labelling that performs no action.
+
+        Named rather than boolean so every production call site declares, at the
+        construction point, that it is authorising a draft and not an action.
+        """
+        return cls(GatePolicy.ADVISORY_NO_SIDE_EFFECT)
+
+    @classmethod
+    def denying(cls) -> ConfirmationGate:
+        """A gate that refuses everything. Useful for tests and safe defaults."""
+        return cls(GatePolicy.DENY)
+
+    @property
+    def policy(self) -> GatePolicy:
+        """The policy this gate was constructed with."""
+        return self._policy
+
+    @property
+    def approves_side_effecting_actions(self) -> bool:
+        """Always False.
+
+        No policy on this class authorises a Commander-impacting action. Kept
+        explicit so the guarantee is assertable from tests and readable at call
+        sites.
+        """
+        return False
 
     async def require_confirmation(
         self,
@@ -153,7 +214,7 @@ class ConfirmationGate:
         details: dict[str, Any] | None = None,
     ) -> bool:
         """
-        Ask the commander to confirm an AI-suggested action.
+        Resolve an AI-suggested step under the configured policy.
 
         Args:
             action_type: Category of action, from ActionType enum
@@ -164,13 +225,13 @@ class ConfirmationGate:
             True if approved, False if rejected or timed out.
 
         Law 1 (Confirmation Gate):
-            There is no bypass. Every AI-suggested action MUST call this
-            method before producing any output. Calling this method is
-            not optional — the dispatcher enforces it.
+            This class cannot approve a side-effecting action. A future caller
+            requiring Commander authority must first wire ``REQUIRE_COMMANDER``
+            to the Week 13 queue or use the owning two-step lifecycle directly.
 
         Law 8 (Sovereignty & Transparency):
-            Every confirmation request is recorded permanently. The
-            commander can inspect the audit log at any time.
+            Requests are retained in memory for the lifetime of this object.
+            Persistent proof belongs in the shared Activity Log lifecycle.
         """
         details = details or {}
 
@@ -181,7 +242,7 @@ class ConfirmationGate:
             summary,
         )
 
-        # Phase 1: resolve the decision
+        # Resolve under the explicit, fail-closed policy.
         decision = await self._await_commander_response(
             action_type=action_type,
             summary=summary,
@@ -215,13 +276,19 @@ class ConfirmationGate:
         details: dict[str, Any],
     ) -> ConfirmationDecision:
         """
-        Resolve the commander's decision on a confirmation request.
+        Resolve the decision for a confirmation request.
 
-        Phase 1: always returns APPROVED when auto_approve is True.
-                 The full pipeline is exercised end-to-end; the UI
-                 replacement in Phase 3 slots in here unchanged.
+        Policy-driven and fail-closed (PB10-R6):
 
-        Phase 3: will display UI prompt and await commander response.
+        - `ADVISORY_NO_SIDE_EFFECT` approves producing a draft. It does not
+          authorise any action.
+        - `REQUIRE_COMMANDER` refuses, because a genuine Commander decision
+          lives in the Week 13 confirmation queue and this class has no channel
+          to it. Wiring that channel is the only way this policy may ever
+          approve.
+        - `DENY` refuses.
+
+        There is no path here that approves a Commander-impacting action.
 
         Args:
             action_type: The kind of action being requested
@@ -231,19 +298,33 @@ class ConfirmationGate:
         Returns:
             APPROVED, REJECTED, or TIMED_OUT
         """
-        if self._auto_approve:
+        if self._policy is GatePolicy.ADVISORY_NO_SIDE_EFFECT:
+            # Authorises producing a draft. The caller must not perform an
+            # action on the strength of this decision.
             return ConfirmationDecision.APPROVED
 
-        # When auto_approve is False we treat it as an immediate reject.
-        # This is used by tests to verify the "no bypass" guarantee.
+        if self._policy is GatePolicy.REQUIRE_COMMANDER:
+            # Fail closed. A real Commander decision lives in the Week 13
+            # confirmation queue; this class has no channel to it, so it must
+            # never manufacture an approval on the Commander's behalf.
+            logger.warning(
+                "[CONFIRMATION DENIED] %s: %s — REQUIRE_COMMANDER gate is not "
+                "wired to the Week 13 confirmation queue; refusing rather than "
+                "approving without a Commander decision.",
+                action_type.value,
+                summary,
+            )
+            return ConfirmationDecision.REJECTED
+
         return ConfirmationDecision.REJECTED
 
     @property
     def audit_log(self) -> list[ConfirmationRecord]:
         """
-        Read-only view of the full confirmation audit trail.
+        Copy of the process-lifetime confirmation diagnostic records.
 
-        Law 8: the commander can always inspect every confirmation decision.
+        This is not persistent proof. Commander-inspectable durable evidence is
+        owned by the Activity Log / Week 13 lifecycle.
         """
         return list(self._audit_log)
 

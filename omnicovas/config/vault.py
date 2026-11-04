@@ -69,6 +69,12 @@ CONFIG_KEYS = frozenset(
         "settings_ai_provider",
         "settings_overlay_opacity",
         "settings_overlay_anchor",
+        # GKI-04 Galactic Intelligence preferences, one record per commander profile
+        "settings_galactic_intelligence",
+        # NHI-03/04 notification attention preferences (per commander + device)
+        # and the explicit Director / legacy presentation owner
+        "settings_notifications",
+        "notification_presentation_owner",
         # Phase 3.1 overlay event toggles and click-through persistence
         "overlay_events",
         "overlay_click_through",

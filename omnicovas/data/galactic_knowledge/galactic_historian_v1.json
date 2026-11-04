@@ -1,0 +1,3453 @@
+{
+  "schema": "galactic-knowledge-v1",
+  "pack_id": "omnicovas-galactic-historian",
+  "version": "2026-11-02-1",
+  "reviewed_at": "2026-11-02",
+  "title": "Galactic Historian: the founding powers, Colonia, the great mysteries, the Missing and the Thargoid wars",
+  "scope": "GKI-07 Historian collection: Sol, Achenar and Alioth with the three superpowers, their founders, the Battle of Achenar and the Nine Martyrs attack; Colonia, Jaques Station, Jaques, the Colonia Council and the station's 3302 voyage and rediscovery; the Dark Wheel, Raxxla, the Formidine Rift mystery, Project Dynasty and the Zurara. GKI-08 adds the capital starports struck in the Nine Martyrs attack and their documented namesakes (Li Qing Jao and the hyperdrive's inventor), Lave Station and the Galactic Cooperative, two real-world memorial names, six more lost generation ships, and the Second Thargoid War: the first Thargoid wreck, the Pleiades starport attacks, Aegis, Salvation and three Titan graveyards.",
+  "game_version": "Lore records are not tied to a game version. Identifiers were read from EDSM on 2026-10-31 and, for GKI-08 records, on 2026-11-02. Wartime and post-war statements (Thargoid presence, graveyard conditions) are as of the cited revisions.",
+  "rights_basis": "Original OmniCOVAS records of Elite Dangerous game facts and lore: names, dates, identifiers, coordinates, relationships and short factual summaries written in OmniCOVAS's own words. No wiki prose, quotations, images or tables are reproduced; sources are credited per claim.",
+  "distribution": {
+    "class": "original_facts",
+    "basis": "GKI-07 content audit (2026-10-31): every record is an original OmniCOVAS statement of game facts or lore, checked with the curator expression check against the cited wiki revisions; identifiers are game identifiers read from EDSM at curation time.",
+    "decision_record": "docs/gki-07-living-historian-20261031.md"
+  },
+  "sources": [
+    {
+      "id": "edw-sol",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Sol",
+      "url": "https://elite-dangerous.fandom.com/wiki/Sol",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Sol as the Federal capital, the move of the capital to Mars, the permit and the 3307 bombing of Li Qing Jao.",
+      "revision": {"page_id": 64817, "revision_id": 169027, "timestamp": "2026-02-11T03:35:56Z"}
+    },
+    {
+      "id": "edw-achenar",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Achenar",
+      "url": "https://elite-dangerous.fandom.com/wiki/Achenar",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Achenar as the Imperial capital, its settlement in 2292, the mudlarks, the Battle of Achenar, the permit and the 3307 bombing of Dawes Hub.",
+      "revision": {"page_id": 10723, "revision_id": 167726, "timestamp": "2025-09-25T18:46:43Z"}
+    },
+    {
+      "id": "edw-alioth",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Alioth",
+      "url": "https://elite-dangerous.fandom.com/wiki/Alioth",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Alioth's colonisation, its centuries as a contested system, the founding of the Alliance in 3230, the seat of government, the permit and the 3307 bombing of Donaldson.",
+      "revision": {"page_id": 10713, "revision_id": 168489, "timestamp": "2025-12-01T06:15:11Z"}
+    },
+    {
+      "id": "edw-federation",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Federation",
+      "url": "https://elite-dangerous.fandom.com/wiki/Federation",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The Federation's origin after the Third World War, the Federal Accord of 2242 and its capital on Mars.",
+      "revision": {"page_id": 3190, "revision_id": 173492, "timestamp": "2026-10-13T10:04:07Z"}
+    },
+    {
+      "id": "edw-empire",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Empire",
+      "url": "https://elite-dangerous.fandom.com/wiki/Empire",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The Empire's official name, its founding year, its form of government and the seat of the Emperor.",
+      "revision": {"page_id": 3191, "revision_id": 173496, "timestamp": "2026-10-13T10:19:47Z"}
+    },
+    {
+      "id": "edw-alliance",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Alliance",
+      "url": "https://elite-dangerous.fandom.com/wiki/Alliance",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The Alliance's founding in Alioth in 3230, its founders, its government and its seat on Turner's World.",
+      "revision": {"page_id": 3192, "revision_id": 172287, "timestamp": "2026-09-11T08:15:04Z"}
+    },
+    {
+      "id": "edw-marlin-duval",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Marlin Duval",
+      "url": "https://elite-dangerous.fandom.com/wiki/Marlin_Duval",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Marlin Duval's expedition, the Republic of Achenar, her death, the unproven suspicion against her brother and Marlinism.",
+      "revision": {"page_id": 47106, "revision_id": 154838, "timestamp": "2023-06-08T13:03:07Z"}
+    },
+    {
+      "id": "edw-henson-duval",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Henson Duval",
+      "url": "https://elite-dangerous.fandom.com/wiki/Henson_Duval",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Henson Duval's seizure of power after 2296 and his reign as the first Emperor.",
+      "revision": {"page_id": 28353, "revision_id": 169317, "timestamp": "2026-03-06T02:37:19Z"}
+    },
+    {
+      "id": "edw-mic-turner",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Mic Turner",
+      "url": "https://elite-dangerous.fandom.com/wiki/Mic_Turner",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Mic Turner's part in Alioth's liberation and the Alliance's founding, the renaming of Gordonworld and his disappearance.",
+      "revision": {"page_id": 48017, "revision_id": 152557, "timestamp": "2022-07-27T07:28:56Z"}
+    },
+    {
+      "id": "edw-meredith-argent",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Meredith Argent",
+      "url": "https://elite-dangerous.fandom.com/wiki/Meredith_Argent",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Meredith Argent's resistance cell, her part in founding the Alliance, the renaming of New California and the belief that she was the first prime minister.",
+      "revision": {"page_id": 53157, "revision_id": 156636, "timestamp": "2024-03-16T00:12:46Z"}
+    },
+    {
+      "id": "edw-battle-of-achenar",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Battle of Achenar",
+      "url": "https://elite-dangerous.fandom.com/wiki/Battle_of_Achenar",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The course, dates and outcome of the Battle of Achenar and the cold war that followed.",
+      "revision": {"page_id": 67673, "revision_id": 167708, "timestamp": "2025-09-21T17:10:44Z"}
+    },
+    {
+      "id": "edw-nine-martyrs",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Nine Martyrs",
+      "url": "https://elite-dangerous.fandom.com/wiki/Nine_Martyrs",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The coordinated starport bombings of 11 March 3307, the stations hit and the cancelled Galactic Summit.",
+      "revision": {"page_id": 67963, "revision_id": 162421, "timestamp": "2024-10-31T03:09:02Z"}
+    },
+    {
+      "id": "edw-colonia",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Colonia",
+      "url": "https://elite-dangerous.fandom.com/wiki/Colonia",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Colonia's former designation, the station's arrival, the system's renaming, its first settlement and its distance from Sol.",
+      "revision": {"page_id": 64266, "revision_id": 173926, "timestamp": "2026-10-21T07:10:00Z"}
+    },
+    {
+      "id": "edw-jaques-station",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Jaques Station",
+      "url": "https://elite-dangerous.fandom.com/wiki/Jaques_Station",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Jaques Station's engines and naming, the 3302 jump, its rediscovery, its repairs and its rare commodity.",
+      "revision": {"page_id": 44345, "revision_id": 171786, "timestamp": "2026-08-22T10:38:54Z"}
+    },
+    {
+      "id": "edw-jaques",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Jaques",
+      "url": "https://elite-dangerous.fandom.com/wiki/Jaques",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Jaques's background (marked by the wiki as legacy lore) and his ownership of the station.",
+      "revision": {"page_id": 44846, "revision_id": 171787, "timestamp": "2026-08-22T10:47:57Z"}
+    },
+    {
+      "id": "edw-colonia-council",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Colonia Council",
+      "url": "https://elite-dangerous.fandom.com/wiki/Colonia_Council",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The Colonia Council's founding with Colonia Hub, its limited role and the Colonia Expansion Initiative.",
+      "revision": {"page_id": 60583, "revision_id": 169400, "timestamp": "2026-03-20T12:41:43Z"}
+    },
+    {
+      "id": "edw-dark-wheel",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: The Dark Wheel",
+      "url": "https://elite-dangerous.fandom.com/wiki/The_Dark_Wheel",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The Dark Wheel legend, its devotion to Raxxla, the minor faction in Shinrarta Dezhra and the name's origin in Robert Holdstock's fiction.",
+      "revision": {"page_id": 3462, "revision_id": 171950, "timestamp": "2026-08-31T10:36:51Z"}
+    },
+    {
+      "id": "edw-raxxla",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Raxxla",
+      "url": "https://elite-dangerous.fandom.com/wiki/Raxxla",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The Raxxla legend, its earliest known mention, the discredited Omphalos Rift details, what developers have said and a community theory.",
+      "revision": {"page_id": 2615, "revision_id": 174267, "timestamp": "2026-10-29T17:16:59Z"}
+    },
+    {
+      "id": "edw-formidine-rift",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Formidine Rift",
+      "url": "https://elite-dangerous.fandom.com/wiki/Formidine_Rift",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "The Formidine Rift's reputation, the Zurara's system and the fate of its crew.",
+      "revision": {"page_id": 43730, "revision_id": 171354, "timestamp": "2026-07-28T07:31:54Z"}
+    },
+    {
+      "id": "edw-project-dynasty",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Project Dynasty",
+      "url": "https://elite-dangerous.fandom.com/wiki/Project_Dynasty",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Project Dynasty's purpose, its 3270 expeditions, the Zurara and the Formidine Rift mystery.",
+      "revision": {"page_id": 43733, "revision_id": 164559, "timestamp": "2025-01-16T18:26:55Z"}
+    },
+    {
+      "id": "edsm-identifiers-gki07",
+      "kind": "community_dataset",
+      "name": "EDSM public system and station records (GKI-07)",
+      "url": "https://www.edsm.net/en/api-v1",
+      "licence": "Licence not reviewed; only game identifiers recorded",
+      "accessed": "2026-10-31",
+      "reuse": "facts_restated",
+      "role": "Read once at curation time for game identifiers only: SystemAddress (id64) and StarPos for Sol, Achenar, Alioth, Colonia and Syreadiae JX-F c0, all coordinate-locked, and Jaques Station's MarketID."
+    },
+    {
+      "id": "edw-generation-ship-gki08",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Generation Ship",
+      "url": "https://elite-dangerous.fandom.com/wiki/Generation_Ship",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The sixteen confirmed lost generation ships, their systems and recorded positions, who found each and when, and what their logs tell.",
+      "revision": {
+        "page_id": 43030,
+        "revision_id": 173400,
+        "timestamp": "2026-10-12T11:02:25Z"
+      }
+    },
+    {
+      "id": "edw-thargoid-titan",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Thargoid Titan",
+      "url": "https://elite-dangerous.fandom.com/wiki/Thargoid_Titan",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The eight Titans, their systems, arrival and destruction dates, Cocijo's advance on Sol, the SCO drive research and what floats at Titan graveyards.",
+      "revision": {
+        "page_id": 51630,
+        "revision_id": 173586,
+        "timestamp": "2026-10-14T13:53:26Z"
+      }
+    },
+    {
+      "id": "edw-second-thargoid-war",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Second Thargoid War",
+      "url": "https://elite-dangerous.fandom.com/wiki/Second_Thargoid_War",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Span and outcome of the war, the first interceptor attacks of 26 September 3303, the Pleiades station attacks of December 3303 and January 3304, and where Thargoids remain.",
+      "revision": {
+        "page_id": 58006,
+        "revision_id": 173536,
+        "timestamp": "2026-10-13T14:43:17Z"
+      }
+    },
+    {
+      "id": "edw-crashed-thargoid-ship",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Crashed Thargoid Ship",
+      "url": "https://elite-dangerous.fandom.com/wiki/Crashed_Thargoid_Ship",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The first Thargoid wreck in Pleiades Sector AB-W b2-4: its discovery at the end of 'the Hunt', its documented surface position and Aegis's dating.",
+      "revision": {
+        "page_id": 40288,
+        "revision_id": 154133,
+        "timestamp": "2023-05-13T17:37:14Z"
+      }
+    },
+    {
+      "id": "edw-delphi",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Delphi",
+      "url": "https://elite-dangerous.fandom.com/wiki/Delphi",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Delphi's former designation, Aegis Research, the 3303 attack on The Oracle, its near fall in 3307, the system layout and the Raxxla theories the name attracts.",
+      "revision": {
+        "page_id": 56721,
+        "revision_id": 166344,
+        "timestamp": "2025-07-03T03:19:33Z"
+      }
+    },
+    {
+      "id": "edw-obsidian-orbital",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Obsidian Orbital",
+      "url": "https://elite-dangerous.fandom.com/wiki/Obsidian_Orbital",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Obsidian Orbital's naming by public vote, its Aegis laboratory, the January 3304 attack and its repair.",
+      "revision": {
+        "page_id": 52014,
+        "revision_id": 163922,
+        "timestamp": "2024-12-28T16:37:30Z"
+      }
+    },
+    {
+      "id": "edw-aegis",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Aegis",
+      "url": "https://elite-dangerous.fandom.com/wiki/Aegis",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Aegis's founding on 4 August 3303, its shutdown in January 3308 and its reform in February 3309.",
+      "revision": {
+        "page_id": 49590,
+        "revision_id": 161896,
+        "timestamp": "2024-08-19T14:12:37Z"
+      }
+    },
+    {
+      "id": "edw-salvation",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Salvation",
+      "url": "https://elite-dangerous.fandom.com/wiki/Salvation",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Caleb Wycherley's identity and aliases, his Azimuth team's work on INRA's mycoid, the Proteus Wave and the reported discovery of his body.",
+      "revision": {
+        "page_id": 68164,
+        "revision_id": 169858,
+        "timestamp": "2026-04-27T11:14:29Z"
+      }
+    },
+    {
+      "id": "edw-li-qing-jao",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Li Qing Jao",
+      "url": "https://elite-dangerous.fandom.com/wiki/Li_Qing_Jao",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The Earth starport named for the hyperdrive's inventor and the 3307 bombing that killed the Federal Vice President.",
+      "revision": {
+        "page_id": 67941,
+        "revision_id": 151247,
+        "timestamp": "2022-01-30T10:24:17Z"
+      }
+    },
+    {
+      "id": "edw-li-qin-jao",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Li Qin Jao",
+      "url": "https://elite-dangerous.fandom.com/wiki/Li_Qin_Jao",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The engineer who led the invention of the hyperdrive, the first colony beyond Sol, and the starport named in Jao's honour.",
+      "revision": {
+        "page_id": 62489,
+        "revision_id": 154404,
+        "timestamp": "2023-05-25T15:21:15Z"
+      }
+    },
+    {
+      "id": "edw-dawes-hub",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Dawes Hub",
+      "url": "https://elite-dangerous.fandom.com/wiki/Dawes_Hub",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Dawes Hub's orbit around Capitol, the 3301 coronation appeal and the 3307 bombing.",
+      "revision": {
+        "page_id": 10736,
+        "revision_id": 144280,
+        "timestamp": "2021-05-29T06:21:13Z"
+      }
+    },
+    {
+      "id": "edw-donaldson",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Donaldson",
+      "url": "https://elite-dangerous.fandom.com/wiki/Donaldson",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Donaldson's parent body as the wiki gives it and the 3307 bombing.",
+      "revision": {
+        "page_id": 10717,
+        "revision_id": 144281,
+        "timestamp": "2021-05-29T06:21:23Z"
+      }
+    },
+    {
+      "id": "edw-lave-station",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Lave Station",
+      "url": "https://elite-dangerous.fandom.com/wiki/Lave_Station",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Lave Station as a former co-capital of the Galactic Cooperative, its rare good, the 3307 bombing and its place in the original Elite.",
+      "revision": {
+        "page_id": 7443,
+        "revision_id": 142052,
+        "timestamp": "2021-04-14T01:42:06Z"
+      }
+    },
+    {
+      "id": "edw-galactic-cooperative",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Galactic Cooperative",
+      "url": "https://elite-dangerous.fandom.com/wiki/Galactic_Cooperative",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The Galactic Cooperative's founding in 2696, its capital in Lave, the Coriolis design, its part in the First Thargoid War and its dissolution in 3174.",
+      "revision": {
+        "page_id": 49072,
+        "revision_id": 162392,
+        "timestamp": "2024-10-28T12:46:35Z"
+      }
+    },
+    {
+      "id": "edw-leonard-nimoy-station",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Leonard Nimoy Station",
+      "url": "https://elite-dangerous.fandom.com/wiki/Leonard_Nimoy_Station",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The renaming of WCM Transfer Orbital in LHS 3006 as a tribute to the actor.",
+      "revision": {
+        "page_id": 3430,
+        "revision_id": 141766,
+        "timestamp": "2021-04-11T01:20:05Z"
+      }
+    },
+    {
+      "id": "edw-memorial-cmdr-garak",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Memorial CMDR Garak",
+      "url": "https://elite-dangerous.fandom.com/wiki/Memorial_CMDR_Garak",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The Colonia listening post that remembers CMDR Garak, an early supplier of the Jaques Station repairs.",
+      "revision": {
+        "page_id": 72557,
+        "revision_id": 171656,
+        "timestamp": "2026-08-14T08:19:32Z"
+      }
+    },
+    {
+      "id": "edw-mars-high",
+      "kind": "community_wiki",
+      "name": "Elite Dangerous Wiki: Mars High",
+      "url": "https://elite-dangerous.fandom.com/wiki/Mars_High",
+      "licence": "CC BY-SA (Fandom community content)",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "The parent body the wiki gives for Mars High, compared with EDSM.",
+      "revision": {
+        "page_id": 7756,
+        "revision_id": 151248,
+        "timestamp": "2022-01-30T10:27:16Z"
+      }
+    },
+    {
+      "id": "edsm-identifiers-gki08",
+      "kind": "community_dataset",
+      "name": "EDSM public system, station and body records (curation-time identifiers)",
+      "url": "https://www.edsm.net/en/api-v1",
+      "licence": "Licence not reviewed; only game identifiers, coordinates and body radii recorded",
+      "accessed": "2026-11-02",
+      "reuse": "facts_restated",
+      "role": "Read once on 2026-11-02 for SystemAddress, star positions EDSM marks as locked, station MarketIDs and parent bodies, and the radius of Pleiades Sector AB-W b2-4 9 a. Not used at runtime."
+    }
+  ],
+  "references": [
+    {"id": "shinrarta-dezhra", "kind": "star_system"},
+    {
+      "id": "first-thargoid-war",
+      "kind": "event"
+    },
+    {
+      "id": "inra",
+      "kind": "organization"
+    },
+    {
+      "id": "generation-ship-lycaon",
+      "kind": "landmark"
+    }
+  ],
+  "entities": [
+    {
+      "id": "sol",
+      "kind": "star_system",
+      "name": "Sol",
+      "aliases": ["Solar System"],
+      "summary": "Humanity's home system and capital of the Federation; entry needs a Federal permit.",
+      "attributes": {
+        "significance": "Birthplace of humanity and seat of the Federal government, which has met on Mars for centuries.",
+        "permit": "Sol"
+      },
+      "location": {
+        "system": "Sol",
+        "system_address": 10477373803,
+        "star_pos": [0.0, 0.0, 0.0],
+        "precision": "exact",
+        "sources": ["edsm-identifiers-gki07", "edw-sol"]
+      },
+      "claims": [
+        {
+          "id": "capital",
+          "topic": "history",
+          "text": "Earth served as the first Federal capital. After the defeat at Achenar the government moved to Olympus Village on Mars, its political centre ever since the 24th century.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-sol", "edw-federation"]
+        },
+        {
+          "id": "accord",
+          "topic": "history",
+          "text": "Sol was one of the founding parties to the 2242 Federal Accord, which made an Earth government into an interstellar union.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-sol", "edw-federation"]
+        },
+        {
+          "id": "nine-martyrs",
+          "topic": "history",
+          "text": "On 11 March 3307 a bomb struck the starport Li Qing Jao; Federal Vice President Brad Mitchell was among those killed.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-sol", "edw-nine-martyrs"]
+        },
+        {
+          "id": "access",
+          "topic": "gameplay",
+          "text": "Entry needs the Sol permit, earned by reaching Petty Officer in the Federal Navy.",
+          "evidence": "community_reference",
+          "sources": ["edw-sol"]
+        }
+      ]
+    },
+    {
+      "id": "achenar",
+      "kind": "star_system",
+      "name": "Achenar",
+      "aliases": [],
+      "summary": "Capital system of the Empire and home of the Emperor; entry needs an Imperial permit.",
+      "attributes": {
+        "significance": "Heart of the Empire: settled by Marlin Duval's colonists and held against the first great interstellar war.",
+        "permit": "Achenar"
+      },
+      "location": {
+        "system": "Achenar",
+        "system_address": 164098653,
+        "star_pos": [67.5, -119.46875, 24.84375],
+        "precision": "exact",
+        "sources": ["edsm-identifiers-gki07", "edw-achenar"]
+      },
+      "claims": [
+        {
+          "id": "settlement",
+          "topic": "history",
+          "text": "Colonists under Marlin Duval reached the system and in 2292 founded the Republic of Achenar on the moon now called Capitol.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-achenar", "edw-battle-of-achenar"]
+        },
+        {
+          "id": "capitol",
+          "topic": "history",
+          "text": "Capitol, a moon of the sixth planet, is home to the Imperial Palace and to the Senate House.",
+          "evidence": "community_reference",
+          "sources": ["edw-achenar"]
+        },
+        {
+          "id": "battle",
+          "topic": "history",
+          "text": "A Federal fleet invaded in 2324 and was driven out in 2325, a defeat that made the Empire the second superpower.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-achenar", "edw-battle-of-achenar"]
+        },
+        {
+          "id": "mudlarks",
+          "topic": "interpretation",
+          "text": "Capitol's native mudlarks died out after the settlers came. The Federation called it deliberate; the Empire blamed germs the colonists brought. Which is true is not recorded.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-achenar", "edw-battle-of-achenar"]
+        },
+        {
+          "id": "nine-martyrs",
+          "topic": "history",
+          "text": "Dawes Hub was one of the nine starports bombed on 11 March 3307.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-achenar", "edw-nine-martyrs"]
+        },
+        {
+          "id": "access",
+          "topic": "gameplay",
+          "text": "Entry needs the Achenar permit, earned by reaching Squire in the Imperial Navy.",
+          "evidence": "community_reference",
+          "sources": ["edw-achenar"]
+        }
+      ]
+    },
+    {
+      "id": "alioth",
+      "kind": "star_system",
+      "name": "Alioth",
+      "aliases": ["Epsilon Ursae Majoris"],
+      "summary": "Capital system of the Alliance, fought over by the Federation and the Empire for centuries; entry needs a permit.",
+      "attributes": {
+        "significance": "Where the Alliance of Independent Systems was born in 3230, after its people expelled both older powers.",
+        "permit": "Alioth"
+      },
+      "location": {
+        "system": "Alioth",
+        "system_address": 1109989017963,
+        "star_pos": [-33.65625, 72.46875, -20.65625],
+        "precision": "exact",
+        "sources": ["edsm-identifiers-gki07", "edw-alioth"]
+      },
+      "claims": [
+        {
+          "id": "colonisation",
+          "topic": "history",
+          "text": "Federal colonists arrived in 2452. The system's mineral wealth drew in the Empire, and for centuries it changed hands amid revolts and occupations.",
+          "evidence": "community_reference",
+          "sources": ["edw-alioth"]
+        },
+        {
+          "id": "founding",
+          "topic": "history",
+          "text": "A rising that began in 3228 pushed Federal and Imperial forces out, and the Alliance was founded here in 3230.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-alioth", "edw-alliance"]
+        },
+        {
+          "id": "seat",
+          "topic": "history",
+          "text": "Turner's World hosts the Alliance government, in Garden City.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-alioth", "edw-alliance"]
+        },
+        {
+          "id": "nine-martyrs",
+          "topic": "history",
+          "text": "The starport Donaldson, where the Council of Admirals meets, was bombed on 11 March 3307.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-alioth", "edw-nine-martyrs"]
+        },
+        {
+          "id": "access",
+          "topic": "gameplay",
+          "text": "Entry needs the Alioth permit, earned through standing with the Alioth Independents.",
+          "evidence": "community_reference",
+          "sources": ["edw-alioth"]
+        }
+      ]
+    },
+    {
+      "id": "federation",
+      "kind": "organization",
+      "name": "Federation",
+      "aliases": ["Federation of Star Systems"],
+      "summary": "The first and biggest of the three superpowers, a representative democracy governed from Mars.",
+      "attributes": {
+        "significance": "Humanity's first interstellar government; its defeat at Achenar made room for a rival superpower.",
+        "period": "Since 2242"
+      },
+      "claims": [
+        {
+          "id": "origin",
+          "topic": "history",
+          "text": "It grew out of the government that united Earth after the Third World War, and became interstellar with the Federal Accord of 2242.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-federation", "edw-sol"]
+        },
+        {
+          "id": "capital",
+          "topic": "history",
+          "text": "Its seat of government later left Earth for Olympus Village, on Mars.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-federation", "edw-sol"]
+        }
+      ]
+    },
+    {
+      "id": "empire",
+      "kind": "organization",
+      "name": "Empire",
+      "aliases": ["Empire of Achenar"],
+      "summary": "Hereditary monarchy ruled from Capitol in Achenar, second of the three superpowers.",
+      "attributes": {
+        "significance": "Born when Henson Duval made his sister's republic a monarchy; victory at Achenar made it a superpower.",
+        "period": "Since 2296"
+      },
+      "claims": [
+        {
+          "id": "origin",
+          "topic": "history",
+          "text": "It began as the Republic of Achenar, which Henson Duval took over after his sister died in 2296 and turned into a hereditary monarchy.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-empire", "edw-henson-duval", "edw-achenar"]
+        },
+        {
+          "id": "seat",
+          "topic": "history",
+          "text": "The Imperial Palace is in Capitol, a city on the Achenar world that shares its name.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-empire", "edw-achenar"]
+        }
+      ]
+    },
+    {
+      "id": "alliance",
+      "kind": "organization",
+      "name": "Alliance",
+      "aliases": ["Alliance of Independent Systems"],
+      "summary": "Parliamentary union of independent systems, founded in Alioth in 3230.",
+      "attributes": {
+        "significance": "The youngest superpower, formed so its members could stay free of both the Federation and the Empire.",
+        "period": "Since 3230"
+      },
+      "claims": [
+        {
+          "id": "founding",
+          "topic": "history",
+          "text": "It was founded in Alioth in 3230, once the system had expelled Federal and Imperial forces; Mic Turner and Meredith Argent were its driving figures.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-alliance", "edw-alioth", "edw-mic-turner"]
+        },
+        {
+          "id": "government",
+          "topic": "history",
+          "text": "Councillors from each member system sit in the Alliance Assembly, which chooses the prime minister.",
+          "evidence": "community_reference",
+          "sources": ["edw-alliance"]
+        }
+      ]
+    },
+    {
+      "id": "marlin-duval",
+      "kind": "person",
+      "name": "Marlin Duval",
+      "aliases": [],
+      "summary": "Led the colonial voyage that settled Achenar, and founded its first republic.",
+      "attributes": {
+        "significance": "Her republic became the Empire, and her ideals survive as the movement called Marlinism.",
+        "period": "Died 2296"
+      },
+      "claims": [
+        {
+          "id": "expedition",
+          "topic": "history",
+          "text": "A wealthy Federal citizen tired of its conformity, she funded and led a colonial voyage to Achenar and set up a democratic republic there.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-marlin-duval", "edw-achenar"]
+        },
+        {
+          "id": "death",
+          "topic": "history",
+          "text": "A speeder accident in 2296 killed her, her partner and her children, and her brother Henson took control of the colony.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-marlin-duval", "edw-henson-duval"]
+        },
+        {
+          "id": "suspicion",
+          "topic": "interpretation",
+          "text": "Some say Henson arranged her death to take power. Nobody ever proved it.",
+          "evidence": "community_reference",
+          "sources": ["edw-marlin-duval"]
+        },
+        {
+          "id": "marlinism",
+          "topic": "history",
+          "text": "Marlinism, which would replace the Emperor with elected senators, outlived her. Its violent offshoot, the Neo-Marlinist Liberation Army, carried out the Nine Martyrs bombings.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-marlin-duval", "edw-nine-martyrs"]
+        }
+      ]
+    },
+    {
+      "id": "henson-duval",
+      "kind": "person",
+      "name": "Henson Duval",
+      "aliases": [],
+      "summary": "Marlin Duval's brother, who turned her republic into an empire and wore its first crown.",
+      "attributes": {
+        "significance": "Made the Republic of Achenar a hereditary empire and led it to victory against the Federation.",
+        "period": "Emperor 2320 to 2402"
+      },
+      "claims": [
+        {
+          "id": "seizure",
+          "topic": "history",
+          "text": "After his sister died in 2296 he used his popularity to seize the government and replaced elected rule with succession by birth.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-henson-duval", "edw-achenar"]
+        },
+        {
+          "id": "reign",
+          "topic": "history",
+          "text": "Crowned first Emperor in 2320, he reigned until he died in 2402.",
+          "evidence": "community_reference",
+          "sources": ["edw-henson-duval"]
+        },
+        {
+          "id": "counter-attack",
+          "topic": "history",
+          "text": "In 2325 he sent every ship he could find, civilian or military, against the Federal fleet and drove it from Achenar.",
+          "evidence": "community_reference",
+          "sources": ["edw-battle-of-achenar"]
+        }
+      ]
+    },
+    {
+      "id": "mic-turner",
+      "kind": "person",
+      "name": "Mic Turner",
+      "aliases": [],
+      "summary": "Pilot and explorer who co-founded the Alliance with Meredith Argent.",
+      "attributes": {
+        "significance": "A hero of Alioth's liberation; the seat of Alliance government is on a world renamed for him.",
+        "period": "Co-founded the Alliance in 3230"
+      },
+      "claims": [
+        {
+          "id": "liberation",
+          "topic": "history",
+          "text": "His flying in the Alioth revolt, including taking the gas mining platforms, made him one of its leaders.",
+          "evidence": "community_reference",
+          "sources": ["edw-mic-turner"]
+        },
+        {
+          "id": "namesake",
+          "topic": "history",
+          "text": "To honour his part in freeing Alioth and creating the Alliance, Gordonworld took the name Turner's World.",
+          "evidence": "community_reference",
+          "sources": ["edw-mic-turner"]
+        },
+        {
+          "id": "disappearance",
+          "topic": "history",
+          "text": "Test-flying a prototype exploration ship from Pleione in the Pleiades, he jumped out and was never seen again.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-mic-turner", "edw-meredith-argent"]
+        },
+        {
+          "id": "real-name",
+          "topic": "theory",
+          "text": "His name may nod to the musician Nik Turner; the wiki offers this only as a possibility.",
+          "evidence": "community_reference",
+          "sources": ["edw-mic-turner"]
+        }
+      ]
+    },
+    {
+      "id": "meredith-argent",
+      "kind": "person",
+      "name": "Meredith Argent",
+      "aliases": [],
+      "summary": "Scientist and resistance leader who co-founded the Alliance with Mic Turner.",
+      "attributes": {
+        "significance": "Co-founder of the Alliance, believed to be its first prime minister; a world in Alioth bears her name.",
+        "period": "Co-founded the Alliance in 3230"
+      },
+      "claims": [
+        {
+          "id": "resistance",
+          "topic": "history",
+          "text": "Before 3228 she led one of the resistance cells working on Alioth's gas platforms.",
+          "evidence": "community_reference",
+          "sources": ["edw-meredith-argent"]
+        },
+        {
+          "id": "namesake",
+          "topic": "history",
+          "text": "In honour of her part in the liberation, New California became Argent's Claim.",
+          "evidence": "community_reference",
+          "sources": ["edw-meredith-argent"]
+        },
+        {
+          "id": "prime-minister",
+          "topic": "uncertainty",
+          "text": "That she was the first prime minister is believed rather than recorded.",
+          "evidence": "community_reference",
+          "sources": ["edw-meredith-argent"]
+        }
+      ]
+    },
+    {
+      "id": "battle-of-achenar",
+      "kind": "event",
+      "name": "Battle of Achenar",
+      "aliases": ["Great Battle of Liberation"],
+      "summary": "The Federal attempt to annex Achenar in 2324 and 2325, ending in an Imperial victory.",
+      "attributes": {
+        "significance": "Humanity's first large interstellar war and the Federation's first major defeat.",
+        "period": "2324 to 2325",
+        "event_type": "conflict"
+      },
+      "claims": [
+        {
+          "id": "course",
+          "topic": "history",
+          "text": "A Federal fleet from Beta Hydri reached Achenar in 2324 at the end of a long, thin supply line and was worn down until the Imperial counter-stroke of 2325 sent it home.",
+          "evidence": "community_reference",
+          "sources": ["edw-battle-of-achenar"]
+        },
+        {
+          "id": "aftermath",
+          "topic": "history",
+          "text": "The defeat began a cold war between the two powers that lasted until 2381.",
+          "evidence": "community_reference",
+          "sources": ["edw-battle-of-achenar"]
+        },
+        {
+          "id": "capital",
+          "topic": "history",
+          "text": "Discontent over the defeat led the Federation to move its capital from Earth to Mars.",
+          "evidence": "community_reference",
+          "sources": ["edw-sol"]
+        }
+      ]
+    },
+    {
+      "id": "nine-martyrs-attack",
+      "kind": "event",
+      "name": "Nine Martyrs attack",
+      "aliases": ["Nine Martyrs"],
+      "summary": "Coordinated bombings of nine major starports on 11 March 3307, one in each superpower capital among them.",
+      "attributes": {
+        "significance": "Struck the capitals of all three superpowers on one day and ended the Galactic Summit early.",
+        "period": "11 March 3307",
+        "event_type": "incident"
+      },
+      "claims": [
+        {
+          "id": "attack",
+          "topic": "history",
+          "text": "The Neo-Marlinist Liberation Army bombed nine starports at once. Among them were Sol's Li Qing Jao, Achenar's Dawes Hub and Alioth's Donaldson.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-nine-martyrs", "edw-sol", "edw-achenar", "edw-alioth"]
+        },
+        {
+          "id": "summit",
+          "topic": "history",
+          "text": "The bombings fell while leaders met at the Galactic Summit, held in Sirius, which ended early.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-nine-martyrs", "edw-sol"]
+        }
+      ]
+    },
+    {
+      "id": "colonia",
+      "kind": "star_system",
+      "name": "Colonia",
+      "aliases": ["Eol Prou RS-T d3-94"],
+      "summary": "Independent hub of the Colonia Region, some 22,000 light years from Sol.",
+      "attributes": {
+        "significance": "An ordinary system until Jaques Station stranded here in 3302; it became the centre of humanity's most distant colony."
+      },
+      "location": {
+        "system": "Colonia",
+        "system_address": 3238296097059,
+        "star_pos": [-9530.5, -910.28125, 19808.125],
+        "precision": "exact",
+        "sources": ["edsm-identifiers-gki07", "edw-colonia"]
+      },
+      "claims": [
+        {
+          "id": "arrival",
+          "topic": "history",
+          "text": "Nobody paid the system much attention until Jaques Station turned up here in May 3302.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-colonia", "edw-jaques-station"]
+        },
+        {
+          "id": "naming",
+          "topic": "history",
+          "text": "Explorers took up the name Colonia, first offered as a placeholder through the Galactic Mapping Project, and Universal Cartographics adopted it on 25 October 3302.",
+          "evidence": "community_reference",
+          "sources": ["edw-colonia"]
+        },
+        {
+          "id": "settlement",
+          "topic": "history",
+          "text": "Colonia Hub on Colonia 2 a, the first permanent settlement, opened on 9 September 3302 as headquarters of the Colonia Council.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-colonia", "edw-colonia-council"]
+        },
+        {
+          "id": "distance",
+          "topic": "gameplay",
+          "text": "It sits about 22,000 light years from Sol, joined to the Core Systems by a chain of inhabited systems built along the way.",
+          "evidence": "community_reference",
+          "sources": ["edw-colonia"]
+        }
+      ]
+    },
+    {
+      "id": "jaques-station",
+      "kind": "station",
+      "name": "Jaques Station",
+      "aliases": [],
+      "summary": "Orbis starport in Colonia, the only finished station fitted with engines, owned by the cyborg bartender Jaques.",
+      "attributes": {
+        "significance": "The travelling starport whose failed leap to Beagle Point founded the Colonia colony."
+      },
+      "location": {
+        "system": "Colonia",
+        "system_address": 3238296097059,
+        "star_pos": [-9530.5, -910.28125, 19808.125],
+        "station": "Jaques Station",
+        "market_id": 128667761,
+        "precision": "exact",
+        "sources": ["edsm-identifiers-gki07", "edw-jaques-station"]
+      },
+      "claims": [
+        {
+          "id": "engines",
+          "topic": "history",
+          "text": "Unlike every other completed station, it carries engines and can move from system to system.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques-station", "edw-colonia"]
+        },
+        {
+          "id": "naming",
+          "topic": "history",
+          "text": "Jaques gave this Orbis his own name when it replaced Peters Base, the Coriolis he had first owned.",
+          "evidence": "community_reference",
+          "sources": ["edw-jaques-station"]
+        },
+        {
+          "id": "jump",
+          "topic": "history",
+          "text": "In May 3302, once commanders had supplied the hydrogen fuel, the station leapt for Beagle Point. Its drives failed in hyperspace and it came out in what is now Colonia.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques-station", "edw-colonia", "edw-colonia-council"]
+        },
+        {
+          "id": "jump-date",
+          "topic": "uncertainty",
+          "text": "The sources disagree on the day of the jump: two give 19 May 3302, one gives 21 May.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques-station", "edw-colonia-council", "edw-colonia"]
+        },
+        {
+          "id": "cause",
+          "topic": "interpretation",
+          "text": "The failure is usually put down to Thargoid sensors smuggled aboard; the station's own history treats that as speculation.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques-station", "edw-colonia"]
+        },
+        {
+          "id": "repairs",
+          "topic": "history",
+          "text": "Through July and August 3302 pilots hauled in repair materials until its services were back.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques-station", "edw-colonia-council"]
+        },
+        {
+          "id": "rare-goods",
+          "topic": "service",
+          "text": "Only this station sells the rare commodity Jaques Quinentian Still.",
+          "evidence": "community_reference",
+          "sources": ["edw-jaques-station"]
+        },
+        {
+          "id": "control",
+          "topic": "history",
+          "text": "On the reviewed revision the wiki listed a cooperative called Jaques as the controlling faction. Live faction control is not tracked.",
+          "evidence": "community_reference",
+          "sources": ["edw-jaques-station"]
+        }
+      ]
+    },
+    {
+      "id": "jaques",
+      "kind": "person",
+      "name": "Jaques",
+      "aliases": [],
+      "summary": "Centuries-old cyborg bartender and owner of Jaques Station.",
+      "attributes": {
+        "significance": "His dream of a station that could roam the galaxy led, by accident, to the founding of Colonia."
+      },
+      "claims": [
+        {
+          "id": "owner",
+          "topic": "history",
+          "text": "He owns Jaques Station and makes its announcements himself, in English and French.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques", "edw-jaques-station"]
+        },
+        {
+          "id": "dream",
+          "topic": "history",
+          "text": "After two centuries behind the bar of Peters Base in Facece he owned the station, and he meant to give it engines and go exploring.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques", "edw-jaques-station"]
+        },
+        {
+          "id": "legacy",
+          "topic": "interpretation",
+          "text": "Older Elite fiction makes him a conscripted Federal black-ops soldier rebuilt as a cyborg and later held by Imperial captors. The wiki marks this biography as legacy lore, whose standing in current canon is unsettled.",
+          "evidence": "community_reference",
+          "sources": ["edw-jaques"]
+        },
+        {
+          "id": "staying",
+          "topic": "history",
+          "text": "After the 3302 stranding he said the station was unlikely to jump again, and he has remained in Colonia.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques-station", "edw-jaques"]
+        }
+      ]
+    },
+    {
+      "id": "cmdr-cly",
+      "kind": "person",
+      "name": "Commander Cly",
+      "aliases": ["Cly"],
+      "summary": "The explorer who found the missing Jaques Station.",
+      "attributes": {
+        "significance": "Ended the search for the lost station while surveying a nebula far from human space."
+      },
+      "claims": [
+        {
+          "id": "find",
+          "topic": "history",
+          "text": "On 29 June 3302, while surveying the Eol Prou nebula, Cly came upon the stranded station and reported its damage.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques-station", "edw-colonia"]
+        }
+      ]
+    },
+    {
+      "id": "colonia-council",
+      "kind": "organization",
+      "name": "Colonia Council",
+      "aliases": [],
+      "summary": "Cooperative of Colonia's first settlers that manages the region's infrastructure and immigration.",
+      "attributes": {
+        "significance": "The nearest thing the Colonia Region has to a government, founded with its first settlement.",
+        "period": "Since 9 September 3302"
+      },
+      "claims": [
+        {
+          "id": "founding",
+          "topic": "history",
+          "text": "It formed on 9 September 3302, the day Colonia Hub opened as its headquarters after a construction drive by independent pilots.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-colonia-council", "edw-colonia"]
+        },
+        {
+          "id": "role",
+          "topic": "history",
+          "text": "Instead of governing the region it confines itself to building infrastructure and drawing settlers from the Core Systems.",
+          "evidence": "community_reference",
+          "sources": ["edw-colonia-council"]
+        },
+        {
+          "id": "expansion",
+          "topic": "history",
+          "text": "From December 3302 its Colonia Expansion Initiative held monthly appeals that decided which groups could settle new systems.",
+          "evidence": "community_reference",
+          "sources": ["edw-colonia-council"]
+        }
+      ]
+    },
+    {
+      "id": "jaques-station-voyage-3302",
+      "kind": "event",
+      "name": "Jaques Station's jump to Beagle Point",
+      "aliases": [],
+      "summary": "The 3302 attempt to send a whole starport across the galaxy, which ended in Colonia instead.",
+      "attributes": {
+        "significance": "A failed voyage that, by stranding the station, opened a new region to settlement.",
+        "period": "May 3302",
+        "event_type": "expedition"
+      },
+      "claims": [
+        {
+          "id": "fuel",
+          "topic": "history",
+          "text": "Jaques backed a drive for hydrogen fuel in May 3302 and confirmed the jump once it was met.",
+          "evidence": "community_reference",
+          "sources": ["edw-jaques-station"]
+        },
+        {
+          "id": "sabotage",
+          "topic": "history",
+          "text": "Cultists tried to sabotage the jump at the last moment, without success.",
+          "evidence": "community_reference",
+          "sources": ["edw-jaques-station"]
+        },
+        {
+          "id": "distance",
+          "topic": "history",
+          "text": "The leap from Gliese 1269 spanned roughly 21,890 light years, the longest single jump on record for a human vessel.",
+          "evidence": "community_reference",
+          "sources": ["edw-jaques-station"]
+        }
+      ]
+    },
+    {
+      "id": "jaques-station-rediscovery-3302",
+      "kind": "discovery",
+      "name": "Rediscovery of Jaques Station",
+      "aliases": [],
+      "summary": "The finding of the lost station in Eol Prou RS-T d3-94 on 29 June 3302.",
+      "attributes": {
+        "significance": "Turned a feared disaster into the first step of the Colonia colony.",
+        "period": "29 June 3302"
+      },
+      "claims": [
+        {
+          "id": "messages",
+          "topic": "history",
+          "text": "Garbled messages thought to come from the station reached outposts in June 3302, but they could not be traced.",
+          "evidence": "community_reference",
+          "sources": ["edw-jaques-station"]
+        },
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Commander Cly located it on 29 June 3302, and within a week a relief convoy had part of it working again.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-jaques-station", "edw-colonia"]
+        }
+      ]
+    },
+    {
+      "id": "the-dark-wheel",
+      "kind": "organization",
+      "name": "The Dark Wheel",
+      "aliases": ["Dark Wheel"],
+      "summary": "A secretive society of legendary explorers, said to have sought Raxxla since the dawn of interstellar travel.",
+      "attributes": {
+        "significance": "The legend behind the search for Raxxla, and a name now carried by a minor faction in Shinrarta Dezhra."
+      },
+      "claims": [
+        {
+          "id": "legend",
+          "topic": "history",
+          "text": "Spacer lore says the society accepts only exceptional pilots, by invitation and after a test they never see coming.",
+          "evidence": "community_reference",
+          "sources": ["edw-dark-wheel"]
+        },
+        {
+          "id": "faction",
+          "topic": "history",
+          "text": "Since 3300 a minor faction calling itself the Dark Wheel has been based in Shinrarta Dezhra, offering unusual missions.",
+          "evidence": "community_reference",
+          "sources": ["edw-dark-wheel"]
+        },
+        {
+          "id": "imitator",
+          "topic": "interpretation",
+          "text": "The wiki judges that faction more likely an imitator than the society of legend, since independent pilots founded it.",
+          "evidence": "community_reference",
+          "sources": ["edw-dark-wheel"]
+        },
+        {
+          "id": "crane",
+          "topic": "interpretation",
+          "text": "The self-styled journalist Lyta Crane claims the group began in a darkened ring station. Critics say she forges evidence, and no such station has been found.",
+          "evidence": "community_reference",
+          "sources": ["edw-dark-wheel"]
+        },
+        {
+          "id": "origin",
+          "topic": "history",
+          "text": "The name comes from Robert Holdstock's 1980 book and from his novella sold with the original Elite in 1984, which sits outside current canon.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-dark-wheel", "edw-raxxla"]
+        }
+      ]
+    },
+    {
+      "id": "raxxla",
+      "kind": "mystery",
+      "name": "Raxxla",
+      "aliases": [],
+      "summary": "A legendary place said to hold a great secret, sought by explorers for centuries.",
+      "attributes": {
+        "significance": "The galaxy's most famous unsolved mystery, and the quest the Dark Wheel is said to serve."
+      },
+      "claims": [
+        {
+          "id": "legend",
+          "topic": "history",
+          "text": "The old tales agree on little, except that Raxxla is a real place and that it guards a secret.",
+          "evidence": "community_reference",
+          "sources": ["edw-raxxla"]
+        },
+        {
+          "id": "first-mention",
+          "topic": "history",
+          "text": "Its earliest known mention is in a ship mechanic's journal from Tau Ceti around 2296, which already treats the tale as familiar.",
+          "evidence": "community_reference",
+          "sources": ["edw-raxxla"]
+        },
+        {
+          "id": "omphalos",
+          "topic": "interpretation",
+          "text": "Some versions link it to an alien gateway called the Omphalos Rift, but those details matched a children's story and fell out of favour.",
+          "evidence": "community_reference",
+          "sources": ["edw-raxxla"]
+        },
+        {
+          "id": "developers",
+          "topic": "community_report",
+          "text": "Frontier has never confirmed or denied it publicly. The novelist Drew Wagar reports being told by developers that it is in the game.",
+          "evidence": "community_reference",
+          "sources": ["edw-raxxla"]
+        },
+        {
+          "id": "visited",
+          "topic": "theory",
+          "text": "A theory resting on a remark at a 2020 convention holds that some commander had already passed through its system without noticing.",
+          "evidence": "community_reference",
+          "sources": ["edw-raxxla"]
+        }
+      ]
+    },
+    {
+      "id": "formidine-rift-mystery",
+      "kind": "mystery",
+      "name": "The Formidine Rift mystery",
+      "aliases": ["Formidine Rift mystery"],
+      "summary": "A trail of clues in a sparse region about 10,000 light years from the Core Systems, centred on Project Dynasty.",
+      "attributes": {
+        "significance": "An in-game mystery tied to the novel Elite: Reclamation, once suspected of leading to Raxxla."
+      },
+      "claims": [
+        {
+          "id": "region",
+          "topic": "history",
+          "text": "The Formidine Rift earned a name as a place where ships vanished, partly because its stars are so thinly spread that crossing it is hard.",
+          "evidence": "community_reference",
+          "sources": ["edw-formidine-rift"]
+        },
+        {
+          "id": "novel",
+          "topic": "history",
+          "text": "Its story comes from Drew Wagar's novel Elite: Reclamation, and the trail has been in the game since version 1.0.",
+          "evidence": "community_reference",
+          "sources": ["edw-project-dynasty"]
+        },
+        {
+          "id": "raxxla",
+          "topic": "theory",
+          "text": "Some players believed the mystery might lead them to Raxxla.",
+          "evidence": "community_reference",
+          "sources": ["edw-project-dynasty"]
+        }
+      ]
+    },
+    {
+      "id": "project-dynasty",
+      "kind": "event",
+      "name": "Project Dynasty expeditions",
+      "aliases": ["Project Dynasty"],
+      "summary": "A secret programme of 3270 that sent ships to chart Earth-like worlds far beyond human space.",
+      "attributes": {
+        "significance": "Its lost ships, the Zurara among them, lie at the heart of the Formidine Rift mystery.",
+        "period": "3270",
+        "event_type": "expedition"
+      },
+      "claims": [
+        {
+          "id": "purpose",
+          "topic": "history",
+          "text": "Fearing a Thargoid war would reach human space, its backers looked for Earth-like refuges and left beacons to mark them.",
+          "evidence": "community_reference",
+          "sources": ["edw-project-dynasty"]
+        },
+        {
+          "id": "regions",
+          "topic": "history",
+          "text": "The ships set out for three uncharted regions, the Formidine Rift among them, before frame shift drives existed.",
+          "evidence": "community_reference",
+          "sources": ["edw-project-dynasty"]
+        },
+        {
+          "id": "the-club",
+          "topic": "history",
+          "text": "The project was conceived by a secretive circle known as The Club.",
+          "evidence": "community_reference",
+          "sources": ["edw-project-dynasty"],
+          "spoiler": true
+        },
+        {
+          "id": "no-return",
+          "topic": "history",
+          "text": "To keep the secret, the crews were never meant to come home.",
+          "evidence": "community_reference",
+          "sources": ["edw-project-dynasty"],
+          "spoiler": true
+        }
+      ]
+    },
+    {
+      "id": "the-zurara",
+      "kind": "landmark",
+      "name": "The Zurara",
+      "aliases": ["Zurara"],
+      "summary": "Derelict exploration megaship of Project Dynasty, adrift in the Formidine Rift.",
+      "attributes": {
+        "significance": "The wreck at the centre of the Formidine Rift mystery.",
+        "landmark_type": "megaship"
+      },
+      "location": {
+        "system": "Syreadiae JX-F c0",
+        "system_address": 67880586498,
+        "star_pos": [-9529.4375, -64.5, -7428.4375],
+        "precision": "system_only",
+        "note": "In space within this system; the sources give no closer position, so only you can confirm reaching it.",
+        "sources": ["edsm-identifiers-gki07", "edw-formidine-rift"]
+      },
+      "claims": [
+        {
+          "id": "ship",
+          "topic": "history",
+          "text": "Purpose-built for long voyages and fitted with experimental repair units, it was the project's ship bound for the Rift.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-project-dynasty", "edw-formidine-rift"]
+        },
+        {
+          "id": "wreck",
+          "topic": "identity",
+          "text": "Its wreck lies in the Syreadiae JX-F c0 system.",
+          "evidence": "community_reference",
+          "sources": ["edw-formidine-rift"]
+        },
+        {
+          "id": "fate",
+          "topic": "history",
+          "text": "Its survey done, the ship was sabotaged and its crew murdered by brainwashed sleeper agents.",
+          "evidence": "community_corroborated",
+          "sources": ["edw-formidine-rift", "edw-project-dynasty"],
+          "spoiler": true
+        }
+      ]
+    },
+    {
+      "id": "li-qing-jao",
+      "kind": "station",
+      "name": "Li Qing Jao",
+      "aliases": [],
+      "summary": "Orbis starport orbiting Earth, named for the inventor of the hyperdrive.",
+      "attributes": {
+        "significance": "Earth's starport named for the engineer whose hyperdrive opened the galaxy, and the worst hit of the Nine Martyrs bombings.",
+        "station_type": "Orbis"
+      },
+      "location": {
+        "system": "Sol",
+        "system_address": 10477373803,
+        "star_pos": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "station": "Li Qing Jao",
+        "market_id": 128017408,
+        "body": "Earth",
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers-gki08",
+          "edw-li-qing-jao"
+        ]
+      },
+      "claims": [
+        {
+          "id": "namesake",
+          "topic": "history",
+          "text": "The starport is named after Li Qin Jao, who led the team that invented the hyperdrive.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-li-qing-jao",
+            "edw-li-qin-jao"
+          ]
+        },
+        {
+          "id": "bombing",
+          "topic": "history",
+          "text": "Of the nine starports bombed on 11 March 3307 it was damaged worst: it alone burned for two weeks, yet it was back in full operation by 1 April 3307.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-li-qing-jao"
+          ]
+        },
+        {
+          "id": "vice-president",
+          "topic": "history",
+          "text": "Federal Vice President Brad Mitchell and several Cabinet members died here; they were attending a government meeting when the bombs went off.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-li-qing-jao"
+          ]
+        },
+        {
+          "id": "spelling",
+          "topic": "identity",
+          "text": "The station's name and the inventor's name differ by one letter (Qing, Qin); the wiki also records Qing as a spelling of the inventor's name.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-li-qin-jao",
+            "edw-li-qing-jao"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "li-qin-jao",
+      "kind": "person",
+      "name": "Li Qin Jao",
+      "aliases": [
+        "Li Qing Jao (inventor)"
+      ],
+      "summary": "Leader of the 22nd-century engineering team that built the first hyperdrive.",
+      "attributes": {
+        "significance": "The hyperdrive let ordinary ships overtake the generation ships and set off the colonisation that built the Core Systems.",
+        "period": "22nd century"
+      },
+      "claims": [
+        {
+          "id": "invention",
+          "topic": "history",
+          "text": "In the 22nd century Jao headed the engineering team behind humanity's first hyperdrive.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-li-qin-jao"
+          ]
+        },
+        {
+          "id": "colony",
+          "topic": "history",
+          "text": "With faster-than-light travel humanity founded its first colony beyond Sol in 2151: Taylor Colony in Tau Ceti.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-li-qin-jao"
+          ]
+        },
+        {
+          "id": "generation-ships",
+          "topic": "history",
+          "text": "Conventional ships could now overtake the thousands of generation ships launched since 2097, and none was built afterwards.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-li-qin-jao",
+            "edw-generation-ship-gki08"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dawes-hub",
+      "kind": "station",
+      "name": "Dawes Hub",
+      "aliases": [],
+      "summary": "Orbis starport orbiting Capitol, the Imperial capital world in Achenar.",
+      "attributes": {
+        "significance": "The starport above the Empire's capital world, bombed in the Nine Martyrs attack.",
+        "station_type": "Orbis"
+      },
+      "location": {
+        "system": "Achenar",
+        "system_address": 164098653,
+        "star_pos": [
+          67.5,
+          -119.46875,
+          24.84375
+        ],
+        "station": "Dawes Hub",
+        "market_id": 3222038272,
+        "body": "Capitol",
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers-gki08",
+          "edw-dawes-hub"
+        ]
+      },
+      "claims": [
+        {
+          "id": "capitol",
+          "topic": "history",
+          "text": "Its parent body is Capitol, the Imperial capital world, which circles the sixth planet of Achenar.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-dawes-hub"
+          ]
+        },
+        {
+          "id": "bombing",
+          "topic": "history",
+          "text": "One of the nine starports bombed on 11 March 3307; the fires were out the following week and it was fully working again by 1 April 3307.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-dawes-hub"
+          ]
+        },
+        {
+          "id": "coronation",
+          "topic": "history",
+          "text": "In October 3301 a community goal here collected gifts of slaves for the newly crowned Emperor, Arissa Lavigny-Duval, following an Imperial custom; the Achenar permit was lifted while it ran.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-dawes-hub"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "donaldson",
+      "kind": "station",
+      "name": "Donaldson",
+      "aliases": [],
+      "summary": "Orbis starport in Alioth, the Alliance capital system.",
+      "attributes": {
+        "significance": "The Alliance capital's starport struck in the Nine Martyrs attack.",
+        "station_type": "Orbis"
+      },
+      "location": {
+        "system": "Alioth",
+        "system_address": 1109989017963,
+        "star_pos": [
+          -33.65625,
+          72.46875,
+          -20.65625
+        ],
+        "station": "Donaldson",
+        "market_id": 128141048,
+        "note": "Parent body disputed: the wiki names Turner's World, EDSM names Alioth 4, so none is recorded.",
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers-gki08",
+          "edw-donaldson"
+        ]
+      },
+      "claims": [
+        {
+          "id": "bombing",
+          "topic": "history",
+          "text": "One of the nine starports bombed on 11 March 3307; it was back in full operation by 1 April 3307.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-donaldson"
+          ]
+        },
+        {
+          "id": "parent-body",
+          "topic": "uncertainty",
+          "text": "Sources disagree on what it orbits: the wiki says Turner's World, the moon that holds the Alliance capital, while EDSM lists Alioth 4.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-donaldson",
+            "edsm-identifiers-gki08"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lave-station",
+      "kind": "station",
+      "name": "Lave Station",
+      "aliases": [],
+      "summary": "Coriolis starport orbiting Planet Lave, once half of the Galactic Cooperative's capital.",
+      "attributes": {
+        "significance": "Where every commander began in the original Elite, and a seat of the Galactic Cooperative's government.",
+        "station_type": "Coriolis"
+      },
+      "location": {
+        "system": "Lave",
+        "system_address": 633742594786,
+        "star_pos": [
+          75.75,
+          48.75,
+          70.75
+        ],
+        "station": "Lave Station",
+        "market_id": 128106744,
+        "body": "Planet Lave",
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers-gki08",
+          "edw-lave-station"
+        ]
+      },
+      "claims": [
+        {
+          "id": "co-capital",
+          "topic": "history",
+          "text": "The Galactic Cooperative split its capital between Planet Lave and Lave Station once it centralised its government in Lave.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-lave-station",
+            "edw-galactic-cooperative"
+          ]
+        },
+        {
+          "id": "bombing",
+          "topic": "history",
+          "text": "Bombed on 11 March 3307 with eight other starports; it was fully restored by 25 March 3307.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-lave-station"
+          ]
+        },
+        {
+          "id": "rare",
+          "topic": "service",
+          "text": "The only seller of the rare commodity Lavian Brandy.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-lave-station"
+          ]
+        },
+        {
+          "id": "original-elite",
+          "topic": "identity",
+          "text": "In the original Elite game every commander started here.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-lave-station"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "galactic-cooperative",
+      "kind": "organization",
+      "name": "Galactic Cooperative",
+      "aliases": [
+        "Galactic Cooperative of Worlds",
+        "GalCop"
+      ],
+      "summary": "Trade-minded superpower of the Old Worlds, founded in 2696 and dissolved in 3174.",
+      "attributes": {
+        "significance": "Ruled the Old Worlds from Lave, introduced the Coriolis station and fought the First Thargoid War, which left it too weak to survive.",
+        "period": "2696 to 3174"
+      },
+      "claims": [
+        {
+          "id": "founded",
+          "topic": "history",
+          "text": "Its charter was ratified in August 2696, uniting Old Worlds colonies around free trade, mutual defence and members' independence.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-galactic-cooperative"
+          ]
+        },
+        {
+          "id": "coriolis",
+          "topic": "history",
+          "text": "The Cooperative created the Coriolis station design and spread it.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-galactic-cooperative"
+          ]
+        },
+        {
+          "id": "thargoid-war",
+          "topic": "history",
+          "text": "It helped defend human space in the First Thargoid War, turning trade ships to military work and capturing Thargoid craft that later reached the Alliance.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-galactic-cooperative"
+          ]
+        },
+        {
+          "id": "end",
+          "topic": "history",
+          "text": "Exhausted by the war and shaken by a murder and corruption scandal, it shrank to eleven worlds; its charter was rescinded on 19 August 3174.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-galactic-cooperative"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "leonard-nimoy-station",
+      "kind": "station",
+      "name": "Leonard Nimoy Station",
+      "aliases": [
+        "WCM Transfer Orbital"
+      ],
+      "summary": "Orbis starport orbiting the planet Vulcan in LHS 3006, renamed as a real-world tribute.",
+      "attributes": {
+        "significance": "A station renamed by the game's developers to honour the actor who played Spock.",
+        "station_type": "Orbis"
+      },
+      "location": {
+        "system": "LHS 3006",
+        "system_address": 27058965194153,
+        "star_pos": [
+          -21.96875,
+          29.09375,
+          -1.71875
+        ],
+        "station": "Leonard Nimoy Station",
+        "market_id": 128012032,
+        "body": "Vulcan",
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers-gki08",
+          "edw-leonard-nimoy-station"
+        ]
+      },
+      "claims": [
+        {
+          "id": "renamed",
+          "topic": "identity",
+          "text": "It was originally WCM Transfer Orbital; a Frontier newsletter (#65) announced the new name.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-leonard-nimoy-station"
+          ]
+        },
+        {
+          "id": "tribute",
+          "topic": "identity",
+          "text": "The new name honoured the passing of Leonard Nimoy, the actor who played Spock. It is an out-of-game tribute, not part of the galaxy's own history.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-leonard-nimoy-station"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "leonard-nimoy",
+      "kind": "person",
+      "name": "Leonard Nimoy",
+      "aliases": [],
+      "summary": "Real-world actor honoured by a station name; not a character in the game's history.",
+      "attributes": {
+        "significance": "The real-world namesake of Leonard Nimoy Station."
+      },
+      "claims": [
+        {
+          "id": "actor",
+          "topic": "identity",
+          "text": "The actor who played Spock in the original Star Trek series; the station rename marked his passing.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-leonard-nimoy-station"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "memorial-cmdr-garak",
+      "kind": "landmark",
+      "name": "Memorial: CMDR Garak",
+      "aliases": [
+        "Memorial CMDR Garak"
+      ],
+      "summary": "Listening post near Jaques Station that remembers an early Colonia pioneer.",
+      "attributes": {
+        "significance": "A memorial to a real commander who hauled supplies for the Jaques Station repairs in Colonia's earliest days.",
+        "landmark_type": "listening_post"
+      },
+      "location": {
+        "system": "Colonia",
+        "system_address": 3238296097059,
+        "star_pos": [
+          -9530.5,
+          -910.28125,
+          19808.125
+        ],
+        "note": "Documented only as near Jaques Station.",
+        "precision": "approximate",
+        "sources": [
+          "edw-memorial-cmdr-garak",
+          "edsm-identifiers-gki08"
+        ]
+      },
+      "claims": [
+        {
+          "id": "memorial",
+          "topic": "history",
+          "text": "Scanning the listening post plays a tribute to CMDR Garak, one of the earliest pilots hauling cargo into the young colony, often with a companion.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-memorial-cmdr-garak"
+          ]
+        },
+        {
+          "id": "player",
+          "topic": "identity",
+          "text": "Garak was a real player, among the first to join the community goals that repaired Jaques Station after its 3302 misjump; he died some time later.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-memorial-cmdr-garak"
+          ]
+        },
+        {
+          "id": "fuel",
+          "topic": "community_report",
+          "text": "The tribute remembers him for refusing comforts and almost never paying for fuel, scooping it from stars instead.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-memorial-cmdr-garak"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cmdr-garak",
+      "kind": "person",
+      "name": "CMDR Garak",
+      "aliases": [
+        "Garak"
+      ],
+      "summary": "Player commander and early Colonia supplier, remembered by a listening post.",
+      "attributes": {
+        "significance": "One of the first commanders to supply Colonia, honoured in game after his death."
+      },
+      "claims": [
+        {
+          "id": "pioneer",
+          "topic": "history",
+          "text": "An early pioneer of Colonia who hauled supplies the long way from the core worlds.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-memorial-cmdr-garak"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "second-thargoid-war",
+      "kind": "event",
+      "name": "Second Thargoid War",
+      "aliases": [
+        "Thargoid war"
+      ],
+      "summary": "War between humanity and the Thargoids from 3303 to 18 December 3310, ending in a human victory.",
+      "attributes": {
+        "significance": "Brought the Thargoids back 152 years after the first war, drove the Titans into human space and ended over Earth.",
+        "event_type": "conflict",
+        "period": "September 3303 to 18 December 3310"
+      },
+      "claims": [
+        {
+          "id": "start",
+          "topic": "history",
+          "text": "Open hostilities began on 26 September 3303, when Interceptors attacked independent pilots without provocation at non-human signal sources.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-second-thargoid-war"
+          ]
+        },
+        {
+          "id": "maelstroms",
+          "topic": "history",
+          "text": "Eight Maelstroms arrived and their fleets overwhelmed 44 populated systems, with billions killed and billions more fleeing.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-second-thargoid-war"
+          ]
+        },
+        {
+          "id": "end",
+          "topic": "history",
+          "text": "The war ended in a human victory when the Titan Cocijo was destroyed on 18 December 3310.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-second-thargoid-war",
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "remaining",
+          "topic": "gameplay",
+          "text": "After the war Thargoids still occupy the Pleiades, Witch Head, California and Coalsack nebulae, as of the reviewed revision.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-second-thargoid-war"
+          ]
+        },
+        {
+          "id": "end-date",
+          "topic": "uncertainty",
+          "text": "The war article's closing section prints the end year as 3010; its summary and the Titan article give 18 December 3310, which is recorded here.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-second-thargoid-war",
+            "edw-thargoid-titan"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aegis",
+      "kind": "organization",
+      "name": "Aegis",
+      "aliases": [],
+      "summary": "Joint research initiative of the three superpowers against the Thargoids, founded in 3303.",
+      "attributes": {
+        "significance": "Built humanity's first effective anti-Thargoid weapons and coordinated research and defence through much of the war.",
+        "period": "Founded 4 August 3303; shut down January 3308; reformed February 3309"
+      },
+      "claims": [
+        {
+          "id": "founded",
+          "topic": "history",
+          "text": "Scientists of the Federation, Empire and Alliance founded it on 4 August 3303 to pool their research on the Thargoids.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-aegis"
+          ]
+        },
+        {
+          "id": "weapons",
+          "topic": "history",
+          "text": "Its first anti-xeno equipment, an AX missile rack and an AX xeno scanner, arrived on 28 September 3303 and let pilots break an Interceptor's defences for the first time.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-second-thargoid-war"
+          ]
+        },
+        {
+          "id": "shutdown",
+          "topic": "history",
+          "text": "After an inquiry into the loss of the Alexandria the superpowers shut it down on 18 January 3308.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-aegis"
+          ]
+        },
+        {
+          "id": "reformed",
+          "topic": "history",
+          "text": "It was re-formed on 13 February 3309 under Professor Alba Tesreau, headquartered in Duamta.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-aegis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "salvation",
+      "kind": "person",
+      "name": "Salvation",
+      "aliases": [
+        "Caleb Wycherley",
+        "The Witch"
+      ],
+      "summary": "Alias of Caleb Wycherley, a scientist who pursued his own anti-Thargoid weapons.",
+      "attributes": {
+        "significance": "Ties the Thargoid wars together: his team worked on INRA's mycoid, and his Proteus Wave of 3308 preceded the Maelstroms.",
+        "period": "32nd to 34th centuries"
+      },
+      "claims": [
+        {
+          "id": "identity",
+          "topic": "history",
+          "text": "Salvation is Caleb Wycherley, once vice-president of research at Azimuth Biochemicals.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-salvation"
+          ]
+        },
+        {
+          "id": "inra",
+          "topic": "history",
+          "text": "His team worked for INRA as subcontractors on the mycoid bioweapon, and he was present when it was tested.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-salvation"
+          ]
+        },
+        {
+          "id": "proteus",
+          "topic": "history",
+          "text": "He was aboard the Bright Sentinel when the Proteus Wave fired; his body was reported found on its bridge on 25 August 3308.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-salvation"
+          ]
+        },
+        {
+          "id": "nemesis",
+          "topic": "theory",
+          "text": "Seo Jin-ae claims he prepared a Nemesis Protocol to keep his mind alive after death; nothing confirms it.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-salvation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pleiades-station-attacks-3303",
+      "kind": "event",
+      "name": "Thargoid attacks on Pleiades starports",
+      "aliases": [],
+      "summary": "Medusa Interceptors crippled starports across the Pleiades between 14 December 3303 and 11 January 3304.",
+      "attributes": {
+        "significance": "The war's first attacks on starports: the opening day struck Titan's Daughter, The Oracle and Liman Legacy.",
+        "event_type": "attack",
+        "period": "14 December 3303 to 11 January 3304"
+      },
+      "claims": [
+        {
+          "id": "first",
+          "topic": "history",
+          "text": "On 14 December 3303 Thargoids damaged Titan's Daughter in Taygeta, The Oracle and Liman Legacy; the Pilots Federation moved docked pilots' ships to rescue vessels.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-second-thargoid-war"
+          ]
+        },
+        {
+          "id": "waves",
+          "topic": "history",
+          "text": "Further waves followed on 21 December, 4 January and 11 January, when Obsidian Orbital in Maia was hit.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-second-thargoid-war",
+            "edw-obsidian-orbital"
+          ]
+        },
+        {
+          "id": "intent",
+          "topic": "interpretation",
+          "text": "Security footage showed shutdown fields disabling defences before the reactor was hit; witnesses read this as an attempt to cripple stations rather than destroy them.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-second-thargoid-war"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "delphi",
+      "kind": "star_system",
+      "name": "Delphi",
+      "aliases": [
+        "Pleiades Sector IR-W d1-55"
+      ],
+      "summary": "Independent system by the Pleiades, renamed in 3304 and once Aegis Research's base.",
+      "attributes": {
+        "significance": "Home of The Oracle and of Aegis's research headquarters, at the heart of the Pleiades front."
+      },
+      "location": {
+        "system": "Delphi",
+        "system_address": 1900262951243,
+        "star_pos": [
+          -63.59375,
+          -147.40625,
+          -319.09375
+        ],
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers-gki08",
+          "edw-delphi"
+        ]
+      },
+      "claims": [
+        {
+          "id": "renamed",
+          "topic": "history",
+          "text": "It was designated Pleiades Sector IR-W d1-55 until 11 December 3304.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-delphi"
+          ]
+        },
+        {
+          "id": "aegis",
+          "topic": "history",
+          "text": "Aegis Research was based here, headquartered at Donar's Oak.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-delphi",
+            "edw-aegis"
+          ]
+        },
+        {
+          "id": "wrecks",
+          "topic": "history",
+          "text": "Wrecked bulk cruiser megaships lie across the system.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-delphi"
+          ]
+        },
+        {
+          "id": "raxxla",
+          "topic": "theory",
+          "text": "Its name has drawn Raxxla and 'Omphalos' theories; none has produced anything.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-delphi"
+          ]
+        },
+        {
+          "id": "risk",
+          "topic": "gameplay",
+          "text": "It sits at the edge of the Pleiades, where Thargoids remain after the war.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-delphi",
+            "edw-second-thargoid-war"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "the-oracle",
+      "kind": "station",
+      "name": "The Oracle",
+      "aliases": [],
+      "summary": "Orbis starport orbiting Delphi 5 a, struck on the first day of the Pleiades station attacks.",
+      "attributes": {
+        "significance": "One of the first starports the Thargoids crippled, and the first to be restored.",
+        "station_type": "Orbis"
+      },
+      "location": {
+        "system": "Delphi",
+        "system_address": 1900262951243,
+        "star_pos": [
+          -63.59375,
+          -147.40625,
+          -319.09375
+        ],
+        "station": "The Oracle",
+        "market_id": 128782803,
+        "body": "Delphi 5 a",
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers-gki08",
+          "edw-delphi"
+        ]
+      },
+      "claims": [
+        {
+          "id": "attack",
+          "topic": "history",
+          "text": "Attacked by Thargoids on 14 December 3303.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-delphi",
+            "edw-second-thargoid-war"
+          ]
+        },
+        {
+          "id": "recovered",
+          "topic": "history",
+          "text": "It was the first station to recover from a Thargoid attack; Obsidian Orbital was the second, on 3 March 3304.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-obsidian-orbital"
+          ]
+        },
+        {
+          "id": "near-fall",
+          "topic": "history",
+          "text": "In 3307 a later attack cost it its alignment thrusters and it nearly fell onto Delphi 5 a before engineers stabilised it.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-delphi"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "obsidian-orbital",
+      "kind": "station",
+      "name": "Obsidian Orbital",
+      "aliases": [],
+      "summary": "Ocellus starport in Maia, named by public vote and hit by Thargoids in January 3304.",
+      "attributes": {
+        "significance": "A community-built Pleiades starport that hosted an Aegis laboratory and survived a Thargoid attack.",
+        "station_type": "Ocellus"
+      },
+      "location": {
+        "system": "Maia",
+        "system_address": 8216113749,
+        "star_pos": [
+          -81.78125,
+          -149.4375,
+          -343.375
+        ],
+        "station": "Obsidian Orbital",
+        "market_id": 128672445,
+        "precision": "exact",
+        "sources": [
+          "edsm-identifiers-gki08",
+          "edw-obsidian-orbital"
+        ]
+      },
+      "claims": [
+        {
+          "id": "named",
+          "topic": "history",
+          "text": "It was built after a community goal and given its name by public vote.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-obsidian-orbital"
+          ]
+        },
+        {
+          "id": "aegis-lab",
+          "topic": "history",
+          "text": "From 2 December 3303 it was one of 25 Pleiades stations hosting an Aegis laboratory.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-obsidian-orbital"
+          ]
+        },
+        {
+          "id": "attack",
+          "topic": "history",
+          "text": "Heavily damaged by Thargoids on 11 January 3304; it was fully repaired by 3 March 3304.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-obsidian-orbital"
+          ]
+        },
+        {
+          "id": "built-where",
+          "topic": "uncertainty",
+          "text": "The wiki says construction began in the Kaushpoos system yet places the station in Maia; the sources reviewed do not explain the difference.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-obsidian-orbital"
+          ]
+        },
+        {
+          "id": "announcer",
+          "topic": "identity",
+          "text": "Since update 2.4 its docking announcements are voiced by CMDR ObsidianAnt.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-obsidian-orbital"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "first-thargoid-crash-site",
+      "kind": "landmark",
+      "name": "First Thargoid crash site",
+      "aliases": [
+        "Alien Crash Site",
+        "Crashed Thargoid Ship, Pleiades Sector AB-W b2-4"
+      ],
+      "summary": "Wreck of an ancient Thargoid Interceptor on Pleiades Sector AB-W b2-4 9 a, found in 3302.",
+      "attributes": {
+        "significance": "The first Thargoid wreck ever found, and the end of 'the Hunt' that led commanders to it.",
+        "landmark_type": "crash_site",
+        "period": "Found 30 August 3302"
+      },
+      "location": {
+        "system": "Pleiades Sector AB-W b2-4",
+        "system_address": 9465168078097,
+        "star_pos": [
+          -137.5625,
+          -118.25,
+          -380.4375
+        ],
+        "body": "Pleiades Sector AB-W b2-4 9 a",
+        "body_id": 12,
+        "latitude": -26.37,
+        "longitude": 97.7,
+        "body_radius_km": 832.1,
+        "surface_resolution_deg": 0.01,
+        "note": "Position as tabled by the wiki, which records Odyssey-era moves for other wrecks but none for this one. Treated as approximate: confirm the site yourself.",
+        "precision": "approximate",
+        "sources": [
+          "edw-crashed-thargoid-ship",
+          "edsm-identifiers-gki08"
+        ]
+      },
+      "claims": [
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "CMDRs Noctrach and Ihazevich found it on 30 August 3302 by following the last clue of 'the Hunt', set by three commanders.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-crashed-thargoid-ship"
+          ]
+        },
+        {
+          "id": "dated",
+          "topic": "history",
+          "text": "In October 3303 Aegis's Professor Alba Tesreau confirmed it as a Thargoid Interceptor a little over 100 years old.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-crashed-thargoid-ship"
+          ]
+        },
+        {
+          "id": "position",
+          "topic": "uncertainty",
+          "text": "The documented surface position predates Odyssey, which moved some other wrecks, so it is not treated as exact.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-crashed-thargoid-ship"
+          ]
+        },
+        {
+          "id": "risk",
+          "topic": "gameplay",
+          "text": "The Pleiades keeps a Thargoid presence after the war; plan for hostile contact.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-second-thargoid-war"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "titan-taranis-graveyard",
+      "kind": "landmark",
+      "name": "Titan Taranis graveyard",
+      "aliases": [
+        "Taranis"
+      ],
+      "summary": "Wreck of Taranis, the first Thargoid Titan destroyed, in Hyades Sector FB-N b7-6.",
+      "attributes": {
+        "significance": "The first Titan humanity destroyed; its drive remains gave pilots the supercruise overcharge drive.",
+        "landmark_type": "titan_graveyard",
+        "period": "Arrived 29 November 3308; destroyed 2 March 3310"
+      },
+      "location": {
+        "system": "Hyades Sector FB-N b7-6",
+        "system_address": 13866167510393,
+        "star_pos": [
+          88.4375,
+          -74.90625,
+          -122.0
+        ],
+        "precision": "system_only",
+        "sources": [
+          "edw-thargoid-titan",
+          "edsm-identifiers-gki08"
+        ]
+      },
+      "claims": [
+        {
+          "id": "first",
+          "topic": "history",
+          "text": "The first Titan to arrive, on 29 November 3308, and the first destroyed, on 2 March 3310, after days of attacks on its thermal core.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "meltdown",
+          "topic": "history",
+          "text": "Its defences failed during a 24-hour meltdown before it exploded; caustic levels kept pilots out for almost two weeks.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "sco",
+          "topic": "history",
+          "text": "Achilles Aerospace finished its supercruise overcharge research with Titan Drive Components from this wreck, selling the SCO drive from April 3310.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "salvage",
+          "topic": "gameplay",
+          "text": "Thargoid materials and samples float around dead Titans; the caustic clouds at old graveyards had dissipated by the reviewed revision.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "name",
+          "topic": "identity",
+          "text": "Pilots named the Titans after storm and thunder gods; Taranis is the Celtic god of thunder.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "titan-cocijo-graveyard",
+      "kind": "landmark",
+      "name": "Titan Cocijo graveyard",
+      "aliases": [
+        "Cocijo"
+      ],
+      "summary": "Remains of Cocijo, the last Titan, destroyed over Earth on 18 December 3310.",
+      "attributes": {
+        "significance": "The Titan that carried the war to Sol, and whose destruction ended it.",
+        "landmark_type": "titan_graveyard",
+        "period": "Reached Sol 5 December 3310; destroyed 18 December 3310"
+      },
+      "location": {
+        "system": "Sol",
+        "system_address": 10477373803,
+        "star_pos": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "note": "Recorded as destroyed over Earth; no position closer than the system is documented.",
+        "precision": "system_only",
+        "sources": [
+          "edw-thargoid-titan",
+          "edsm-identifiers-gki08"
+        ]
+      },
+      "claims": [
+        {
+          "id": "advance",
+          "topic": "history",
+          "text": "The last Titan standing, it turned back into a rogue signal source, crossed to Sol and took up orbit around Earth on 5 December 3310.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "losses",
+          "topic": "history",
+          "text": "Its fleet devastated Sol; the battle cruisers FNS Nero and FNS Erebus and several rescue megaships, Federal Haven among them, were lost.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "destroyed",
+          "topic": "history",
+          "text": "Pilots retook the occupied systems; Cocijo became vulnerable on 12 December and exploded over Earth on 18 December 3310.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-thargoid-titan",
+            "edw-second-thargoid-war"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "titan-hadad-graveyard",
+      "kind": "landmark",
+      "name": "Titan Hadad graveyard",
+      "aliases": [
+        "Hadad"
+      ],
+      "summary": "Wreck of Hadad, the eighth Titan, destroyed on 26 May 3310 in HIP 30377.",
+      "attributes": {
+        "significance": "One of the eight Titans brought down during the Second Thargoid War.",
+        "landmark_type": "titan_graveyard",
+        "period": "Arrived 15 December 3308; destroyed 26 May 3310"
+      },
+      "location": {
+        "system": "HIP 30377",
+        "system_address": 79247165795,
+        "star_pos": [
+          178.78125,
+          -81.71875,
+          -47.9375
+        ],
+        "precision": "system_only",
+        "sources": [
+          "edw-thargoid-titan",
+          "edsm-identifiers-gki08"
+        ]
+      },
+      "claims": [
+        {
+          "id": "destroyed",
+          "topic": "history",
+          "text": "Hadad arrived on 15 December 3308 and was destroyed on 26 May 3310.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "name",
+          "topic": "identity",
+          "text": "Named after a storm and rain god of the Canaanite and Mesopotamian religions.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "salvage",
+          "topic": "gameplay",
+          "text": "Thargoid materials and samples float around dead Titans; the caustic clouds at old graveyards had dissipated by the reviewed revision.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "battle-for-sol-3310",
+      "kind": "event",
+      "name": "Thargoid invasion of Sol",
+      "aliases": [
+        "Battle for Sol"
+      ],
+      "summary": "The Titan Cocijo's invasion of Sol from 5 to 18 December 3310, the last battle of the war.",
+      "attributes": {
+        "significance": "The Thargoids reached humanity's home system, and the war ended over Earth.",
+        "event_type": "attack",
+        "period": "5 to 18 December 3310"
+      },
+      "claims": [
+        {
+          "id": "invasion",
+          "topic": "history",
+          "text": "Cocijo's fleet invaded Sol from 5 December 3310; thousands of anti-xeno ships were lost.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-thargoid-titan"
+          ]
+        },
+        {
+          "id": "end",
+          "topic": "history",
+          "text": "The invasion ended when Cocijo was destroyed over Earth on 18 December 3310.",
+          "evidence": "community_corroborated",
+          "sources": [
+            "edw-thargoid-titan",
+            "edw-second-thargoid-war"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generation-ship-thetis",
+      "kind": "landmark",
+      "name": "Generation Ship Thetis",
+      "aliases": [
+        "Thetis"
+      ],
+      "summary": "Lost generation ship recorded in the Nefertem system, found in April 3303.",
+      "attributes": {
+        "significance": "One of the Missing: a sub-light colony ark from before the hyperdrive, whose recovered logs tell how its voyage ended.",
+        "landmark_type": "generation_ship",
+        "period": "Pre-hyperdrive era voyage; found 28 April 3303",
+        "significance_spoiler": true
+      },
+      "location": {
+        "system": "Nefertem",
+        "system_address": 11666607711649,
+        "star_pos": [
+          38.125,
+          30.875,
+          -21.25
+        ],
+        "body": "Nefertem 6 a",
+        "body_id": 8,
+        "precision": "approximate",
+        "sources": [
+          "edw-generation-ship-gki08",
+          "edsm-identifiers-gki08"
+        ],
+        "note": "Recorded orbiting Nefertem 6 a when found; generation ships can move, so locate it with the FSS."
+      },
+      "claims": [
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Found on 28 April 3303; the wiki credits CMDR Rhaider.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        },
+        {
+          "id": "fate",
+          "topic": "history",
+          "text": "Its ninth generation began hearing whispers on the comms; the signal, traced to a planet passed 15 light years before, drove passengers to kill until whole decks were lost.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "finding",
+          "topic": "gameplay",
+          "text": "The Full Spectrum System Scanner picks out a generation ship's signal anywhere in its system; listening posts within about 90 light years of Sol carry clues.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        },
+        {
+          "id": "echo",
+          "topic": "interpretation",
+          "text": "Reports in 3309 of a mass psychological disturbance among naval crews in Shamash, with an anomalous signal, suggest the Thetis phenomenon may have recurred.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ],
+          "spoiler": true
+        }
+      ]
+    },
+    {
+      "id": "generation-ship-artemis",
+      "kind": "landmark",
+      "name": "Generation Ship Artemis",
+      "aliases": [
+        "Artemis"
+      ],
+      "summary": "Lost generation ship recorded in the Mu Cassiopeia system, found in October 3303.",
+      "attributes": {
+        "significance": "One of the Missing: a sub-light colony ark from before the hyperdrive, whose recovered logs tell how its voyage ended.",
+        "landmark_type": "generation_ship",
+        "period": "Pre-hyperdrive era voyage; found 4 October 3303",
+        "significance_spoiler": true
+      },
+      "location": {
+        "system": "Mu Cassiopeia",
+        "system_address": 9466510583217,
+        "star_pos": [
+          -26.125,
+          -24.625,
+          17.34375
+        ],
+        "body": "Mu Cassiopeia C 1",
+        "precision": "approximate",
+        "sources": [
+          "edw-generation-ship-gki08",
+          "edsm-identifiers-gki08"
+        ],
+        "note": "Recorded orbiting Mu Cassiopeia C 1 when found; locate it with the FSS."
+      },
+      "claims": [
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Found on 4 October 3303; the wiki credits CMDR Friend 360.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        },
+        {
+          "id": "fate",
+          "topic": "history",
+          "text": "Its logs show one murderer killing those aboard over time; a smuggled dog was blamed at first, and his last act was to sabotage the reactor.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "finding",
+          "topic": "gameplay",
+          "text": "The Full Spectrum System Scanner picks out a generation ship's signal anywhere in its system; listening posts within about 90 light years of Sol carry clues.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generation-ship-atlas",
+      "kind": "landmark",
+      "name": "Generation Ship Atlas",
+      "aliases": [
+        "Atlas"
+      ],
+      "summary": "Lost generation ship recorded in the Charick Drift system, found in May 3303.",
+      "attributes": {
+        "significance": "One of the Missing: a sub-light colony ark from before the hyperdrive, whose recovered logs tell how its voyage ended.",
+        "landmark_type": "generation_ship",
+        "period": "Pre-hyperdrive era voyage; found 23 May 3303",
+        "significance_spoiler": true
+      },
+      "location": {
+        "system": "Charick Drift",
+        "system_address": 2999774611819,
+        "star_pos": [
+          8.1875,
+          26.71875,
+          -6.0625
+        ],
+        "body": "Charick Drift A",
+        "body_id": 1,
+        "precision": "approximate",
+        "sources": [
+          "edw-generation-ship-gki08",
+          "edsm-identifiers-gki08"
+        ],
+        "note": "Recorded orbiting the star Charick Drift A when found; locate it with the FSS."
+      },
+      "claims": [
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Found on 23 May 3303; the wiki credits CMDR Dilliam53.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        },
+        {
+          "id": "fate",
+          "topic": "history",
+          "text": "It could not brake. Chief engineer Tom Edwards stayed aboard to launch the escape pods at the target world while the ship flew past; the captain pledged to name the colony after him.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "finding",
+          "topic": "gameplay",
+          "text": "The Full Spectrum System Scanner picks out a generation ship's signal anywhere in its system; listening posts within about 90 light years of Sol carry clues.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generation-ship-venusian",
+      "kind": "landmark",
+      "name": "Generation Ship Venusian",
+      "aliases": [
+        "Venusian"
+      ],
+      "summary": "Lost generation ship recorded in the Kitae system, found in April 3303.",
+      "attributes": {
+        "significance": "One of the Missing: a sub-light colony ark from before the hyperdrive, whose recovered logs tell how its voyage ended.",
+        "landmark_type": "generation_ship",
+        "period": "Pre-hyperdrive era voyage; found 26 April 3303",
+        "significance_spoiler": true
+      },
+      "location": {
+        "system": "Kitae",
+        "system_address": 4236725193059,
+        "star_pos": [
+          -13.5,
+          24.75,
+          -56.46875
+        ],
+        "precision": "historical",
+        "sources": [
+          "edw-generation-ship-gki08",
+          "edsm-identifiers-gki08"
+        ],
+        "note": "Recorded about 2,500 ls from the arrival star towards Zephyrus. Generation ships drift, so locate its present signal with the FSS."
+      },
+      "claims": [
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Found on 26 April 3303; the wiki credits CMDR Klumpozyte.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        },
+        {
+          "id": "fate",
+          "topic": "history",
+          "text": "Pirates boarded it to take the passengers as slaves; a traitorous executive officer showed them a way past the last barricade.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "finding",
+          "topic": "gameplay",
+          "text": "The Full Spectrum System Scanner picks out a generation ship's signal anywhere in its system; listening posts within about 90 light years of Sol carry clues.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generation-ship-hyperion",
+      "kind": "landmark",
+      "name": "Generation Ship Hyperion",
+      "aliases": [
+        "Hyperion"
+      ],
+      "summary": "Lost generation ship recorded in the Lalande 2966 system, found in April 3303.",
+      "attributes": {
+        "significance": "One of the Missing: a sub-light colony ark from before the hyperdrive, whose recovered logs tell how its voyage ended.",
+        "landmark_type": "generation_ship",
+        "period": "Pre-hyperdrive era voyage; found 27 April 3303",
+        "significance_spoiler": true
+      },
+      "location": {
+        "system": "Lalande 2966",
+        "system_address": 457137195363,
+        "star_pos": [
+          -95.25,
+          10.21875,
+          -74.78125
+        ],
+        "precision": "historical",
+        "sources": [
+          "edw-generation-ship-gki08",
+          "edsm-identifiers-gki08"
+        ],
+        "note": "Recorded towards Yemaki from the fourth planet; the wiki gives two distances. Use the FSS."
+      },
+      "claims": [
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Found on 27 April 3303; the wiki credits CMDR Vall.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        },
+        {
+          "id": "fate",
+          "topic": "history",
+          "text": "Passengers came to worship a child named Zachariah, and the ship's air was vented when his followers opened the airlocks.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "finding",
+          "topic": "gameplay",
+          "text": "The Full Spectrum System Scanner picks out a generation ship's signal anywhere in its system; listening posts within about 90 light years of Sol carry clues.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        },
+        {
+          "id": "position",
+          "topic": "uncertainty",
+          "text": "The wiki's location table puts it 7,000 ls from the fourth planet towards Yemaki, while its log summary says 9,500 ls.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generation-ship-odysseus",
+      "kind": "landmark",
+      "name": "Generation Ship Odysseus",
+      "aliases": [
+        "Odysseus"
+      ],
+      "summary": "Lost generation ship recorded in the Ross 859 system, found in April 3303.",
+      "attributes": {
+        "significance": "One of the Missing: a sub-light colony ark from before the hyperdrive, whose recovered logs tell how its voyage ended.",
+        "landmark_type": "generation_ship",
+        "period": "Pre-hyperdrive era voyage; found 28 April 3303",
+        "significance_spoiler": true
+      },
+      "location": {
+        "system": "Ross 859",
+        "system_address": 670417692137,
+        "star_pos": [
+          -31.8125,
+          15.9375,
+          162.125
+        ],
+        "body": "Ross 859 B 1",
+        "body_id": 10,
+        "precision": "approximate",
+        "sources": [
+          "edw-generation-ship-gki08",
+          "edsm-identifiers-gki08"
+        ],
+        "note": "Recorded orbiting Ross 859 B 1 when found; locate it with the FSS."
+      },
+      "claims": [
+        {
+          "id": "found",
+          "topic": "history",
+          "text": "Found on 28 April 3303; the wiki credits CMDR DarkShadowLYNX.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        },
+        {
+          "id": "fate",
+          "topic": "history",
+          "text": "Its council chose to live aboard for good; generations later a disease returned again and again until almost everyone had died, and a survivor left a warning to stay away.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ],
+          "spoiler": true
+        },
+        {
+          "id": "finding",
+          "topic": "gameplay",
+          "text": "The Full Spectrum System Scanner picks out a generation ship's signal anywhere in its system; listening posts within about 90 light years of Sol carry clues.",
+          "evidence": "community_reference",
+          "sources": [
+            "edw-generation-ship-gki08"
+          ]
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {"type": "historically_controlled_by", "from": "sol", "to": "federation", "role": "Capital system", "period": "Federal capital as documented on the reviewed revision (2026-10-31). Live faction control is not tracked.", "sources": ["edw-sol", "edw-federation"]},
+    {"type": "historically_controlled_by", "from": "achenar", "to": "empire", "role": "Capital system", "period": "Imperial capital as documented on the reviewed revision (2026-10-31). Live faction control is not tracked.", "sources": ["edw-achenar", "edw-empire"]},
+    {"type": "historically_controlled_by", "from": "alioth", "to": "alliance", "role": "Capital system", "period": "Alliance capital as documented on the reviewed revision (2026-10-31). Live faction control is not tracked.", "sources": ["edw-alioth", "edw-alliance"]},
+    {"type": "founded_by", "from": "achenar", "to": "marlin-duval", "period": "2292", "note": "Led the expedition that settled the system and founded its republic.", "sources": ["edw-achenar", "edw-marlin-duval"]},
+    {"type": "founded_by", "from": "empire", "to": "henson-duval", "period": "2296; first Emperor from 2320", "note": "Turned his sister's republic into a hereditary monarchy.", "sources": ["edw-henson-duval", "edw-empire"]},
+    {"type": "founded_by", "from": "alliance", "to": "mic-turner", "period": "3230", "sources": ["edw-alliance", "edw-mic-turner"]},
+    {"type": "founded_by", "from": "alliance", "to": "meredith-argent", "period": "3230", "sources": ["edw-alliance", "edw-meredith-argent"]},
+    {"type": "associated_with", "from": "marlin-duval", "to": "henson-duval", "note": "Her brother, who made her republic an empire.", "sources": ["edw-marlin-duval", "edw-henson-duval"]},
+    {"type": "member_of", "from": "henson-duval", "to": "empire", "role": "First Emperor", "sources": ["edw-henson-duval"]},
+    {"type": "associated_with", "from": "mic-turner", "to": "alioth", "note": "Turner's World in this system was renamed in his honour.", "sources": ["edw-mic-turner"]},
+    {"type": "associated_with", "from": "meredith-argent", "to": "alioth", "note": "Argent's Claim in this system was renamed in her honour.", "sources": ["edw-meredith-argent"]},
+    {"type": "occurred_at", "from": "battle-of-achenar", "to": "achenar", "sources": ["edw-battle-of-achenar", "edw-achenar"]},
+    {"type": "participated_in", "from": "federation", "to": "battle-of-achenar", "role": "Invader", "sources": ["edw-battle-of-achenar"]},
+    {"type": "participated_in", "from": "empire", "to": "battle-of-achenar", "role": "Defender and victor", "sources": ["edw-battle-of-achenar"]},
+    {"type": "participated_in", "from": "henson-duval", "to": "battle-of-achenar", "role": "Ordered the 2325 counter-attack", "sources": ["edw-battle-of-achenar"]},
+    {"type": "occurred_at", "from": "nine-martyrs-attack", "to": "sol", "note": "Li Qing Jao was bombed.", "sources": ["edw-nine-martyrs", "edw-sol"]},
+    {"type": "occurred_at", "from": "nine-martyrs-attack", "to": "achenar", "note": "Dawes Hub was bombed.", "sources": ["edw-nine-martyrs", "edw-achenar"]},
+    {"type": "occurred_at", "from": "nine-martyrs-attack", "to": "alioth", "note": "Donaldson was bombed.", "sources": ["edw-nine-martyrs", "edw-alioth"]},
+    {"type": "related_to", "from": "marlin-duval", "to": "nine-martyrs-attack", "note": "Carried out by a violent offshoot of Marlinism, the movement that grew from her ideals.", "sources": ["edw-marlin-duval", "edw-nine-martyrs"]},
+    {"type": "located_in", "from": "jaques-station", "to": "colonia", "sources": ["edw-jaques-station", "edw-colonia"]},
+    {"type": "named_after", "from": "jaques-station", "to": "jaques", "note": "Jaques named the station after himself.", "sources": ["edw-jaques-station"]},
+    {"type": "associated_with", "from": "jaques", "to": "jaques-station", "note": "Owner and announcer", "sources": ["edw-jaques", "edw-jaques-station"]},
+    {"type": "part_of_expedition", "from": "jaques-station", "to": "jaques-station-voyage-3302", "note": "The station that made the jump", "sources": ["edw-jaques-station"]},
+    {"type": "participated_in", "from": "jaques", "to": "jaques-station-voyage-3302", "role": "Owner; ordered the jump", "sources": ["edw-jaques-station"]},
+    {"type": "occurred_at", "from": "jaques-station-voyage-3302", "to": "colonia", "note": "Where the station dropped out of hyperspace and stayed.", "sources": ["edw-jaques-station", "edw-colonia"]},
+    {"type": "occurred_at", "from": "jaques-station-rediscovery-3302", "to": "colonia", "sources": ["edw-jaques-station", "edw-colonia"]},
+    {"type": "discovered_by", "from": "jaques-station-rediscovery-3302", "to": "cmdr-cly", "sources": ["edw-jaques-station"]},
+    {"type": "associated_with", "from": "colonia-council", "to": "colonia", "note": "Headquartered at Colonia Hub on Colonia 2 a", "sources": ["edw-colonia-council", "edw-colonia"]},
+    {"type": "associated_with", "from": "the-dark-wheel", "to": "shinrarta-dezhra", "certainty": "uncertain", "note": "A minor faction using the name has operated here since 3300; any link to the legendary society is unproven.", "sources": ["edw-dark-wheel"]},
+    {"type": "related_to_mystery", "from": "the-dark-wheel", "to": "raxxla", "note": "Said to be devoted to finding it.", "sources": ["edw-dark-wheel", "edw-raxxla"]},
+    {"type": "related_to_mystery", "from": "project-dynasty", "to": "formidine-rift-mystery", "sources": ["edw-project-dynasty"]},
+    {"type": "related_to_mystery", "from": "the-zurara", "to": "formidine-rift-mystery", "sources": ["edw-project-dynasty", "edw-formidine-rift"]},
+    {"type": "part_of_expedition", "from": "the-zurara", "to": "project-dynasty", "note": "The project's ship bound for the Formidine Rift", "sources": ["edw-project-dynasty", "edw-formidine-rift"]},
+    {"type": "related_to", "from": "formidine-rift-mystery", "to": "raxxla", "certainty": "uncertain", "note": "Some players thought the Rift mystery might lead to Raxxla.", "sources": ["edw-project-dynasty"]},
+    {
+      "type": "located_in",
+      "from": "li-qing-jao",
+      "to": "sol",
+      "sources": [
+        "edsm-identifiers-gki08",
+        "edw-li-qing-jao"
+      ]
+    },
+    {
+      "type": "named_after",
+      "from": "li-qing-jao",
+      "to": "li-qin-jao",
+      "note": "Both wiki pages state the starport was named in Jao's honour.",
+      "sources": [
+        "edw-li-qing-jao",
+        "edw-li-qin-jao"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "li-qin-jao",
+      "to": "generation-ship-lycaon",
+      "note": "The hyperdrive made generation ships such as the Lycaon obsolete.",
+      "sources": [
+        "edw-li-qin-jao",
+        "edw-generation-ship-gki08"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "dawes-hub",
+      "to": "achenar",
+      "sources": [
+        "edsm-identifiers-gki08",
+        "edw-dawes-hub"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "donaldson",
+      "to": "alioth",
+      "sources": [
+        "edsm-identifiers-gki08",
+        "edw-donaldson"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "nine-martyrs-attack",
+      "to": "li-qing-jao",
+      "note": "Burned for two weeks; the Federal Vice President was killed here.",
+      "sources": [
+        "edw-li-qing-jao"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "nine-martyrs-attack",
+      "to": "dawes-hub",
+      "sources": [
+        "edw-dawes-hub"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "nine-martyrs-attack",
+      "to": "donaldson",
+      "sources": [
+        "edw-donaldson"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "nine-martyrs-attack",
+      "to": "lave-station",
+      "sources": [
+        "edw-lave-station"
+      ]
+    },
+    {
+      "type": "historically_controlled_by",
+      "from": "lave-station",
+      "to": "galactic-cooperative",
+      "period": "Shared seat of the Cooperative's government until its charter ended in 3174",
+      "role": "Co-capital",
+      "sources": [
+        "edw-lave-station",
+        "edw-galactic-cooperative"
+      ]
+    },
+    {
+      "type": "participated_in",
+      "from": "galactic-cooperative",
+      "to": "first-thargoid-war",
+      "role": "Defended human space with the Federation and INRA",
+      "sources": [
+        "edw-galactic-cooperative"
+      ]
+    },
+    {
+      "type": "named_after",
+      "from": "leonard-nimoy-station",
+      "to": "leonard-nimoy",
+      "note": "A real-world tribute announced in a Frontier newsletter, not an in-universe naming.",
+      "sources": [
+        "edw-leonard-nimoy-station"
+      ]
+    },
+    {
+      "type": "named_after",
+      "from": "memorial-cmdr-garak",
+      "to": "cmdr-garak",
+      "note": "The listening post is his memorial.",
+      "sources": [
+        "edw-memorial-cmdr-garak"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "memorial-cmdr-garak",
+      "to": "colonia",
+      "sources": [
+        "edw-memorial-cmdr-garak"
+      ]
+    },
+    {
+      "type": "associated_with",
+      "from": "cmdr-garak",
+      "to": "jaques-station",
+      "note": "Among the first to supply its repairs after the 3302 misjump.",
+      "sources": [
+        "edw-memorial-cmdr-garak"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "second-thargoid-war",
+      "to": "first-thargoid-war",
+      "note": "Began 152 years after the first war ended.",
+      "sources": [
+        "edw-second-thargoid-war"
+      ]
+    },
+    {
+      "type": "participated_in",
+      "from": "aegis",
+      "to": "second-thargoid-war",
+      "role": "Research and defence coordination",
+      "sources": [
+        "edw-aegis",
+        "edw-second-thargoid-war"
+      ]
+    },
+    {
+      "type": "participated_in",
+      "from": "salvation",
+      "to": "second-thargoid-war",
+      "role": "Pursued his own anti-xeno weapons",
+      "sources": [
+        "edw-salvation",
+        "edw-second-thargoid-war"
+      ]
+    },
+    {
+      "type": "associated_with",
+      "from": "salvation",
+      "to": "inra",
+      "note": "His Azimuth team were subcontractors on INRA's mycoid research.",
+      "sources": [
+        "edw-salvation"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "pleiades-station-attacks-3303",
+      "to": "second-thargoid-war",
+      "note": "An early escalation of the war.",
+      "sources": [
+        "edw-second-thargoid-war"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "pleiades-station-attacks-3303",
+      "to": "the-oracle",
+      "sources": [
+        "edw-second-thargoid-war",
+        "edw-delphi"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "pleiades-station-attacks-3303",
+      "to": "obsidian-orbital",
+      "sources": [
+        "edw-obsidian-orbital",
+        "edw-second-thargoid-war"
+      ]
+    },
+    {
+      "type": "located_in",
+      "from": "the-oracle",
+      "to": "delphi",
+      "sources": [
+        "edw-delphi"
+      ]
+    },
+    {
+      "type": "associated_with",
+      "from": "aegis",
+      "to": "delphi",
+      "note": "Aegis Research was headquartered at Donar's Oak in this system.",
+      "sources": [
+        "edw-delphi",
+        "edw-aegis"
+      ]
+    },
+    {
+      "type": "related_to_mystery",
+      "from": "delphi",
+      "to": "raxxla",
+      "certainty": "uncertain",
+      "sources": [
+        "edw-delphi"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "first-thargoid-crash-site",
+      "to": "second-thargoid-war",
+      "note": "An early sign that the Thargoids still existed.",
+      "sources": [
+        "edw-crashed-thargoid-ship",
+        "edw-second-thargoid-war"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "titan-taranis-graveyard",
+      "to": "second-thargoid-war",
+      "sources": [
+        "edw-thargoid-titan"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "titan-hadad-graveyard",
+      "to": "second-thargoid-war",
+      "sources": [
+        "edw-thargoid-titan"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "titan-cocijo-graveyard",
+      "to": "battle-for-sol-3310",
+      "sources": [
+        "edw-thargoid-titan"
+      ]
+    },
+    {
+      "type": "occurred_at",
+      "from": "battle-for-sol-3310",
+      "to": "sol",
+      "sources": [
+        "edw-thargoid-titan"
+      ]
+    },
+    {
+      "type": "related_to",
+      "from": "battle-for-sol-3310",
+      "to": "second-thargoid-war",
+      "note": "Its final battle.",
+      "sources": [
+        "edw-thargoid-titan",
+        "edw-second-thargoid-war"
+      ]
+    }
+  ],
+  "requirements": [
+    {"id": "sol-permit", "place": "sol", "kind": "permit", "text": "Entering Sol needs the Sol permit, earned by reaching Petty Officer in the Federal Navy.", "basis": [{"entity": "sol", "claim": "access"}]},
+    {"id": "achenar-permit", "place": "achenar", "kind": "permit", "text": "Entering Achenar needs the Achenar permit, earned by reaching Squire in the Imperial Navy.", "basis": [{"entity": "achenar", "claim": "access"}]},
+    {"id": "alioth-permit", "place": "alioth", "kind": "permit", "text": "Entering Alioth needs the Alioth permit, earned through standing with the Alioth Independents.", "basis": [{"entity": "alioth", "claim": "access"}]},
+    {
+      "id": "delphi-thargoid-risk",
+      "place": "delphi",
+      "kind": "access",
+      "text": "Delphi lies at the edge of the Pleiades, where Thargoids remain after the war. Expect possible hostile contact.",
+      "basis": [
+        {
+          "entity": "delphi",
+          "claim": "risk"
+        }
+      ]
+    },
+    {
+      "id": "crash-site-risk",
+      "place": "first-thargoid-crash-site",
+      "kind": "access",
+      "text": "The wreck is in the Pleiades, which keeps a Thargoid presence. Its position is approximate: search the surface yourself.",
+      "basis": [
+        {
+          "entity": "first-thargoid-crash-site",
+          "claim": "risk"
+        },
+        {
+          "entity": "first-thargoid-crash-site",
+          "claim": "position"
+        }
+      ]
+    },
+    {
+      "id": "cocijo-sol-permit",
+      "place": "titan-cocijo-graveyard",
+      "kind": "permit",
+      "text": "Cocijo fell over Earth, inside Sol, which needs the Sol permit.",
+      "basis": [
+        {
+          "entity": "sol",
+          "claim": "access"
+        },
+        {
+          "entity": "titan-cocijo-graveyard",
+          "claim": "destroyed"
+        }
+      ]
+    }
+  ],
+  "themes": [
+    {"id": "founding-powers", "label": "Founding of the superpowers", "summary": "The capitals of the Federation, the Empire and the Alliance, and the wars and founders behind them.", "select": {"related_to": ["federation", "empire", "alliance"]}},
+    {"id": "colonia-story", "label": "The road to Colonia", "summary": "Where a travelling starport's failed jump started humanity's most distant colony.", "select": {"related_to": ["jaques-station-voyage-3302", "jaques-station-rediscovery-3302"]}},
+    {"id": "great-mysteries", "label": "The great mysteries", "summary": "Places tied to the galaxy's unsolved legends: Raxxla, the Dark Wheel and the Formidine Rift.", "select": {"related_to": ["raxxla", "formidine-rift-mystery", "the-dark-wheel"]}}
+  ],
+  "unsupported": [
+    {"subject": "Positions closer than the system", "reason": "No source gives a position for the Zurara closer than its system, and the Dark Wheel's legendary station has never been located."},
+    {"subject": "Current control of the capitals and of Jaques Station", "reason": "Faction control changes over time. The Atlas records the documented historical role only; current control is shown solely from the commander's own Journal."},
+    {"subject": "Raxxla's location", "reason": "No source documents one, so Raxxla is a mystery record with no location and can never become a destination."},
+    {
+      "subject": "Positions of the Titan graveyards",
+      "reason": "Sources give the systems only; Cocijo is described as destroyed over Earth. No closer position is recorded."
+    },
+    {
+      "subject": "Namesakes of the other capital starports",
+      "reason": "Reviewed sources give no namesake for Dawes Hub, Donaldson or Lave Station, so none is recorded. Mars High was considered and left out: the wiki and EDSM disagree on whether it orbits Mars or Earth, and no source gives its history."
+    },
+    {
+      "subject": "Thargoid materials at Titan graveyards",
+      "reason": "The sources list what floats there, but the Journal symbols of these xeno materials are not verified in this project, so they are not linked to acquisition planning."
+    }
+  ]
+}

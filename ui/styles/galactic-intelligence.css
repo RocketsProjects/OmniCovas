@@ -1,0 +1,119 @@
+/* Galactic Intelligence (GKI-04): briefings, Intel "Documented here" and the
+   Settings panel. Same grammar as the Galactic Atlas: cyan marks the subject,
+   amber marks focus and links, muted blue-grey carries provenance, and
+   uncertainty is a dashed border, never colour alone. */
+
+/* Briefings: a small stack above the bottom spine, never modal. It stays under
+   half the window, and while it shows the route content keeps its height free at
+   its foot, so any control can be scrolled clear of it: nothing has to be
+   dismissed to be reached (GKI-07 corrections). */
+.gi-briefings {
+  position: fixed;
+  right: 16px;
+  bottom: calc(var(--uiv3-bottom-spine-height, 44px) + 12px);
+  z-index: 40;
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(40vh, calc(100vh - var(--uiv3-bottom-spine-height, 44px) - 96px));
+  overflow-y: auto;
+  color: #d9e5f0;
+}
+.gi-briefings[hidden] { display: none; }
+/* --gi-briefings-height is the stack's rendered height (createBriefingStack). */
+body.gi-briefings-open #content-area {
+  padding-bottom: calc(var(--gi-briefings-height, 0px) + 28px);
+}
+.gi-briefings-live { display: flex; flex-direction: column; gap: 10px; }
+.gi-briefings-waiting { display: none; margin: 6px 2px 0; font-size: 12px; line-height: 1.4; color: #d9e5f0; background: #0f1a26; padding: 4px 8px; border-radius: 4px; }
+.gi-briefings :is(button, summary):focus-visible { outline: 2px solid #ffb35a; outline-offset: 3px; }
+.gi-briefing {
+  border: 1px solid #3c6f7c;
+  border-left: 3px solid #7acada;
+  border-radius: 6px;
+  background: #0f1a26;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.gi-briefing p { margin: 0; }
+.gi-briefing-kicker { font-size: 11px; color: #a9bacb; letter-spacing: .06em; text-transform: uppercase; }
+.gi-briefing-title { margin: 0; font-size: 16px; font-weight: 600; color: #e1ebf4; }
+.gi-briefing-headline { color: #9fd7e3; }
+.gi-briefing-lead { color: #c9d7e3; }
+.gi-briefing-visit { font-size: 12px; color: #c3d4e3; border-left: 2px solid #5c6f82; padding-left: 8px; }
+.gi-briefing-earlier { margin: 2px 0 0; font-size: 12px; color: #d9c79a; }
+.gi-briefing--earlier { border-left-color: #6f8496; }
+.gi-briefing-uncertain { font-size: 12px; color: #d6c8a3; border: 1px dashed #6b6146; border-radius: 4px; padding: 6px 8px; }
+.gi-briefing-recommendation { border: 1px solid #5c6f82; border-radius: 4px; padding: 6px 8px; font-size: 12px; }
+.gi-briefing-reason { color: #ffcf8f; }
+.gi-briefing-more summary { cursor: pointer; font-size: 12px; color: #a9bacb; }
+.gi-briefing-details { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.gi-briefing-details li { display: flex; flex-direction: column; gap: 1px; }
+.gi-briefing-detail-label, .gi-briefing-note, .gi-briefing-sources { font-size: 11px; color: #8fa2b5; }
+.gi-briefing-sources { overflow-wrap: anywhere; margin-top: 6px; }
+.gi-briefing-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.gi-briefing-actions button {
+  min-height: 32px;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.gi-briefing-open { background: #1d3a47; border: 1px solid #7acada; color: #e1ebf4; }
+.gi-briefing-dismiss { background: transparent; border: 1px solid #44576a; color: #c3d4e3; }
+/* GKI-07: the Historian's view and the Commander's own record. */
+.gi-briefing-chronicle { background: transparent; border: 1px solid #ffb35a; color: #ffe0b8; }
+.gi-briefing--compact { padding: 8px 12px; gap: 3px; box-shadow: 0 3px 10px rgba(0, 0, 0, .35); }
+.gi-briefing--compact .gi-briefing-title { font-size: 14px; }
+.gi-briefing--compact .gi-briefing-headline { font-size: 12px; }
+
+@media (max-width: 760px) {
+  /* Narrow windows: never more than ~45% of the height; the stack scrolls. */
+  .gi-briefings { right: 8px; left: 8px; width: auto; max-height: 45vh; }
+  /* GKI-08 closeout: one compact card at a time, so a noncritical briefing never
+     takes over the work. Title, headline and actions stay; the full text is one
+     step away in the Atlas, and dismissing shows the next card. */
+  .gi-briefing:not(:first-child) { display: none; }
+  .gi-briefing { padding: 8px 12px; gap: 3px; box-shadow: 0 3px 10px rgba(0, 0, 0, .35); }
+  .gi-briefing-title { font-size: 14px; }
+  .gi-briefing-headline { font-size: 12px; }
+  .gi-briefing :is(.gi-briefing-lead, .gi-briefing-visit, .gi-briefing-uncertain, .gi-briefing-recommendation, .gi-briefing-more) { display: none; }
+  .gi-briefings-waiting:not([hidden]) { display: block; }
+}
+
+/* Intel: Documented here */
+.intel-brief-with-knowledge { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.gi-documented { border: 1px solid #2c3a49; border-radius: 6px; background: #0d1721; padding: 14px 16px; color: #d9e5f0; min-width: 0; }
+.gi-documented-title { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: #c3d4e3; }
+.gi-documented-lead { margin: 0 0 10px; font-size: 12px; color: #a9bacb; }
+.gi-documented-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.gi-documented-item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 13px; line-height: 1.5; }
+.gi-documented-item p { flex-basis: 100%; margin: 0; }
+.gi-documented-open { background: transparent; border: 0; padding: 0; color: #ffcf8f; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; }
+.gi-documented-open:focus-visible { outline: 2px solid #ffb35a; outline-offset: 3px; }
+.gi-documented-kind { font-size: 11px; color: #8fa2b5; }
+.gi-documented-text { color: #c9d7e3; }
+.gi-documented-reason { font-size: 12px; color: #a9bacb; }
+.gi-documented-uncertain { font-size: 12px; color: #d6c8a3; }
+.gi-documented-associations { flex-basis: 100%; list-style: none; margin: 2px 0 0; padding: 0 0 0 10px; border-left: 2px solid #344354; font-size: 12px; color: #c3d4e3; display: flex; flex-direction: column; gap: 2px; }
+
+/* Settings */
+.gi-settings { display: flex; flex-direction: column; gap: 12px; max-width: 760px; }
+.gi-settings p { margin: 0; }
+.gi-settings-scope, .gi-settings-help { font-size: 12px; color: var(--color-fg-muted, #a9bacb); }
+.gi-settings-group { border: 1px solid #2c3a49; border-radius: 6px; padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+.gi-settings-group legend { padding: 0 6px; font-weight: 600; }
+.gi-settings-field { display: flex; flex-direction: column; gap: 2px; }
+.gi-settings-label { display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 28px; }
+.gi-settings-help { padding-left: 26px; }
+.gi-settings-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.gi-settings-status { min-height: 1.2em; font-size: 12px; }
+
+/* GKI-07: storytelling presets and the Historian link under Documented here. */
+.gi-settings-presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.gi-settings-preset[aria-pressed=true] { border-color: #7acada; color: #e1ebf4; background: #1d3a47; }
+.gi-documented-chronicle { margin-top: 12px; }

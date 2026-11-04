@@ -24,6 +24,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -33,7 +34,16 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_BUDGET_PATH = Path("resource_budget.yaml")
+
+def _runtime_bundle_root() -> Path:
+    """Return the source root or PyInstaller extraction root."""
+    frozen_root = getattr(sys, "_MEIPASS", None)
+    if frozen_root:
+        return Path(frozen_root).resolve()
+    return Path(__file__).resolve().parents[2]
+
+
+DEFAULT_BUDGET_PATH = _runtime_bundle_root() / "resource_budget.yaml"
 
 # Constrained-system thresholds
 CONSTRAINED_RAM_GB_THRESHOLD = 8.0

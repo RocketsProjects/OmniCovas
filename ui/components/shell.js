@@ -172,13 +172,13 @@ function setConnected(yes, _portNum) {
   if (!dot || !text) return;
 
   if (yes) {
-    setUiv3StatusDot(dot, 'ok', 'Backend connected', { connected: true });
+    setUiv3StatusDot(dot, 'ok', 'OmniCOVAS ready', { connected: true });
     setUiv3StatusValueState(text, 'ok');
-    text.textContent = 'Connected';
+    text.textContent = 'Ready';
   } else {
-    setUiv3StatusDot(dot, 'warn', 'Backend disconnected');
+    setUiv3StatusDot(dot, 'warn', 'OmniCOVAS is not connected');
     setUiv3StatusValueState(text, 'warn');
-    text.textContent = 'Disconnected';
+    text.textContent = 'Not connected';
   }
 }
 
@@ -187,7 +187,7 @@ function setCoreNotFound() {
   const dot = document.getElementById('status-dot');
 
   if (dot) {
-    setUiv3StatusDot(dot, 'alert', 'Backend not found');
+    setUiv3StatusDot(dot, 'alert', 'OmniCOVAS core not found');
   }
 
   if (text) {
@@ -263,9 +263,15 @@ function setEliteSessionState(state) {
   const kind = sessionStatusKind(next);
   if (target) {
     setUiv3StatusValueState(target, kind);
-    target.textContent = next;
+    target.textContent = next === 'Active'
+      ? 'In game'
+      : next === 'Last known'
+        ? 'Last seen'
+        : next === 'Waiting'
+          ? 'Not detected'
+          : 'Not checked';
   }
-  setUiv3StatusDot(dot, kind, `Elite session ${next.toLowerCase()}`);
+  setUiv3StatusDot(dot, kind, `Elite Dangerous ${target?.textContent?.toLowerCase() || 'not checked'}`);
   emit('elite-session-state', { state: next });
 }
 
@@ -275,6 +281,13 @@ function normalizeEliteSessionState(value) {
     case 'active': return 'Active';
     case 'last_known': return 'Last known';
     case 'waiting': return 'Waiting';
+    /* No Elite folder: the session state is genuinely unknown, not "waiting"
+       (which implies data is coming) and certainly not "last known". Mapped
+       into the existing controlled vocabulary rather than extending it — the
+       specific fact is carried by the boot curtain and Sources diagnostics.
+       Without this case the value fell through to the generated_at fallback
+       and the frame reported "Last known" with no folder present at all. */
+    case 'no_local_path': return 'Unknown';
     case 'unknown': return 'Unknown';
     default: return null;
   }
@@ -328,13 +341,13 @@ function uiv3FrameEl(tagName, className = '', text = null) {
   return node;
 }
 
-function uiv3FrameText(value, fallback = 'Unknown') {
+function uiv3FrameText(value, fallback = 'Not checked') {
   if (value === null || value === undefined || value === '') return fallback;
   const text = String(value).trim();
   return text || fallback;
 }
 
-function uiv3FrameFirstText(values, fallback = 'Unknown') {
+function uiv3FrameFirstText(values, fallback = 'Not checked') {
   for (const value of values) {
     const text = uiv3FrameText(value, '');
     if (text) return text;
@@ -346,11 +359,28 @@ function uiv3FramePct(value) {
   return Number.isFinite(value) ? `${Math.round(value)}%` : null;
 }
 
+/* A live monitor reports what it knows. Capacity comes from Loadout, which is
+   not observed until the Commander's first loadout event, so early in a
+   session — or whenever OmniCOVAS attaches mid-flight — a ratio cannot be
+   computed. Rendering nothing in that window hid tonnage the app already had:
+   the Commander was carrying cargo and burning fuel while Vitals showed only
+   shields. Absolutes are shown alone rather than inventing a denominator. */
 function uiv3FrameCargo(shipState) {
-  if (!Number.isFinite(shipState?.cargo_count) || !Number.isFinite(shipState?.cargo_capacity)) {
-    return null;
+  const count = shipState?.cargo_count;
+  if (!Number.isFinite(count)) return null;
+  if (!Number.isFinite(shipState?.cargo_capacity)) return `${count} t`;
+  return `${count}/${shipState.cargo_capacity} t`;
+}
+
+function uiv3FrameFuel(shipState) {
+  const pct = shipState?.fuel_pct;
+  const main = shipState?.fuel_main;
+  const hasMain = Number.isFinite(main);
+  const rounded = hasMain ? Math.round(main * 10) / 10 : null;
+  if (Number.isFinite(pct)) {
+    return hasMain ? `${rounded} t (${Math.round(pct)}%)` : `${Math.round(pct)}%`;
   }
-  return `${shipState.cargo_count}/${shipState.cargo_capacity} t`;
+  return hasMain ? `${rounded} t` : null;
 }
 
 function uiv3FrameSourceLoaded(node) {
@@ -372,19 +402,19 @@ function uiv3FrameLocalSourceSummary(rawLocalContext) {
     : { label: 'Local data waiting', topbar: 'Local data waiting', kind: 'warn' };
 }
 
-function uiv3FrameShipLabel(shipState, publicState) {
+function uiv3FrameShipLabel(shipState, publicState, fallback = 'not checked') {
   return uiv3FrameFirstText([
     shipState?.ship_name,
     shipState?.ship_type,
     publicState?.current_ship_name,
     publicState?.current_ship_type,
-  ]);
+  ], fallback);
 }
 
-function uiv3FrameCommanderLabel(publicState) {
+function uiv3FrameCommanderLabel(publicState, fallback = 'Commander not checked') {
   return uiv3FrameText(
     publicState?.commander_name || publicState?.commander || publicState?.cmdr,
-    'Unknown',
+    fallback,
   );
 }
 
@@ -400,7 +430,7 @@ function uiv3FrameLocationFallback(shipState, navSnap) {
     flightLabel: shipState?.is_docked === true ? 'Docking state' : 'Flight state',
     flightValue: shipState?.is_docked === true
       ? (Shell.eliteSessionState === 'Active' ? 'Docked' : 'Last known docked')
-      : (shipState?.is_docked === false && Shell.eliteSessionState === 'Active' ? 'In space' : (haveLocation ? 'Last known' : 'Unknown')),
+      : (shipState?.is_docked === false && Shell.eliteSessionState === 'Active' ? 'In space' : (haveLocation ? 'Last known' : 'Docking state not checked')),
     dockingState: shipState?.is_docked === true ? 'last_known_docked' : (haveLocation ? 'unknown' : 'unknown'),
     isStale: Shell.eliteSessionState !== 'Active',
   };
@@ -417,8 +447,23 @@ function uiv3FrameChip(location) {
     case 'last_known_docked':
       return { label: 'Last-known docked', kind: 'info' };
     default:
-      return { label: location?.isStale ? 'Last-known' : 'Unknown', kind: 'info' };
+      return { label: location?.isStale ? 'Last seen' : 'Not checked', kind: 'info' };
   }
+}
+
+/* R0-3: `shield_up === false` is also what a ship with no shield generator
+   reports, so rendering it as "DOWN" states a failure the ship cannot have.
+   The served `shield_generator_fitted` field distinguishes them; null means
+   the loadout has not been observed, which stays Unknown. */
+function shieldsDisplayValue(shipState) {
+  if (!shipState) return null;
+  if (shipState.shield_up === true) return 'UP';
+  if (shipState.shield_up === false) {
+    if (shipState.shield_generator_fitted === false) return 'NONE FITTED';
+    if (shipState.shield_generator_fitted === true) return 'DOWN';
+    return null;
+  }
+  return null;
 }
 
 function uiv3FrameMetric(label, value) {
@@ -462,13 +507,13 @@ function renderUiv3IdentityFrame(frame, location, sourceSummary) {
   const sourceText = document.getElementById('sources-status-text');
   const chipModel = uiv3FrameChip(location);
 
-  if (commander) commander.textContent = uiv3FrameCommanderLabel(frame.publicState);
-  if (ship) ship.textContent = `Ship: ${uiv3FrameShipLabel(frame.shipState, frame.publicState)}`;
-  if (system) system.textContent = uiv3FrameText(location.systemName);
+  if (commander) commander.textContent = uiv3FrameCommanderLabel(frame.publicState, 'Commander not checked');
+  if (ship) ship.textContent = `Ship: ${uiv3FrameShipLabel(frame.shipState, frame.publicState, 'not checked')}`;
+  if (system) system.textContent = uiv3FrameText(location.systemName, 'System not checked');
   if (station) {
     station.textContent = location.dockingState === 'in_space'
       ? 'In space'
-      : uiv3FrameText(location.stationName, 'Not Loaded');
+      : uiv3FrameText(location.stationName, 'Station not checked');
   }
   if (chip) {
     chip.replaceChildren();
@@ -479,7 +524,7 @@ function renderUiv3IdentityFrame(frame, location, sourceSummary) {
   if (badge) {
     const dot = uiv3FrameEl('span', `uiv3-dot uiv3-dot--${chipModel.kind}`);
     dot.setAttribute('aria-hidden', 'true');
-    badge.replaceChildren(dot, document.createTextNode(location.flightValue === 'Unknown' ? 'Location unknown' : location.flightValue));
+    badge.replaceChildren(dot, document.createTextNode(location.flightValue === 'Unknown' ? 'Location not checked' : location.flightValue));
   }
   if (sourceDot) setUiv3StatusDot(sourceDot, sourceSummary.kind, sourceSummary.topbar);
   if (sourceText) {
@@ -529,7 +574,7 @@ function renderUiv3ShellSlots(frame, location, sourceSummary) {
      "Local telemetry" caption so every route's rail header reads identically.
      Reuses the shared dashboard-uiv3-rail-* classes for identical styling. */
   const railHeader = uiv3FrameEl('div', 'uiv3-left-rail-header dashboard-uiv3-rail-header');
-  const railDetailsLink = uiv3FrameEl('a', 'uiv3-data-label dashboard-uiv3-rail-link', 'Details');
+  const railDetailsLink = uiv3FrameEl('a', 'uiv3-data-label dashboard-uiv3-rail-link cmd-btn cmd-btn--quiet', 'Details');
   railDetailsLink.setAttribute('href', '#/activity-log');
   railHeader.append(uiv3FrameEl('span', 'uiv3-label', 'Ship state'), railDetailsLink);
 
@@ -550,8 +595,8 @@ function renderUiv3ShellSlots(frame, location, sourceSummary) {
   vitalsPanel.appendChild(uiv3FrameEl('span', 'uiv3-label', 'Vitals'));
   const vitalRows = [
     uiv3FrameMetric('Hull', uiv3FramePct(frame.shipState?.hull_health)),
-    uiv3FrameMetric('Shields', frame.shipState?.shield_up === true ? 'UP' : (frame.shipState?.shield_up === false ? 'DOWN' : null)),
-    uiv3FrameMetric('Fuel', uiv3FramePct(frame.shipState?.fuel_pct)),
+    uiv3FrameMetric('Shields', shieldsDisplayValue(frame.shipState)),
+    uiv3FrameMetric('Fuel', uiv3FrameFuel(frame.shipState)),
     uiv3FrameMetric('Cargo', uiv3FrameCargo(frame.shipState)),
     uiv3FrameMetric('Jump range', Number.isFinite(frame.shipState?.jump_range_ly) ? `${frame.shipState.jump_range_ly} ly` : null),
   ].filter(Boolean);
@@ -582,8 +627,8 @@ function renderUiv3ShellSlots(frame, location, sourceSummary) {
   const vitals = uiv3FrameEl('span', 'uiv3-spine-vitals');
   [
     uiv3FrameSpineItem('Hull', uiv3FramePct(frame.shipState?.hull_health)),
-    uiv3FrameSpineItem('Shields', frame.shipState?.shield_up === true ? 'UP' : (frame.shipState?.shield_up === false ? 'DOWN' : null)),
-    uiv3FrameSpineItem('Fuel', uiv3FramePct(frame.shipState?.fuel_pct)),
+    uiv3FrameSpineItem('Shields', shieldsDisplayValue(frame.shipState)),
+    uiv3FrameSpineItem('Fuel', uiv3FrameFuel(frame.shipState)),
     uiv3FrameSpineItem('Cargo', uiv3FrameCargo(frame.shipState)),
     uiv3FrameSpineItem('Route', routeLabel),
   ].filter((item) => item.querySelector('.uiv3-spine-value')?.textContent).forEach((item) => vitals.appendChild(item));
@@ -648,6 +693,11 @@ async function refreshUiv3FrameSnapshots() {
       const next = deriveEliteSessionState(localContextRaw);
       if (next) setEliteSessionState(next);
     }
+    /* PB11-R1: the local-context request is the single existing source check
+       that covers Journal/Status and supported companion JSON attempts. Feed
+       its actual outcome to the boot state machine even when the request
+       failed, so readiness never depends on event ordering or a silent timeout. */
+    window.BootCurtain?.markLocalSources?.(localContextRaw);
     if (navSnap) frame.navSnap = navSnap;
     if (sourceSnap) frame.sourceSnap = sourceSnap;
     if (viewModels && frame.localContextRaw) {
@@ -925,6 +975,10 @@ function openWebSocket() {
 
       if (message.type === 'initial_state') {
         emit('state', message.state ?? message);
+      } else if (message.type === 'notification_presentation') {
+        /* NHI-03/04: Director presentation snapshots have their own channel;
+           they are not Journal events and never enter event logs. */
+        emit('notification', message);
       } else if (message.type === 'event') {
         emit('event', message);
         const evtType = message.event_type || message.event;
@@ -978,6 +1032,7 @@ async function boot() {
   if (!bridge?.port) {
     Shell.booting = false;
     setCoreNotFound();
+    window.BootCurtain?.markBridge?.(false);
 
     setTimeout(boot, 5000);
     return;
@@ -1109,21 +1164,33 @@ function isModalOrGateFocusActive() {
     return true;
   }
 
-  const modal = document.querySelector('[aria-modal="true"], [role="dialog"], #confirmation-gate-root, .confirmation-gate, .confirmation-card, .sq-gate-modal');
-  if (!modal) {
-    return false;
-  }
+  /* The Confirmation Gate root is always in the page; it is a modal only while
+     it holds a card. Treating the empty root as one stopped every handoff from
+     moving focus to its target (GKI-06). */
+  const modals = document.querySelectorAll('[aria-modal="true"], [role="dialog"], #confirmation-gate-root, .confirmation-gate, .confirmation-card, .sq-gate-modal');
+  return [...modals].some((modal) => {
+    if (modal.id === 'confirmation-gate-root' && modal.children.length === 0) {
+      return false;
+    }
+    return isRendered(modal);
+  });
+}
 
-  if (modal.hidden || modal.getAttribute('aria-hidden') === 'true') {
-    return false;
+/* A dialog is open only if it and every ancestor are shown: a route's dialog
+   keeps its own display while the route itself is hidden. */
+function isRendered(element) {
+  for (let node = element; node && node !== document.documentElement; node = node.parentElement) {
+    if (node.hidden || node.getAttribute?.('aria-hidden') === 'true') {
+      return false;
+    }
+    if (typeof window.getComputedStyle === 'function') {
+      const style = window.getComputedStyle(node);
+      if (style.display === 'none' || style.visibility === 'hidden') {
+        return false;
+      }
+    }
   }
-
-  if (typeof window.getComputedStyle !== 'function') {
-    return true;
-  }
-
-  const style = window.getComputedStyle(modal);
-  return style.display !== 'none' && style.visibility !== 'hidden';
+  return true;
 }
 
 function prefersReducedMotion() {
@@ -1188,13 +1255,17 @@ function createReturnIntent(intent) {
 
   return Shell.createRouteTransferIntent({
     originRoute: intent.targetRoute,
-    originPackage: routeLabel(intent.targetRoute),
+    /* The banner already names the route; the section is named by what was
+       shown there, never by its DOM id (GKI-06: "Intel / Intel / intel-domain-atlas"). */
+    originPackage: '',
     originSectionId: intent.targetSectionId,
+    originSectionLabel: intent.targetLabel || '',
     targetRoute: returnTarget.route,
     targetSectionId: returnTarget.sectionId,
     targetEntityId: returnTarget.entityId,
     targetLabel: intent.returnLabel || routeLabel(returnTarget.route),
     reason: `Return from ${routeLabel(intent.targetRoute)}.`,
+    returning: true,
     returnLabel: intent.targetLabel ? `Return to ${intent.targetLabel}` : `Return to ${routeLabel(intent.targetRoute)}`,
     returnTarget: {
       route: intent.targetRoute,
@@ -1222,7 +1293,11 @@ function createRouteTransferBanner(intent, target, unavailable) {
   if (intent.originPackage) {
     originParts.push(intent.originPackage);
   }
-  if (intent.originSectionId) {
+  /* A human section label wins over the section id, which is a DOM contract
+     (GKI-04: the Atlas used to show "intel-domain-atlas" here). */
+  if (intent.originSectionLabel) {
+    originParts.push(intent.originSectionLabel);
+  } else if (intent.originSectionId) {
     originParts.push(intent.originSectionId);
   }
 
@@ -1295,6 +1370,18 @@ function scrollAndFocusRouteTransferTarget(target) {
   }
 }
 
+function normalizeTargetPurpose(input) {
+  if (!input || typeof input !== 'object') return null;
+  const purpose = {
+    materialId: toRouteTransferText(input.materialId, '').slice(0, 64),
+    materialName: toRouteTransferText(input.materialName, '').slice(0, 80),
+    methodId: toRouteTransferText(input.methodId, '').slice(0, 96),
+    methodName: toRouteTransferText(input.methodName, '').slice(0, 96),
+    scope: toRouteTransferText(input.scope, '').slice(0, 64),
+  };
+  return purpose.materialId ? purpose : null;
+}
+
 function createRouteTransferIntent(input = {}) {
   const originRoute = normalizeRouteName(input.originRoute) || normalizeRouteName(window.location.hash) || '/dashboard';
   const targetRoute = normalizeRouteName(input.targetRoute);
@@ -1304,15 +1391,40 @@ function createRouteTransferIntent(input = {}) {
     originRoute,
     originPackage: toRouteTransferText(input.originPackage, ''),
     originSectionId,
+    originSectionLabel: toRouteTransferText(input.originSectionLabel, ''),
     targetRoute,
     targetSectionId: toRouteTransferText(input.targetSectionId, ''),
     targetEntityId: toRouteTransferText(input.targetEntityId, ''),
     targetLabel: toRouteTransferText(input.targetLabel, ''),
+    /* Phase 14 R2-4: the search term a handoff is asking the target route to
+       run, when there is one. Separate from `targetLabel`, which is the human
+       label for the target and is already used as display text. */
+    targetQuery: toRouteTransferText(input.targetQuery, ''),
+    /* Outcome handoffs may carry a Commander-selected destination plus a
+       compact, display-only context string.  They never activate a game route. */
+    targetDestination: toRouteTransferText(input.targetDestination, ''),
+    targetContext: toRouteTransferText(input.targetContext, ''),
+    /* GKI-08: what a Materials handoff is for (the material, the method the
+       Commander chose and the build scope), so an expedition stop can record
+       that need and a return can restore the same build. Text only. */
+    targetPurpose: normalizeTargetPurpose(input.targetPurpose),
+    /* A way back, as opposed to a handoff to something specific. */
+    returning: input.returning === true,
     reason: toRouteTransferText(input.reason, ''),
     returnLabel: toRouteTransferText(input.returnLabel, ''),
     returnTarget: normalizeReturnTarget(input.returnTarget, originRoute, originSectionId),
     timestamp: toRouteTransferText(input.timestamp, new Date().toISOString()),
   };
+}
+
+/* A handoff that carries a destination for Navigation to review: an
+   Engineering acquisition plan or a Galactic Atlas entry (GKI-03). A return to
+   an expedition (GKI-06) is not one: it goes back to the stop it left. */
+function isDestinationHandoff(intent) {
+  if (intent?.targetRoute !== '/navigation') return false;
+  if (String(intent.targetSectionId || '').startsWith('navigation-expedition')) return false;
+  return intent.originRoute === '/engineering'
+    || (intent.originRoute === '/intel' && intent.originSectionId === 'intel-domain-atlas');
 }
 
 function startRouteTransfer(intentInput) {
@@ -1324,9 +1436,20 @@ function startRouteTransfer(intentInput) {
 
   Shell.routeTransferIntent = intent;
   const nextHash = `#${intent.targetRoute}`;
+  const navigationContextHandoff = isDestinationHandoff(intent);
   window.location.hash = nextHash;
-  navigate(nextHash);
-  applyMountedRouteTransferIfReady(intent);
+  /* This handoff rebuilds Navigation's Plan workspace from the intent.  Let
+     the hashchange own the single navigation pass; an eager second pass races
+     the async view fetch and can restore Current after Plan consumed it. */
+  if (!navigationContextHandoff) {
+    navigate(nextHash);
+  }
+  /* Engineering or Atlas → Navigation carries destination/context that Navigation
+     consumes while rebuilding its Plan workspace.  Applying against the
+     previously mounted Navigation DOM would clear that context too early. */
+  if (!navigationContextHandoff) {
+    applyMountedRouteTransferIfReady(intent);
+  }
   emit('route-transfer-started', { intent });
   return intent;
 }
@@ -1364,6 +1487,14 @@ function applyRouteTransferArrival(routeName, root, options = {}) {
     activeTarget.removeAttribute('data-route-handoff-target');
   });
 
+  /* GKI-08 closeout: going back to a route that had no section selected (a
+     briefing opened over it) is simply being back: the route keeps its own
+     state, and there is no handoff target to report as missing. */
+  if (intent.returning && !intent.targetSectionId && !intent.targetEntityId) {
+    clearRouteTransferIntent(intent);
+    return null;
+  }
+
   const target = resolveRouteTransferTarget(root, intent, options);
   const unavailable = !target;
   const banner = createRouteTransferBanner(intent, target, unavailable);
@@ -1392,7 +1523,16 @@ function applyMountedRouteTransferIfReady(intent) {
   const routeView = viewId ? document.getElementById(viewId) : null;
   const target = intent.targetSectionId ? document.getElementById(intent.targetSectionId) : null;
 
-  if (!routeView || !target || !routeView.contains(target)) {
+  /* A mounted route may keep inactive workspaces in the DOM with [hidden].
+     Do not consume the intent against that stale hidden node: the owning view
+     needs the intact context to switch workspace and render the arrival. */
+  if (
+    !routeView
+    || !target
+    || !routeView.contains(target)
+    || target.hidden
+    || target.closest('[hidden]')
+  ) {
     return null;
   }
 
@@ -1408,6 +1548,7 @@ function navigate(hash) {
   const inRouteAnchor = hashSepIndex >= 0 ? rawHash.slice(hashSepIndex + 1) : '';
   const viewId = ROUTES[route] || ROUTES['/dashboard'];
 
+  document.body.classList.toggle('engineering-workstation-active', route === '/engineering');
   updateUiv3ActiveTab(route);
 
   document.querySelectorAll('.view').forEach((view) => {
@@ -1433,6 +1574,11 @@ function navigate(hash) {
   }
 
   renderUiv3Frame();
+
+  /* Views stay mounted across navigation, so a route the Commander returns to
+     is showing whatever it last fetched. Anything that can be changed from
+     another route has to know it was re-entered. */
+  emit('route-changed', { route });
 }
 
 window.addEventListener('hashchange', () => {
@@ -1440,10 +1586,44 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ── DOM ready ── */
+/* ── FU-013b: interactive density mode (PB07.6-10 CSS foundation) ──
+   Display-only classes per NRL-33: density adjusts spacing and typography
+   through CSS only. It never hides blockers, the Confirmation Gate,
+   Activity Log access, accessibility affordances, or proof drawers. */
+const DENSITY_STORAGE_KEY = 'omnicovas.density-mode';
+const DENSITY_CLASSES = Object.freeze({
+  commander: 'ocv-density-commander',
+  pilot: 'ocv-density-pilot',
+  proof: 'ocv-density-proof',
+});
+
+function applyDensityMode(mode) {
+  const valid = Object.prototype.hasOwnProperty.call(DENSITY_CLASSES, mode)
+    ? mode : 'commander';
+  Object.values(DENSITY_CLASSES).forEach((cls) => document.body.classList.remove(cls));
+  document.body.classList.add(DENSITY_CLASSES[valid]);
+  try {
+    window.localStorage?.setItem(DENSITY_STORAGE_KEY, valid);
+  } catch { /* localStorage unavailable — density still applies this session */ }
+  return valid;
+}
+
+function restoreDensityMode() {
+  let stored = null;
+  try {
+    stored = window.localStorage?.getItem(DENSITY_STORAGE_KEY);
+  } catch { /* localStorage unavailable */ }
+  return applyDensityMode(stored || 'commander');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (window.Uiv3Frame?.mountUiv3Icons) {
     window.Uiv3Frame.mountUiv3Icons(document);
   }
+  /* PB11-01 startup readiness curtain: presentation over the shell's own
+     boot signals (bridge discovery, first state, Elite session state). */
+  window.BootCurtain?.start?.();
+  restoreDensityMode();
   updateUiv3Clock();
   setInterval(updateUiv3Clock, 30_000);
   navigate(window.location.hash || '#/dashboard');
@@ -1460,10 +1640,29 @@ window.OmniEvents.addEventListener('elite-session-state', () => {
   renderUiv3Frame();
   refreshUiv3FrameSnapshots();
 });
+
+/* PB11-01: feed the boot curtain from the shell's existing signals — no
+   parallel bridge or hydration path. Each fires once; the curtain's own
+   hard timeout resolves anything that never arrives. */
+window.OmniEvents.addEventListener('bridge-connected', () => {
+  window.BootCurtain?.markBridge?.(true);
+}, { once: true });
+/* Local-source readiness AND cached-state readiness are both fed by
+   refreshUiv3FrameSnapshots(), which owns the combined local-context attempt.
+   elite-session-state alone cannot prove that companion sources were checked,
+   and the arrival of a /state payload proves only that the bridge answered —
+   it says nothing about whether any state was restored. Reporting the cached
+   state check from the `state` event meant passing a hardcoded `true`, which
+   claimed "Last-known state restored" on every launch, including a first run
+   against an empty Elite folder. */
+window.addEventListener('omnicovas:startup-outcome', (event) => {
+  Shell.startupOutcome = event.detail || null;
+});
 Shell.navigate = navigate;
 Shell.routeTransferIntent = null;
 Shell.createRouteTransferIntent = createRouteTransferIntent;
 Shell.startRouteTransfer = startRouteTransfer;
+Shell.isDestinationHandoff = isDestinationHandoff;
 Shell.getRouteTransferIntent = getRouteTransferIntent;
 Shell.clearRouteTransferIntent = clearRouteTransferIntent;
 Shell.applyRouteTransferArrival = applyRouteTransferArrival;
@@ -1474,4 +1673,11 @@ Shell.recomputeEliteSessionState = recomputeEliteSessionState;
 Shell.updateUiv3ActiveTab = updateUiv3ActiveTab;
 Shell.renderUiv3Frame = renderUiv3Frame;
 Shell.refreshUiv3FrameSnapshots = refreshUiv3FrameSnapshots;
+Shell.applyDensityMode = applyDensityMode;
+Shell.restoreDensityMode = restoreDensityMode;
+/* Test seam for the vitals formatters, matching the pattern used by the
+   view modules. Exposed so the partial-capacity behaviour these encode is
+   protected by tests rather than only by inspection. */
+globalThis.__shellFrameExports = { uiv3FrameCargo, uiv3FrameFuel, uiv3FramePct };
+
 window.Shell = Shell;

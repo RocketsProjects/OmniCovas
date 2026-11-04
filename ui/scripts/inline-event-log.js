@@ -113,15 +113,8 @@ if (searchEl) {
     renderLog(searchEl.value.toLowerCase().trim());
   });
 }
-var clearBtn = document.getElementById('log-clear-btn');
-if (clearBtn) {
-  clearBtn.addEventListener('click', function () {
-    if (confirm('Clear the activity log display? (Does not affect stored history.)')) {
-      logEntries = [];
-      renderLog('');
-    }
-  });
-}
+/* The Activity Log controller owns protected display clearing through the
+   shared Confirmation Gate. Do not attach a second handler here. */
 
 window.addEventListener('hashchange', function () {
   if (window.location.hash === '#/activity-log') fetchLog();

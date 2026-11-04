@@ -27,16 +27,18 @@
         "transparent": true,
         "alwaysOnTop": true,
         "decorations": false,
+        "shadow": false,
         "skipTaskbar": true,
         "resizable": false,
         "focus": false,
+        "focusable": false,
         "visible": false,
         "x": 100,
         "y": 100
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' ipc: http://ipc.localhost http://127.0.0.1:* ws://127.0.0.1:*; object-src 'none'; base-uri 'self'; form-action 'self'"
     }
   },
   "bundle": {

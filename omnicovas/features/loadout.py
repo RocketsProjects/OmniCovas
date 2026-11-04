@@ -16,7 +16,7 @@ Field mapping from journal Module dict to ModuleInfo:
     Health            -> health (float, 0.0-1.0)
     Power             -> power (float | None)
     Priority          -> priority (int | None)
-    On                -> on (bool)
+    On                -> on (bool | None; missing is unknown)
     Engineering       -> engineering (dict | None)
 
 Law 5 (Zero Hallucination):
@@ -90,7 +90,9 @@ def modules_from_loadout_event(event: dict[str, Any]) -> dict[str, ModuleInfo]:
         power = float(power_raw) if power_raw is not None else None
         priority_raw = entry.get("Priority")
         priority = int(priority_raw) if priority_raw is not None else None
-        on_val = bool(entry.get("On", True))
+        # Missing activation data is unknown, not an implicit enabled module.
+        on_raw = entry.get("On")
+        on_val = on_raw if isinstance(on_raw, bool) else None
         eng_raw = entry.get("Engineering")
         engineering = eng_raw if isinstance(eng_raw, dict) else None
         value_raw = entry.get("Value")

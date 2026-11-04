@@ -14,8 +14,10 @@
  *   - createQuickToolStrip       — small pinned tool/quick action strip
  *   - createSearchPanel          — search-first input panel
  *   - createOperationSelector    — manual operation picker
- *   - createProofToggle          — compact "Show proof" toggle wrapping a node
+ *   - createProofToggle          — compact "Proof" toggle wrapping a node
  */
+
+import './uiv3-frame-primitives.js';
 
 'use strict';
 
@@ -35,6 +37,10 @@ function buildAction(action, baseClass) {
   if (!action.href) el.setAttribute('type', 'button');
   if (typeof action.onClick === 'function') el.addEventListener('click', action.onClick);
   return el;
+}
+
+function withCommandClass(baseClass, roleClass) {
+  return `${baseClass} cmd-btn ${roleClass}`;
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -134,7 +140,7 @@ export function createInterruptBanner(interrupts, options) {
   });
   banner.appendChild(ul);
 
-  const actionEl = buildAction(options?.onResolveAction, 'interrupt-banner-action');
+  const actionEl = buildAction(options?.onResolveAction, withCommandClass('interrupt-banner-action', 'cmd-btn--quiet'));
   if (actionEl) banner.appendChild(actionEl);
 
   return banner;
@@ -176,7 +182,11 @@ export function createSupportCard(options) {
   card.appendChild(makeEl('p', 'support-card-summary', summary || ''));
 
   if (route || onOpen) {
-    const action = makeEl(route ? 'a' : 'button', 'support-card-action', `Open ${label || 'support'}`);
+    const action = makeEl(
+      route ? 'a' : 'button',
+      'support-card-action cmd-btn cmd-btn--quiet',
+      `Open ${label || 'support'}`,
+    );
     if (route) action.setAttribute('href', String(route));
     else action.setAttribute('type', 'button');
     if (typeof onOpen === 'function') action.addEventListener('click', onOpen);
@@ -206,7 +216,7 @@ export function createPrimaryActionBlock(action) {
     label: action.label,
     href: action.route || action.href,
     onClick: action.onClick,
-  }, 'primary-action-button');
+  }, withCommandClass('primary-action-button', 'cmd-btn--primary'));
   if (button) block.appendChild(button);
   if (action.hint) block.appendChild(makeEl('p', 'primary-action-hint', action.hint));
   return block;
@@ -228,7 +238,7 @@ export function createQuickToolStrip(tools, options) {
       label: tool.label,
       href: tool.route || tool.href,
       onClick: tool.onClick,
-    }, 'quick-tool');
+    }, withCommandClass('quick-tool', 'cmd-btn--quiet'));
     if (btn) {
       if (tool.id) btn.setAttribute('data-tool', tool.id);
       strip.appendChild(btn);
@@ -251,6 +261,12 @@ export function createSearchPanel(options) {
   panel.setAttribute('role', 'search');
   panel.setAttribute('aria-label', options?.ariaLabel || 'Intel search');
 
+  /* FU-013 (C1): these tabs switch the search input's mode rather than
+     revealing a panel, so each must name the control it governs. Without
+     aria-controls a screen reader announces "tab, selected" and leaves the
+     commander looking for a tabpanel that does not exist. */
+  const searchInputId = options?.inputId || 'intel-search-input';
+
   const tabs = makeEl('div', 'search-panel-modes');
   tabs.setAttribute('role', 'tablist');
   modes.forEach((mode) => {
@@ -260,30 +276,30 @@ export function createSearchPanel(options) {
     tab.setAttribute('type', 'button');
     tab.setAttribute('role', 'tab');
     tab.setAttribute('data-mode', mode.id);
-    tab.setAttribute('aria-selected', mode.id === initialMode ? 'true' : 'false');
-    tab.addEventListener('click', () => {
-      panel.querySelectorAll('.search-panel-mode').forEach(b => {
-        b.classList.remove('is-active');
-        b.setAttribute('aria-selected', 'false');
-      });
-      tab.classList.add('is-active');
-      tab.setAttribute('aria-selected', 'true');
+    tab.setAttribute('aria-controls', searchInputId);
+    tabs.appendChild(tab);
+  });
+  window.Uiv3Frame.bindUiv3TabList(tabs, {
+    selector: '.search-panel-mode',
+    valueAttribute: 'data-mode',
+    activeValue: initialMode,
+    onActivate(modeId, _tab, detail) {
+      const mode = modes.find((entry) => entry.id === modeId) || modes[0];
       const input = panel.querySelector('.search-panel-input');
       if (input) {
         input.setAttribute('placeholder', mode.placeholder || '');
         input.setAttribute('data-mode', mode.id);
-        input.focus();
+        if (detail.source === 'click') input.focus();
       }
-    });
-    tabs.appendChild(tab);
+    },
   });
   panel.appendChild(tabs);
 
   const row = makeEl('div', 'search-panel-row');
   const input = document.createElement('input');
   input.className = 'search-panel-input';
-  input.id = 'intel-search-input';
-  input.name = 'intel-search-input';
+  input.id = searchInputId;
+  input.name = searchInputId;
   input.setAttribute('type', 'search');
   input.setAttribute('data-mode', initialMode);
   const initial = modes.find(m => m.id === initialMode) || modes[0];
@@ -291,7 +307,7 @@ export function createSearchPanel(options) {
   input.setAttribute('aria-label', 'Intel search query');
   row.appendChild(input);
 
-  const submit = makeEl('button', 'search-panel-submit', 'Search');
+  const submit = makeEl('button', 'search-panel-submit cmd-btn cmd-btn--primary', 'Search');
   submit.setAttribute('type', 'button');
   submit.addEventListener('click', () => {
     if (typeof options?.onSearch === 'function') {
@@ -314,7 +330,10 @@ export function createSearchPanel(options) {
  * ────────────────────────────────────────────────────────────────────── */
 export function createOperationSelector(options) {
   const list = Array.isArray(options?.operations) ? options.operations : [];
-  const current = options?.current || null;
+  const requested = options?.current || null;
+  const current = list.some((op) => op.id === requested)
+    ? requested
+    : (list[0]?.id || null);
   const onSelect = typeof options?.onSelect === 'function' ? options.onSelect : null;
 
   const sel = makeEl('nav', 'operation-selector');
@@ -328,11 +347,15 @@ export function createOperationSelector(options) {
     btn.setAttribute('type', 'button');
     btn.setAttribute('role', 'tab');
     btn.setAttribute('data-operation', op.id);
-    btn.setAttribute('aria-selected', op.id === current ? 'true' : 'false');
-    btn.addEventListener('click', () => {
-      if (onSelect) onSelect(op.id);
-    });
     sel.appendChild(btn);
+  });
+  window.Uiv3Frame.bindUiv3TabList(sel, {
+    selector: '.operation-selector-tab',
+    valueAttribute: 'data-operation',
+    activeValue: current,
+    onActivate(operation) {
+      if (onSelect) onSelect(operation);
+    },
   });
 
   return sel;
@@ -348,7 +371,7 @@ export function createOperationSelector(options) {
  * ────────────────────────────────────────────────────────────────────── */
 export function createProofToggle(content, summary) {
   const drawer = makeEl('details', 'proof-toggle');
-  const sum = makeEl('summary', 'proof-toggle-summary', summary || 'Show proof');
+  const sum = makeEl('summary', 'proof-toggle-summary', summary || 'Proof');
   drawer.appendChild(sum);
   const body = makeEl('div', 'proof-toggle-body');
   if (content instanceof Node) {

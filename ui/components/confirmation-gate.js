@@ -6,11 +6,29 @@
  * Future expansions (tactical threat, module targeting) populate this framework.
  */
 
+const POLL_BASE_MS = 2000;
+const POLL_MAX_BACKOFF_MS = 60000;
+
 class ConfirmationGateComponent {
   constructor() {
     this.confirmations = new Map();
     this.containerEl = null;
-    this.pollInterval = null;
+    this.pollTimer = null;
+    this.activeLocalDialog = null;
+    this.statusEl = null;
+    /* Poll lifecycle state. `connected` is tri-state (null = not yet known)
+       so the first transition in either direction emits exactly one line.
+
+       `pollGeneration` is the lifecycle token. Every start/stop bumps it, so
+       a request issued by an earlier generation can never render, reschedule,
+       or alter counters after an unmount — even if it settles late. */
+    this.pollDelayMs = POLL_BASE_MS;
+    this.pollGeneration = 0;
+    this.inflightRequests = 0;
+    this.pollWakeups = 0;
+    this.pollAbort = null;
+    this.connected = null;
+    this._onBridgeConnected = null;
   }
 
   get apiBase() {
@@ -49,40 +67,111 @@ class ConfirmationGateComponent {
   unmount() {
     this.stopPolling();
     if (this.containerEl) {
-      this.containerEl.innerHTML = "";
+      this.containerEl.replaceChildren();
     }
   }
 
   /**
-   * Start polling /week13/confirmations/pending every 2 seconds.
+   * Start polling /week13/confirmations/pending.
+   *
+   * Responsive while connected (2s); backs off exponentially to a 60s ceiling
+   * while the local bridge is down so a disconnected session does not burn
+   * wakeups or flood the console (Principle 10). A `bridge-connected` signal
+   * resets the cadence immediately.
    */
   startPolling() {
-    this.pollInterval = setInterval(() => {
-      this.fetchPending();
-    }, 2000);
-    this.fetchPending(); // Fetch immediately
+    this.stopPolling();
+    this.pollGeneration += 1;
+    this._onBridgeConnected = () => this.onBridgeConnected();
+    window.OmniEvents?.addEventListener('bridge-connected', this._onBridgeConnected);
+    this.scheduleNextPoll(0);
+  }
+
+  /** Schedule exactly one pending-poll for the current generation. */
+  scheduleNextPoll(delayMs) {
+    const generation = this.pollGeneration;
+    if (this.pollTimer !== null) {
+      clearTimeout(this.pollTimer);
+      this.pollTimer = null;
+    }
+    this.pollTimer = setTimeout(() => {
+      this.pollTimer = null;
+      this.pollWakeups += 1;
+      if (generation !== this.pollGeneration) return; // stopped or restarted
+      this.fetchPending().finally(() => {
+        if (generation === this.pollGeneration && this._onBridgeConnected !== null) {
+          this.scheduleNextPoll(this.pollDelayMs);
+        }
+      });
+    }, delayMs);
+  }
+
+  /** Bridge came back: drop to the responsive cadence at once. */
+  onBridgeConnected() {
+    this.pollDelayMs = POLL_BASE_MS;
+    // Requeue rather than firing directly, so a signal arriving mid-request
+    // replaces the pending wakeup instead of stacking a second one.
+    if (this.inflightRequests > 0) return;
+    this.scheduleNextPoll(0);
   }
 
   /**
-   * Stop polling.
+   * Stop polling and release every timer, listener, and unresolved request.
    */
   stopPolling() {
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = null;
+    this.pollGeneration += 1; // invalidate anything already in flight
+    if (this.pollTimer !== null) {
+      clearTimeout(this.pollTimer);
+      this.pollTimer = null;
     }
+    if (this.pollAbort) {
+      try {
+        this.pollAbort.abort();
+      } catch {
+        /* AbortController is unavailable in some test environments. */
+      }
+      this.pollAbort = null;
+    }
+    if (this._onBridgeConnected) {
+      window.OmniEvents?.removeEventListener('bridge-connected', this._onBridgeConnected);
+      this._onBridgeConnected = null;
+    }
+    this.pollDelayMs = POLL_BASE_MS;
+    this.inflightRequests = 0;
   }
 
   /**
    * Fetch pending confirmations from the API.
+   *
+   * Emits at most one diagnostic per connection-state transition, so a long
+   * disconnected session leaves one line rather than one line every 2s.
    */
   async fetchPending() {
+    const generation = this.pollGeneration;
     const url = this.apiUrl('/week13/confirmations/pending');
-    if (!url) return;
+    if (!url) {
+      // No bridge yet. Back off instead of waking every 2s forever; a
+      // `bridge-connected` signal short-circuits the wait when it arrives.
+      this.pollDelayMs = Math.min(this.pollDelayMs * 2, POLL_MAX_BACKOFF_MS);
+      return;
+    }
+    if (this.inflightRequests > 0) return; // never overlap requests
+
+    this.inflightRequests += 1;
+    let signal;
     try {
-      const res = await fetch(url);
+      this.pollAbort = new AbortController();
+      signal = this.pollAbort.signal;
+    } catch {
+      signal = undefined;
+    }
+
+    try {
+      const res = await fetch(url, signal ? { signal } : undefined);
+      if (generation !== this.pollGeneration) return; // stale: abandon quietly
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      if (generation !== this.pollGeneration) return;
 
       const confirmations = data.confirmations || [];
 
@@ -94,9 +183,34 @@ class ConfirmationGateComponent {
 
       // Re-render
       this.render();
+      this.markPollConnected();
     } catch (err) {
-      console.error("Failed to fetch pending confirmations:", err);
+      if (generation !== this.pollGeneration) return; // stale failure: ignore
+      this.markPollDisconnected(err);
+    } finally {
+      if (generation === this.pollGeneration) {
+        this.inflightRequests = Math.max(0, this.inflightRequests - 1);
+        this.pollAbort = null;
+      }
     }
+  }
+
+  /** Record a healthy poll; log only on the disconnected → connected edge. */
+  markPollConnected() {
+    if (this.connected === false) {
+      console.info('Confirmation Gate: local bridge reachable again; resuming normal polling.');
+    }
+    this.connected = true;
+    this.pollDelayMs = POLL_BASE_MS;
+  }
+
+  /** Record a failed poll; log only on the connected → disconnected edge. */
+  markPollDisconnected(err) {
+    if (this.connected !== false) {
+      console.error('Failed to fetch pending confirmations:', err);
+    }
+    this.connected = false;
+    this.pollDelayMs = Math.min(this.pollDelayMs * 2, POLL_MAX_BACKOFF_MS);
   }
 
   /**
@@ -105,7 +219,7 @@ class ConfirmationGateComponent {
   render() {
     if (!this.containerEl) return;
 
-    this.containerEl.innerHTML = "";
+    this.containerEl.replaceChildren();
 
     if (this.confirmations.size === 0) {
       // No pending confirmations — optionally show placeholder
@@ -136,8 +250,8 @@ class ConfirmationGateComponent {
     const whyEl = document.createElement("button");
     whyEl.type = "button";
     whyEl.className = "confirmation-why-btn";
-    whyEl.setAttribute("aria-label", "Why is this suggested?");
-    whyEl.textContent = "Why?";
+    whyEl.setAttribute("aria-label", "Why OmniCOVAS is suggesting this");
+    whyEl.textContent = "Why this?";
     whyEl.addEventListener("click", () => {
       this.showWhy(id, conf);
     });
@@ -148,10 +262,10 @@ class ConfirmationGateComponent {
     whyPlaceholderEl.style.display = "none";
 
     const emEl = document.createElement("em");
-    emEl.textContent = "Tier 3 explainability is reserved for a future Commander-approved expansion.";
+    emEl.textContent = "Review the reason before deciding.";
 
     const smallEl = document.createElement("small");
-    smallEl.textContent = conf.why_text || "See docs/ai/phase4_advisories.md";
+    smallEl.textContent = conf.why_text || "No additional explanation is available.";
 
     whyPlaceholderEl.appendChild(emEl);
     whyPlaceholderEl.appendChild(document.createElement("br"));
@@ -172,8 +286,8 @@ class ConfirmationGateComponent {
     const confirmBtn = document.createElement("button");
     confirmBtn.type = "button";
     confirmBtn.className = "confirmation-btn confirm";
-    confirmBtn.textContent = "✓ Confirm";
-    confirmBtn.setAttribute("aria-label", "Confirm this suggestion");
+    confirmBtn.textContent = "Apply suggestion";
+    confirmBtn.setAttribute("aria-label", "Apply this suggestion");
     confirmBtn.addEventListener("click", () => {
       this.respond(id, "confirm");
     });
@@ -181,8 +295,8 @@ class ConfirmationGateComponent {
     const declineBtn = document.createElement("button");
     declineBtn.type = "button";
     declineBtn.className = "confirmation-btn decline";
-    declineBtn.textContent = "✗ Decline";
-    declineBtn.setAttribute("aria-label", "Decline this suggestion");
+    declineBtn.textContent = "Cancel";
+    declineBtn.setAttribute("aria-label", "Cancel this suggestion");
     declineBtn.addEventListener("click", () => {
       this.respond(id, "decline");
     });
@@ -233,6 +347,160 @@ class ConfirmationGateComponent {
       console.error(`Failed to respond to confirmation ${id}:`, err);
     }
   }
+
+  /**
+   * Confirm a protected local UI action through the one shared Commander gate.
+   *
+   * This is intentionally separate from the Week 13 advisory queue.  It binds
+   * a Commander's click to a local mutation request but does not claim or
+   * execute a game action.
+   */
+  confirmLocalAction(options = {}) {
+    if (this.activeLocalDialog) return Promise.resolve(false);
+
+    const title = String(options.title || 'Confirm local action');
+    const message = String(options.message || 'Review this action before continuing.');
+    const confirmLabel = String(options.confirmLabel || 'Confirm');
+    const cancelLabel = String(options.cancelLabel || 'Cancel');
+    const secondMessage = options.secondMessage
+      ? String(options.secondMessage)
+      : null;
+    const finalConfirmLabel = String(options.finalConfirmLabel || confirmLabel);
+    const previousFocus = document.activeElement;
+
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'confirmation-local-overlay';
+
+      const dialog = document.createElement('section');
+      dialog.className = 'confirmation-local-dialog';
+      if (options.danger) dialog.classList.add('confirmation-local-dialog--danger');
+      dialog.setAttribute('role', 'dialog');
+      dialog.setAttribute('aria-modal', 'true');
+      dialog.setAttribute('aria-labelledby', 'confirmation-local-title');
+      dialog.setAttribute('aria-describedby', 'confirmation-local-message');
+
+      const heading = document.createElement('h2');
+      heading.id = 'confirmation-local-title';
+      heading.className = 'confirmation-local-title';
+      heading.textContent = title;
+
+      const body = document.createElement('p');
+      body.id = 'confirmation-local-message';
+      body.className = 'confirmation-local-message';
+      body.textContent = message;
+
+      const buttons = document.createElement('div');
+      buttons.className = 'confirmation-buttons';
+
+      const confirmButton = document.createElement('button');
+      confirmButton.type = 'button';
+      confirmButton.className = 'confirmation-btn confirm';
+      if (options.danger) confirmButton.classList.add('danger');
+      confirmButton.dataset.confirmLocal = 'true';
+      confirmButton.textContent = confirmLabel;
+
+      const cancelButton = document.createElement('button');
+      cancelButton.type = 'button';
+      cancelButton.className = 'confirmation-btn decline';
+      cancelButton.dataset.cancelLocal = 'true';
+      cancelButton.textContent = cancelLabel;
+
+      let stage = 1;
+      const finish = (accepted) => {
+        document.removeEventListener('keydown', onKeydown);
+        overlay.remove();
+        this.activeLocalDialog = null;
+        this.restoreFocusAfterDialog(previousFocus);
+        resolve(accepted);
+      };
+      const onKeydown = (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          finish(false);
+        }
+      };
+
+      confirmButton.addEventListener('click', () => {
+        if (secondMessage && stage === 1) {
+          stage = 2;
+          body.textContent = secondMessage;
+          confirmButton.textContent = finalConfirmLabel;
+          confirmButton.focus();
+          return;
+        }
+        finish(true);
+      });
+      cancelButton.addEventListener('click', () => finish(false));
+
+      buttons.append(confirmButton, cancelButton);
+      dialog.append(heading, body, buttons);
+      overlay.appendChild(dialog);
+      document.body.appendChild(overlay);
+      document.addEventListener('keydown', onKeydown);
+      this.activeLocalDialog = overlay;
+      /* Error prevention: a dangerous dialog opens on the safe choice, so a
+         stray Enter/Space cancels rather than destroys. Non-dangerous dialogs
+         keep opening on Confirm — that stays the intended fast path. */
+      if (options.danger) {
+        cancelButton.focus();
+      } else {
+        confirmButton.focus();
+      }
+    });
+  }
+
+  /**
+   * Return focus after a dialog closes.
+   *
+   * Prefers the invoking control. When it is gone (or was never focusable —
+   * e.g. a programmatic caller), falls back deterministically to the route
+   * landmark instead of letting focus drop silently onto <body>, which would
+   * strand keyboard and screen-reader users at the top of the document.
+   */
+  restoreFocusAfterDialog(previousFocus) {
+    if (previousFocus instanceof HTMLElement
+      && previousFocus.isConnected
+      && previousFocus !== document.body) {
+      previousFocus.focus();
+      return;
+    }
+    const fallback = document.querySelector('main')
+      || document.querySelector('[role="main"]');
+    if (!fallback) return;
+    if (!fallback.hasAttribute('tabindex')) fallback.setAttribute('tabindex', '-1');
+    fallback.focus();
+  }
+
+  /**
+   * Bounded delay for flows waiting on a commander decision.
+   *
+   * Timers for the confirmation surface live in this component, so route
+   * controllers can wait on a decision without introducing their own timer
+   * calls (the Activity Log view is scanned for timer/DOM-sink identifiers).
+   */
+  delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+  }
+
+  /** Show a non-blocking result through the same shared UI surface. */
+  announce(message, options = {}) {
+    this.statusEl?.remove();
+    const status = document.createElement('div');
+    status.className = 'confirmation-status';
+    status.classList.add(`confirmation-status--${String(options.kind || 'info')}`);
+    // A warning here means the action succeeded but its audit record did not,
+    // which the commander must not miss — announce it as assertively as an error.
+    const assertive = options.kind === 'error' || options.kind === 'warning';
+    status.setAttribute('role', assertive ? 'alert' : 'status');
+    status.textContent = String(message || '');
+    document.body.appendChild(status);
+    this.statusEl = status;
+    window.setTimeout(() => {
+      if (this.statusEl === status) this.statusEl = null;
+      status.remove();
+    }, 5000);
+  }
 }
 
 // Export for use in other modules
@@ -244,3 +512,6 @@ if (typeof module !== "undefined" && module.exports) {
 if (typeof globalThis.__confirmationGateExports === "undefined") {
   globalThis.__confirmationGateExports = { ConfirmationGateComponent };
 }
+/* Production-safe constructor export. A top-level class declaration is not a
+   reliable Window property across classic/module loading boundaries. */
+globalThis.ConfirmationGateComponent = ConfirmationGateComponent;

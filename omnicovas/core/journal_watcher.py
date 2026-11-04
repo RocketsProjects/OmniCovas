@@ -23,16 +23,31 @@ See: Phase 1 Development Guide Week 2
 from __future__ import annotations
 
 import asyncio
+import inspect
 import json
 import logging
 import os
 import re
+from contextvars import ContextVar
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Coroutine
 
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
+
+# GKI-04: true only while the watcher replays a Journal that already existed when
+# it started.  State handlers ignore it and rebuild the current position as
+# before; consumers that announce things (Galactic Intelligence) must not treat
+# these events as live arrivals.  Live tailing and later rollovers run outside
+# this context, so their events are new observations.
+STARTUP_REPLAY: ContextVar[bool] = ContextVar("journal_startup_replay", default=False)
+
+
+def is_startup_replay() -> bool:
+    """Whether the current dispatch belongs to the startup catch-up."""
+    return STARTUP_REPLAY.get()
+
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +186,7 @@ class JournalWatcher:
         self,
         dispatch_fn: Callable[[str], Coroutine[Any, Any, None]],
         journal_path: Path | None = None,
-        on_rollover: Callable[[Path | None, Path], None] | None = None,
+        on_rollover: Callable[[Path | None, Path], Any] | None = None,
         poll_interval: float = ROLLOVER_POLL_INTERVAL,
     ) -> None:
         self._dispatch_fn = dispatch_fn
@@ -184,6 +199,9 @@ class JournalWatcher:
         self._poll_interval = poll_interval
         self._rollover_task: asyncio.Task[None] | None = None
         self._running = False
+        # Selection checks run every few seconds. Keep the polling frequency,
+        # but only surface a selection diagnostic when its outcome changes.
+        self._last_selection_log: tuple[str, str] | None = None
 
     # Matches Journal.YYYY-MM-DDTHHMMSS.NN.log and Journal.YYYY-MM-DDTHH:MM:SS.NN.log
     _JOURNAL_TS_RE = re.compile(
@@ -243,6 +261,21 @@ class JournalWatcher:
         except OSError:
             return False
 
+    def _log_selection_once(
+        self,
+        state: str,
+        detail: str,
+        level: int,
+        message: str,
+        *args: object,
+    ) -> None:
+        """Log a journal-selection outcome only when that outcome changes."""
+        signature = (state, detail)
+        if signature == self._last_selection_log:
+            return
+        self._last_selection_log = signature
+        logger.log(level, message, *args)
+
     def _find_current_journal(self) -> Path | None:
         """
         Find the newest Journal.*.log file in the journal directory.
@@ -258,7 +291,13 @@ class JournalWatcher:
             Path to the newest journal file, or None if none found.
         """
         if not self._journal_path.exists():
-            logger.error("Journal directory not found: %s", self._journal_path)
+            self._log_selection_once(
+                "missing_directory",
+                str(self._journal_path),
+                logging.ERROR,
+                "Journal directory not found: %s",
+                self._journal_path,
+            )
             return None
 
         journal_files = [
@@ -269,7 +308,13 @@ class JournalWatcher:
         ]
 
         if not journal_files:
-            logger.warning("No journal files found in: %s", self._journal_path)
+            self._log_selection_once(
+                "no_journals",
+                str(self._journal_path),
+                logging.WARNING,
+                "No journal files found in: %s",
+                self._journal_path,
+            )
             return None
 
         # Attempt filename-timestamp ordering first. Tie-break on the per-session
@@ -283,14 +328,21 @@ class JournalWatcher:
 
         if parseable:
             selected = max(parseable, key=self._journal_sort_key)
-            logger.info(
-                "Journal selected: %s (method: filename_timestamp)", selected.name
+            self._log_selection_once(
+                "filename_timestamp",
+                selected.name,
+                logging.INFO,
+                "Journal selected: %s (method: filename_timestamp)",
+                selected.name,
             )
             return selected
 
         # Fallback: use modification time when filenames cannot be parsed
         selected = max(journal_files, key=lambda f: f.stat().st_mtime)
-        logger.warning(
+        self._log_selection_once(
+            "fallback_mtime",
+            selected.name,
+            logging.WARNING,
             "Journal selected: %s (method: fallback_mtime — filename parsing failed)",
             selected.name,
         )
@@ -371,13 +423,28 @@ class JournalWatcher:
         # cursor, then retarget + resume in one atomic handoff.
         if self._handler is not None:
             self._handler.pause()
+        # Notify before replaying. Catch-up dispatches the new journal's events
+        # immediately, so a listener that opens the recording session must be
+        # given the chance to do so first — otherwise the first events of the
+        # new journal are recorded against the previous one.
+        await self._notify_rollover(old, new_journal)
         await self._attach_journal(new_journal, catchup=True)
-        if self._on_rollover is not None:
-            try:
-                self._on_rollover(old, new_journal)
-            except Exception:
-                # Law 6: an audit-hook failure must never crash the watcher.
-                logger.exception("Journal rollover callback failed")
+
+    async def _notify_rollover(self, old: Path | None, new_journal: Path) -> None:
+        """Tell the listener which journal is now current, before replaying it.
+
+        An async listener is awaited so session bookkeeping completes before
+        catch-up dispatches a single event.
+        """
+        if self._on_rollover is None:
+            return
+        try:
+            result = self._on_rollover(old, new_journal)
+            if inspect.isawaitable(result):
+                await result
+        except Exception:
+            # Law 6: an audit-hook failure must never crash the watcher.
+            logger.exception("Journal rollover callback failed")
 
     async def _check_for_rollover(self) -> bool:
         """Re-scan the directory and switch journals if a newer one appeared.
@@ -392,12 +459,8 @@ class JournalWatcher:
         # Elite was not running at startup; attach now that a journal exists.
         if self._current_journal is None:
             logger.info("Journal now available; attaching: %s", newest.name)
+            await self._notify_rollover(None, newest)
             await self._attach_journal(newest, catchup=True)
-            if self._on_rollover is not None:
-                try:
-                    self._on_rollover(None, newest)
-                except Exception:
-                    logger.exception("Journal rollover callback failed")
             return True
 
         if newest == self._current_journal:
@@ -458,7 +521,11 @@ class JournalWatcher:
         current = self._find_current_journal()
         if current is not None:
             logger.info("Starting journal watcher for: %s", current.name)
-            await self._attach_journal(current, catchup=True)
+            replaying = STARTUP_REPLAY.set(True)
+            try:
+                await self._attach_journal(current, catchup=True)
+            finally:
+                STARTUP_REPLAY.reset(replaying)
             logger.info("Journal watcher live. Monitoring: %s", self._journal_path)
         else:
             logger.warning(

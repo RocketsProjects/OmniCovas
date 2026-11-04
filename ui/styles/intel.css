@@ -38,7 +38,7 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
-.intel-domain-tab[aria-current="true"] {
+.intel-domain-tab[aria-selected="true"] {
   color: var(--color-info);
   border-bottom-color: var(--color-info);
   background: var(--color-info-bg);
@@ -110,42 +110,6 @@
   color: var(--color-fg-muted);
   font-size: var(--font-size-sm);
   line-height: 1.5;
-}
-
-/* Honest reserved-domain workspace card. */
-.intel-reserved-workspace {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-height: 220px;
-  padding: var(--space-5);
-  border: 1px dashed var(--color-border);
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.18);
-}
-
-.intel-reserved-eyebrow {
-  margin: 0;
-  color: var(--color-fg-muted);
-  font-family: var(--font-family-mono, monospace);
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.intel-reserved-title {
-  margin: 0;
-  color: var(--color-fg);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-}
-
-.intel-reserved-desc {
-  margin: 0;
-  color: var(--color-fg-muted);
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
-  max-width: 56ch;
 }
 
 .intel-route {
@@ -346,7 +310,7 @@
 
 .intel-economic-show-all-btn {
   font-size: var(--font-size-xs);
-  color: var(--color-accent);
+  color: var(--color-fg);
   background: none;
   border: none;
   padding: 0;
@@ -357,7 +321,7 @@
 .intel-economic-show-all-btn:hover,
 .intel-economic-show-all-btn:focus-visible {
   opacity: 0.8;
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -396,4 +360,943 @@
   color: var(--color-fg-muted);
   font-style: italic;
   margin: 0;
+}
+
+/* --- Observed Galaxy / Commander Memory (Phase 11 reconciliation) ------- */
+
+.intel-memory-workspace {
+  display: grid;
+  gap: 12px;
+}
+
+.intel-memory-heading,
+.intel-memory-record-header,
+.intel-memory-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.intel-memory-heading .intel-workspace-lead {
+  margin-bottom: 0;
+}
+
+.intel-memory-owner-actions,
+.intel-memory-record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.intel-memory-status,
+.intel-memory-record {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.intel-memory-status {
+  padding: 12px;
+}
+
+.intel-memory-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.intel-memory-summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-fg);
+  cursor: pointer;
+  text-align: left;
+}
+
+.intel-memory-summary-item:hover,
+.intel-memory-summary-item:focus-visible {
+  border-color: var(--color-border-active);
+  background: var(--color-surface-hover);
+}
+
+.intel-memory-summary-item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.intel-memory-summary-label,
+.intel-memory-meta,
+.intel-memory-page-position,
+.intel-memory-record-location,
+.intel-memory-caveat,
+.intel-memory-proof-body,
+.intel-memory-snapshot-count,
+.intel-memory-snapshot-items {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-sm);
+}
+
+.intel-memory-summary-count {
+  color: var(--color-fg);
+}
+
+.intel-memory-caveat,
+.intel-memory-meta,
+.intel-memory-record-location,
+.intel-memory-snapshot-count {
+  margin: 6px 0 0;
+}
+
+.intel-memory-filter {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(150px, 1fr) minmax(150px, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.intel-memory-input,
+.intel-memory-select {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+.intel-memory-input:focus-visible,
+.intel-memory-select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.intel-memory-records {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 10px;
+}
+
+.intel-memory-record {
+  padding: 12px;
+}
+
+.intel-memory-record-title {
+  margin: 0;
+  color: var(--color-fg);
+  overflow-wrap: anywhere;
+}
+
+.intel-memory-record-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+  margin: 12px 0;
+}
+
+.intel-memory-metric {
+  min-width: 0;
+}
+
+.intel-memory-metric-label {
+  color: var(--color-fg-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+}
+
+.intel-memory-metric-value {
+  margin: 0;
+  color: var(--color-fg);
+  overflow-wrap: anywhere;
+}
+
+.intel-memory-snapshot-summary {
+  padding: 8px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.intel-memory-snapshot-count {
+  margin-top: 0;
+}
+
+.intel-memory-snapshot-items {
+  margin: 6px 0 0 18px;
+  padding: 0;
+}
+
+.intel-memory-proof {
+  margin: 10px 0;
+}
+
+.intel-memory-proof-summary {
+  color: var(--color-telemetry-label);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.intel-memory-proof-body p {
+  margin: 4px 0;
+}
+
+.intel-memory-pagination {
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .intel-memory-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .intel-memory-filter {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .intel-memory-input {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .intel-memory-filter,
+  .intel-memory-records,
+  .intel-memory-record-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .intel-memory-pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+/* --- History domain (Phase 13 Intel terminal core) ----------------------- */
+
+.intel-history-workspace {
+  display: grid;
+  gap: 12px;
+}
+
+.intel-history-catalogs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.intel-history-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.intel-history-input {
+  flex: 1 1 180px;
+  min-width: 140px;
+}
+
+.intel-history-meta {
+  font-size: 0.85em;
+  opacity: 0.8;
+  margin: 4px 0;
+}
+
+.intel-history-list {
+  list-style: none;
+  margin: 4px 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.intel-history-row-line,
+.intel-history-row--catalog {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.intel-history-row-type {
+  font-weight: 600;
+}
+
+.intel-history-row-time,
+.intel-history-row-detail {
+  font-size: 0.85em;
+  opacity: 0.8;
+  text-align: right;
+}
+
+.intel-history-raw {
+  margin-top: 2px;
+}
+
+.intel-history-raw-summary {
+  cursor: pointer;
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
+.intel-history-raw-json {
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.78em;
+  margin: 4px 0 0;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.intel-history-caveat {
+  font-size: 0.8em;
+  opacity: 0.7;
+  margin: 6px 0 0;
+}
+
+@media (max-width: 900px) {
+  .intel-history-catalogs {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Ships / Services domains (PB13-01 maturation) ----------------------- */
+
+.intel-ships-list,
+.intel-services-chips {
+  list-style: none;
+  margin: 6px 0;
+  padding: 0;
+}
+
+.intel-ships-list {
+  display: grid;
+  gap: 4px;
+}
+
+.intel-ships-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: baseline;
+}
+
+.intel-ships-name {
+  font-weight: 600;
+}
+
+.intel-ships-price {
+  font-size: 0.88em;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.intel-services-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.intel-services-chip {
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.8em;
+}
+
+.intel-services-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* --- Recorded event-type presets (PB13-02) -------------------------------- */
+
+.intel-history-presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.intel-history-presets-label {
+  font-size: 0.78em;
+  opacity: 0.7;
+}
+
+.intel-history-preset {
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  padding: 1px 10px;
+  font-size: 0.78em;
+  cursor: pointer;
+}
+
+.intel-history-preset:hover,
+.intel-history-preset:focus-visible {
+  border-color: var(--ocv-accent, #ffb24c);
+}
+
+/* LNA-001 session timeline — sittings the flight recorder witnessed. */
+.intel-session-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.intel-session-filter {
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  padding: 1px 10px;
+  font-size: 0.78em;
+  cursor: pointer;
+}
+
+.intel-session-filter:hover,
+.intel-session-filter:focus-visible {
+  border-color: var(--ocv-accent, #ffb24c);
+}
+
+.intel-session-filter.is-active {
+  border-color: var(--ocv-accent, #ffb24c);
+  background: color-mix(in srgb, var(--ocv-accent, #ffb24c) 16%, transparent);
+}
+
+.intel-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.intel-session-row {
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.18));
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.intel-session-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.intel-session-title {
+  font-weight: 600;
+}
+
+.intel-session-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.82em;
+}
+
+.intel-session-operations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.intel-session-open {
+  align-self: flex-start;
+}
+
+@media (forced-colors: active) {
+  .intel-session-row {
+    border-color: CanvasText;
+  }
+
+  .intel-session-filter.is-active {
+    border-color: Highlight;
+    background: Canvas;
+  }
+}
+
+/* LNA-004 system visit history — per-system provenance and dockings. */
+.intel-history-row-sources,
+.intel-history-row-stations {
+  display: block;
+  width: 100%;
+  font-size: 0.78em;
+  opacity: 0.75;
+}
+
+/* LNA-004 Commander-authored system notes. */
+.intel-system-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.intel-system-note-label {
+  font-size: 0.76em;
+  opacity: 0.7;
+  width: 100%;
+}
+
+.intel-system-note-input {
+  flex: 1 1 220px;
+  min-width: 0;
+  background: transparent;
+  color: inherit;
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  border-radius: 4px;
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 0.82em;
+  resize: vertical;
+}
+
+.intel-system-note-status {
+  font-size: 0.76em;
+  opacity: 0.75;
+}
+
+@media (forced-colors: active) {
+  .intel-system-note-input {
+    border-color: CanvasText;
+  }
+}
+
+/* LNA-006 knowledge graph connections panel. */
+.intel-connections-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.intel-connections-title {
+  margin: 0 0 4px;
+  font-size: 0.92em;
+}
+
+.intel-connections-note {
+  font-size: 0.82em;
+  margin: 4px 0;
+}
+
+.intel-connections-proof {
+  font-size: 0.8em;
+  margin-top: 6px;
+}
+
+.intel-connections-btn {
+  margin-right: 6px;
+}
+
+/* ── Exploration domain (Phase 13, LNA-034/035) ─────────────────────────
+   The whole point of these surfaces is that observed fact and reference
+   estimate are different things. Saying so in the copy is not enough if
+   they render identically — the distinction has to survive a glance. Rows
+   stack so a body name never runs into its own signal count. */
+.intel-exploration-list,
+.intel-biology-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.intel-exploration-row,
+.intel-biology-row {
+  border-left: 2px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  display: grid;
+  gap: 2px;
+  padding-left: 10px;
+}
+
+.intel-exploration-system,
+.intel-biology-body {
+  font-weight: 600;
+}
+
+/* Coverage and signal counts are observed facts and read at full strength. */
+.intel-exploration-coverage,
+.intel-biology-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.intel-exploration-facts,
+.intel-exploration-time,
+.intel-biology-progress {
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+/* Journal-reported genera are fact; candidates are not. The candidate line
+   is deliberately quieter and italic so it can never be mistaken for the
+   reported line directly above it in another row. */
+.intel-biology-observed {
+  font-size: 0.9em;
+}
+
+.intel-biology-candidates {
+  font-size: 0.9em;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* Commander-relevant flags derived from their own record. */
+.intel-exploration-untouched,
+.intel-biology-unlogged {
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+@media (forced-colors: active) {
+  .intel-exploration-row,
+  .intel-biology-row {
+    border-left-color: CanvasText;
+  }
+
+  /* Italic and opacity do not survive forced colours; keep the estimate
+     distinguishable by a mark that does. */
+  .intel-biology-candidates {
+    opacity: 1;
+  }
+
+  .intel-biology-candidates::before {
+    content: "~ ";
+  }
+}
+
+/* -- Reference domain (PB13-02) ------------------------------------------
+   A reference card without a version is a claim without a date, so the
+   citation line is part of the entry, not a footnote. Withheld entries keep
+   their topic visible and lose only their body: the gap stays honest, and
+   unreviewed material stays off a surface that would otherwise read as
+   settled. */
+.intel-reference-category {
+  border-top: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  margin-top: 10px;
+  padding-top: 8px;
+}
+
+.intel-reference-category-summary {
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.intel-reference-category-label {
+  font-weight: 600;
+}
+
+.intel-reference-category-count {
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.intel-reference-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.intel-reference-entry {
+  border-left: 2px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  display: grid;
+  gap: 2px;
+  padding-left: 10px;
+}
+
+.intel-reference-topic {
+  font-weight: 600;
+}
+
+.intel-reference-content {
+  font-size: 0.9em;
+}
+
+/* Provenance reads quieter than content but never disappears. */
+.intel-reference-cite {
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
+/* A withheld entry must not be mistakable for an available one at a glance. */
+.intel-reference-entry--withheld {
+  border-left-style: dashed;
+}
+
+.intel-reference-entry--withheld .intel-reference-topic {
+  opacity: 0.8;
+}
+
+.intel-reference-status {
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.intel-reference-withheld-reason,
+.intel-reference-withheld-note {
+  font-size: 0.85em;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* -- Campaign domain (PB13-03, LNA-039) ----------------------------------
+   Evidence counts and the caveat that qualifies them travel together. The
+   match note sits directly under the numbers rather than at the foot of the
+   card, because a reader who meets the caveat after the count has already
+   drawn the conclusion it was meant to prevent. */
+.intel-campaign-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.intel-campaign-row {
+  border-left: 2px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  display: grid;
+  gap: 2px;
+  padding-left: 10px;
+}
+
+.intel-campaign-title {
+  font-weight: 600;
+}
+
+.intel-campaign-meta {
+  font-size: 0.85em;
+  text-transform: capitalize;
+}
+
+.intel-campaign-age {
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+.intel-campaign-evidence {
+  font-variant-numeric: tabular-nums;
+}
+
+.intel-campaign-evidence-none,
+.intel-campaign-match-note {
+  font-size: 0.85em;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.intel-campaign-owner-note {
+  font-size: 0.85em;
+  margin-top: 10px;
+  opacity: 0.75;
+}
+
+@media (forced-colors: active) {
+  .intel-reference-entry,
+  .intel-campaign-row {
+    border-left-color: CanvasText;
+  }
+
+  /* Italic and opacity are both dropped under forced colours, so the
+     withheld and estimate qualifiers need a mark that survives. */
+  .intel-reference-withheld-reason,
+  .intel-reference-withheld-note,
+  .intel-campaign-evidence-none,
+  .intel-campaign-match-note {
+    opacity: 1;
+  }
+
+  .intel-reference-withheld-reason::before,
+  .intel-reference-withheld-note::before,
+  .intel-campaign-match-note::before {
+    content: "* ";
+  }
+}
+/* Prior activity is context, not credit. Distinct from the in-window count
+   it sits under, and never additive with it. */
+.intel-campaign-evidence-prior {
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+/* Workspace wrappers stack their cards, matching the History domain. */
+.intel-reference-workspace,
+.intel-campaign-workspace {
+  display: grid;
+  gap: 12px;
+}
+
+/* -- Source-class chips (PB13-02) ----------------------------------------
+   A known-facts result must identify where it came from. The chip sits
+   beside the card title so the class is read with the heading rather than
+   hunted for, and stays visually subordinate to it: provenance qualifies
+   the facts below, it is not the headline. The class meaning rides on
+   title= so the limit is one hover away without crowding the card. */
+.intel-card-heading {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.intel-source-class-chip {
+  border: 1px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  border-radius: 999px;
+  font-size: 0.72em;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+  padding: 1px 8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Classes that mean "no fact was supplied" must not read like ones that
+   did. They carry a dashed edge, which survives forced colours where
+   opacity does not. */
+.intel-source-class-chip[data-source-class="unknown"],
+.intel-source-class-chip[data-source-class="unsupported"],
+.intel-source-class-chip[data-source-class="disabled_provider"] {
+  border-style: dashed;
+}
+
+@media (forced-colors: active) {
+  .intel-source-class-chip {
+    border-color: CanvasText;
+    opacity: 1;
+  }
+}
+/* -- Exploration trips (LNA-034) -----------------------------------------
+   One row is one recorded session. Facts stack so a date never runs into a
+   scan count, and the sale line stays visually apart from the scan facts
+   because it describes money moved, not work done on this trip. */
+.intel-trips-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.intel-trip-row {
+  border-left: 2px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  display: grid;
+  gap: 2px;
+  padding-left: 10px;
+}
+
+.intel-trip-when {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.intel-trip-open {
+  font-size: 0.85em;
+  font-style: italic;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.intel-trip-facts {
+  font-variant-numeric: tabular-nums;
+}
+
+.intel-trip-travel {
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+/* Money moved, qualified in place. */
+.intel-trip-sold {
+  font-size: 0.9em;
+}
+
+/* The Commander's own words read differently from derived facts. */
+.intel-trip-note {
+  font-size: 0.85em;
+  font-style: italic;
+  padding-left: 8px;
+}
+
+.intel-trips-excluded {
+  font-size: 0.85em;
+  margin-top: 10px;
+  opacity: 0.75;
+}
+
+@media (forced-colors: active) {
+  .intel-trip-row {
+    border-left-color: CanvasText;
+  }
+
+  .intel-trip-open,
+  .intel-trip-note {
+    opacity: 1;
+  }
+
+  .intel-trip-note::before {
+    content: "\201C";
+  }
+}
+/* -- Data Sold rows ------------------------------------------------------
+   Missed when the rest of the exploration domain was styled: these three
+   spans had no rules at all, so a label ran straight into its own amount
+   ("Exploration data2,244,400 cr1 sale"). Label left, amount right, detail
+   beneath — the amount is the fact being read, so it leads visually. */
+.intel-earnings-row {
+  align-items: baseline;
+  border-left: 2px solid var(--ocv-border, rgba(255, 255, 255, 0.2));
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 12px;
+  margin-top: 8px;
+  padding-left: 10px;
+}
+
+.intel-earnings-label {
+  font-weight: 600;
+}
+
+.intel-earnings-value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.intel-earnings-detail {
+  font-size: 0.85em;
+  grid-column: 1 / -1;
+  opacity: 0.75;
+}
+
+@media (forced-colors: active) {
+  .intel-earnings-row {
+    border-left-color: CanvasText;
+  }
 }

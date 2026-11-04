@@ -1,0 +1,140 @@
+/* Galactic Expeditions (GKI-06), Navigation › Plan. The Atlas grammar: cyan marks
+   selection and progress, amber marks focus and links, muted blue-grey carries
+   provenance and caveats. Journal-confirmed, marked and uncertain states differ
+   by label and border, never by colour alone. */
+.expeditions { color: #d9e5f0; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.expeditions :is(button, input, select, textarea, summary, a):focus-visible,
+.expeditions [tabindex="-1"]:focus-visible { outline: 2px solid #ffb35a; outline-offset: 3px; }
+.expeditions h4, .expeditions h5, .expeditions h6 { margin: 0; color: #c3d4e3; }
+.expeditions h5 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+.expeditions h6 { font-size: 12px; font-weight: 600; margin: 12px 0 6px; }
+.expedition-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.expedition-muted, .expedition-meta { color: #a9bacb; font-size: 12px; line-height: 1.55; margin: 2px 0; }
+.expedition-meta { color: #8fa2b5; font-variant-numeric: tabular-nums; }
+.expedition-kicker { margin: 0; font-size: 11px; color: #a9bacb; letter-spacing: .06em; text-transform: uppercase; }
+.expedition-lead { margin: 0 0 12px; color: #c9d7e3; line-height: 1.6; max-width: 72ch; }
+.expedition-message { margin: 0; border-left: 3px solid #ffb35a; background: #1c1f24; padding: 8px 12px; font-size: 13px; }
+.expedition-note-line { margin: 6px 0; font-size: 12px; line-height: 1.5; color: #d6c8a3; border-left: 2px dashed #6b6146; padding-left: 8px; }
+.expedition-caveat { margin: 8px 0 0; font-size: 11px; color: #8fa2b5; line-height: 1.5; }
+.expedition-sources { margin: 6px 0 0; font-size: 11px; color: #8fa2b5; overflow-wrap: anywhere; }
+
+.expeditions-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.expeditions-title { margin: 0; font-size: 16px; font-weight: 500; color: #e1ebf4; margin-right: auto; }
+.expeditions-pick select, .expedition-field select, .expedition-field input, .expedition-field textarea, .expedition-copy-field {
+  box-sizing: border-box; min-height: 34px; border: 1px solid #44576a; border-radius: 4px; background: #111d2a;
+  color: #e1ebf4; padding: 6px 10px; font: inherit; font-size: 13px; max-width: 100%;
+}
+.expedition-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #a9bacb; margin: 6px 0; }
+.expedition-field textarea { resize: vertical; min-height: 52px; }
+
+.expedition-empty, .expedition-starts, .expedition-head, .expedition-next,
+.expedition-itinerary, .expedition-find, .expedition-story, .expedition-preflight,
+.expedition-storytelling, .expedition-recap, .expedition-moments, .expedition-unassigned {
+  border: 1px solid #2c3a49; border-radius: 6px; background: #0d1721; padding: 14px 16px; min-width: 0;
+}
+.expedition-empty-status { margin: 0 0 4px; font-size: 14px; color: #e1ebf4; }
+.expedition-unassigned { border-style: dashed; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.expedition-unassigned p { margin: 0; }
+.expedition-unassigned-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.expedition-start-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.expedition-start { border: 1px solid #344354; border-radius: 6px; background: #0f1a26; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.expedition-start-story { border-top: 1px solid #2c3a49; padding-top: 8px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.expedition-start-story:first-of-type { border-top: 0; padding-top: 0; }
+.expedition-start-name, .expedition-candidate-name { margin: 0; font-size: 13px; color: #e1ebf4; font-weight: 500; }
+
+.expedition { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.expedition-head { display: flex; flex-direction: column; gap: 6px; background: #0f1a26; border-color: #344354; }
+.expedition-name { font-size: 22px; font-weight: 500; color: #e1ebf4; }
+.expedition-rename { max-width: 420px; }
+.expedition-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 12px; color: #c3d4e3; }
+.expedition-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 6px; }
+.expedition-confirm { font-size: 12px; color: #ffcf8f; }
+.expedition-chip { font-size: 11px; border-radius: 3px; padding: 1px 7px; border: 1px solid #5c6f82; color: #c3d4e3; white-space: nowrap; }
+.expedition-chip--done { border-color: #7acada; color: #bfe9f1; }
+.expedition-chip--partial { border-style: dashed; border-color: #8fa2b5; }
+.expedition-chip--skipped { border-style: dotted; color: #a9bacb; }
+.expedition-chip--planned { color: #a9bacb; }
+
+.expedition-next { border-left: 3px solid #7acada; background: #142231; }
+.expedition-next-name { margin: 4px 0 0; font-size: 17px; color: #e1ebf4; }
+.expedition-next-why { margin: 4px 0; font-size: 13px; color: #c9d7e3; }
+.expedition-external { text-decoration: none; }
+
+.expedition-columns { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 14px; align-items: start; }
+.expedition-main, .expedition-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.expedition-stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.expedition-stop { border-left: 3px solid transparent; padding: 2px 0 4px 8px; }
+.expedition-stop.is-selected { border-left-color: #7acada; background: #12202e; }
+.expedition-stop[data-status="reached"], .expedition-stop[data-status="completed"] { border-left-color: #36687a; }
+.expedition-stop.is-selected[data-status] { border-left-color: #7acada; }
+.expedition-leg { margin: 0 0 2px 34px; font-size: 11px; color: #8fa2b5; }
+.expedition-stop-main { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%;
+  background: transparent; border: 0; color: inherit; font: inherit; text-align: left; padding: 6px 4px; cursor: pointer; min-height: 40px; }
+.expedition-stop-main:hover { background: #1a2a3a; }
+.expedition-stop-number { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #44576a; display: grid; place-items: center; font-size: 11px; color: #a9bacb; }
+.expedition-stop-text { display: flex; flex-direction: column; min-width: 0; }
+.expedition-stop-name { font-size: 14px; color: #e1ebf4; overflow-wrap: anywhere; }
+.expedition-purposes { margin: 0 0 0 34px; display: flex; flex-wrap: wrap; gap: 4px; }
+.expedition-purpose { font-size: 11px; color: #b5c5d4; border: 1px solid #344354; border-radius: 3px; padding: 1px 6px; }
+.expedition-stop-detail { margin: 8px 0 4px 34px; padding: 10px 12px; border: 1px solid #2c3a49; border-radius: 6px; background: #0f1a26; display: flex; flex-direction: column; gap: 6px; }
+.expedition-evidence { margin: 0; font-size: 13px; color: #c9d7e3; }
+.expedition-where { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 4px 0; font-size: 13px; }
+.expedition-where dt { color: #a9bacb; }
+.expedition-where dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.expedition-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.expedition-copy-field { width: min(260px, 100%); }
+.expedition-copied { font-size: 12px; color: #bfe9f1; }
+.expedition-relevance { border-left: 3px solid #5c6f82; background: #142231; padding: 8px 12px; font-size: 13px; line-height: 1.5; }
+.expedition-relevance p { margin: 0; }
+.expedition-tone-short { border-left-color: #ffb35a; }
+.expedition-tone-ready { border-left-color: #4fb38a; }
+.expedition-tone-unknown { border-left-color: #8495a8; border-left-style: dashed; }
+.expedition-requirements { list-style: none; margin: 4px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.expedition-requirement { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.45; border-left: 2px solid #5c6f82; padding-left: 8px; }
+.expedition-requirement--unknown { border-left-style: dashed; border-left-color: #d6c8a3; }
+.expedition-requirement-label { font-size: 11px; color: #d6c8a3; text-transform: uppercase; letter-spacing: .05em; }
+.expedition-orders { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+.expedition-order-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 4px 0; font-size: 13px; }
+
+.expedition-find-tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid #344354; margin-bottom: 10px; }
+.expedition-find-tab { background: transparent; color: #a9bacb; border: 0; border-bottom: 3px solid transparent; padding: 8px 10px; min-height: 36px; font: inherit; font-size: 12px; cursor: pointer; }
+.expedition-find-tab[aria-selected="true"] { color: #e1ebf4; border-bottom-color: #7acada; }
+.expedition-candidates, .expedition-conditions, .expedition-moment-list, .expedition-connections, .expedition-recap-list {
+  list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px;
+}
+.expedition-candidate { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; border-top: 1px solid #1f2c3a; padding-top: 8px; }
+.expedition-candidate:first-child { border-top: 0; padding-top: 0; }
+.expedition-candidate-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 240px; }
+.expedition-candidate-why { font-size: 12px; color: #c3d4e3; }
+.expedition-in { font-size: 12px; color: #bfe9f1; }
+.expedition-conditions li { display: flex; flex-direction: column; gap: 2px; }
+
+.expedition-drawer { border-top: 1px solid #1f2c3a; padding-top: 6px; }
+.expedition-drawer > summary { cursor: pointer; font-size: 12px; color: #ffcf8f; min-height: 28px; display: flex; align-items: center; }
+.expedition-passage { display: flex; flex-direction: column; gap: 4px; padding: 6px 0; }
+.expedition-passage-text { margin: 0; line-height: 1.65; font-size: 13px; color: #d9e5f0; max-width: 70ch; }
+.expedition-chapters { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.expedition-chapter { border-left: 2px solid #344354; padding-left: 10px; }
+.expedition-chapter-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; justify-content: space-between; }
+.expedition-chapter-title { font-size: 14px; color: #e1ebf4; }
+.expedition-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+.expedition-teaser { margin: 2px 0; font-size: 13px; color: #c9d7e3; font-style: italic; }
+.expedition-discoveries, .expedition-conclusion { margin-top: 10px; }
+.expedition-discovery { border-left: 2px dashed #44576a; padding-left: 10px; margin-top: 6px; }
+.expedition-connections li { display: flex; flex-direction: column; gap: 1px; font-size: 13px; }
+.expedition-moments { border-left: 3px solid #ffb35a; }
+.expedition-moment { border-top: 1px solid #1f2c3a; padding-top: 8px; }
+.expedition-moment:first-child { border-top: 0; padding-top: 0; }
+
+@media (max-width: 1100px) {
+  .expedition-columns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .expedition-name { font-size: 19px; }
+  .expedition-stop-detail, .expedition-purposes, .expedition-leg { margin-left: 0; }
+  .expedition-empty, .expedition-starts, .expedition-head, .expedition-next,
+  .expedition-itinerary, .expedition-find, .expedition-story, .expedition-preflight,
+  .expedition-storytelling, .expedition-recap, .expedition-moments { padding: 12px; }
+}

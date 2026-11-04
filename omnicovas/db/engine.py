@@ -19,6 +19,8 @@ import logging
 import os
 from pathlib import Path
 
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -33,6 +35,39 @@ logger = logging.getLogger(__name__)
 # Database lives in AppData so it is per-user and survives app upgrades
 APPDATA_DIR = Path(os.path.expandvars(r"%APPDATA%\OmniCOVAS"))
 SESSION_DB_PATH = APPDATA_DIR / "omnicovas_session.db"
+
+
+def _reconcile_additive_schema(connection: Connection) -> None:
+    """Apply safe additive fixes needed by databases created before Alembic.
+
+    Early OmniCOVAS releases initialized the Commander-owned database with
+    ``metadata.create_all()``.  That creates new tables but cannot add columns
+    to an existing table, so a long-lived database can otherwise start against
+    a newer model and fail at query time.  Keep this compatibility bridge
+    deliberately narrow and additive; versioned installs still use Alembic.
+    """
+
+    tables = set(inspect(connection).get_table_names())
+    if "operations_objectives" not in tables:
+        return
+
+    columns = {
+        column["name"]
+        for column in inspect(connection).get_columns("operations_objectives")
+    }
+    additions = {
+        "target_commodity": "VARCHAR(64)",
+        "target_quantity": "INTEGER",
+    }
+    for name, sql_type in additions.items():
+        if name not in columns:
+            logger.info(
+                "Adding missing operations_objectives.%s compatibility column",
+                name,
+            )
+            connection.execute(
+                text(f"ALTER TABLE operations_objectives ADD COLUMN {name} {sql_type}")
+            )
 
 
 def build_database_url(db_path: Path) -> str:
@@ -69,6 +104,7 @@ async def init_database(db_path: Path | None = None) -> AsyncEngine:
     # Create tables if they don't exist
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_reconcile_additive_schema)
 
     logger.info("Session database ready.")
     return engine

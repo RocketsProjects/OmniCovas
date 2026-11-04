@@ -1,0 +1,56 @@
+/* Material acquisition intelligence (GKI-05), inside the Materials workspace.
+   Same grammar as Materials: cyan marks the recommendation, amber marks focus and
+   actions, muted blue-grey carries provenance. Disputed sources use a dashed
+   border, never colour alone. */
+.mi-activities, .mi-strategy, .mi-guide { color: #d9e5f0; min-width: 0; }
+.mi-activities { border: 1px solid #344354; border-radius: 6px; background: #0f1a26; padding: 12px 14px; margin: 4px 0 12px; }
+.mi-activities-title { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #c3d4e3; }
+.mi-activity-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: mi; }
+.mi-activity { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 6px 0; border-top: 1px solid #25323f; }
+.mi-activity:first-child { border-top: 0; }
+.mi-activity p { flex-basis: 100%; margin: 0; }
+.mi-activity-name { color: #e1ebf4; font-size: 13px; }
+.mi-activity-count { font-size: 11px; color: #7acada; }
+.mi-activity-materials { font-size: 12px; color: #c3d4e3; }
+.mi-link { background: transparent; border: 0; padding: 0; color: #ffcf8f; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.mi-muted { margin: 4px 0 0; font-size: 12px; color: #a9bacb; }
+.mi-ranking { font-style: italic; }
+
+.mi-strategy, .mi-guide { border-top: 1px solid #344354; margin-top: 12px; padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.mi-strategy h4, .mi-guide h4 { margin: 0; font-size: 14px; color: #c3d4e3; }
+.mi-strategy h5 { margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #c3d4e3; text-transform: uppercase; letter-spacing: .05em; }
+.mi-verdict { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; border-left: 3px solid #7acada; background: #142231; padding: 8px 12px; }
+.mi-verdict strong { font-size: 15px; color: #e1ebf4; }
+.mi-verdict--unknown { border-left-color: #8ea4b8; }
+.mi-verdict-short { font-size: 12px; color: #a9bacb; }
+.mi-reasons { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: #c9d7e3; }
+.mi-collect { border: 1px solid #2b3948; border-radius: 6px; background: #0d1721; padding: 10px 12px; }
+.mi-method { border-top: 1px solid #25323f; padding: 6px 0; }
+.mi-method:first-of-type { border-top: 0; }
+.mi-method-summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 13px; color: #e1ebf4; }
+.mi-method p { margin: 6px 0 0; font-size: 12px; line-height: 1.5; }
+.mi-method-lead { color: #c9d7e3; }
+.mi-method-note { color: #e1ebf4; }
+.mi-method-here { border-left: 2px solid #5c6f82; padding-left: 8px; color: #c3d4e3; }
+.mi-here--possible { border-left-color: #7acada; color: #9fd7e3; }
+.mi-here--uncertain { border-left-style: dashed; border-left-color: #d6c8a3; color: #d6c8a3; }
+.mi-method-serves { color: #9fd7e3; }
+.mi-method-equipment { color: #c3d4e3; }
+.mi-steps, .mi-claims { margin: 6px 0 0; padding-left: 18px; font-size: 12px; line-height: 1.5; color: #c9d7e3; }
+.mi-claims { color: #a9bacb; }
+.mi-places { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mi-place { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12px; }
+.mi-place-name { color: #e1ebf4; }
+.mi-tag { font-size: 10px; border: 1px solid #5c6f82; border-radius: 3px; padding: 0 6px; color: #b5c5d4; }
+.mi-tag--serves { border-color: #7acada; color: #9fd7e3; }
+.mi-tag--disputed { border-style: dashed; border-color: #d6c8a3; color: #d6c8a3; }
+.mi-action { min-height: 28px; border-radius: 4px; border: 1px solid #a9791f; background: transparent; color: #ffcf8f; font: inherit; font-size: 12px; padding: 2px 10px; cursor: pointer; }
+.mi-action--quiet { border-color: #44576a; color: #c3d4e3; }
+.mi-provenance { color: #8fa2b5; font-size: 11px; }
+.mi-activities :is(button, summary):focus-visible, .mi-strategy :is(button, summary):focus-visible, .mi-guide :is(button, summary):focus-visible { outline: 2px solid #ffb35a; outline-offset: 2px; }
+.materials-how-to-get { margin-top: 8px; }
+/* Narrow windows show the list or one material's detail; the activity summary
+   belongs to the list, like the queue's other summaries. */
+@media (max-width: 760px) {
+  .materials-acquisition[data-view=detail] .mi-activities { display: none; }
+}

@@ -97,7 +97,7 @@
   content: "+";
   display: inline-block;
   width: 1rem;
-  color: var(--color-accent, currentColor);
+  color: var(--color-fg-muted, currentColor);
 }
 
 .squadrons-future-roadmap[open] .squadrons-future-summary::before {

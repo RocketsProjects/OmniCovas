@@ -1,0 +1,215 @@
+/* OmniCOVAS accessibility — contrast accommodations.
+ *
+ * Phase 10 reconciliation gate (PB10-R7).
+ *
+ * Roadmap v1.0 §11.3.E requires colour/contrast hardening. The UI shipped with
+ * `prefers-reduced-motion` support but no `forced-colors` or `prefers-contrast`
+ * handling at all — a real exclusion on a Windows-only product, where Windows
+ * High Contrast is the primary OS-level accommodation.
+ *
+ * Loaded LAST so these overrides win over route stylesheets without needing
+ * `!important` on ordinary properties.
+ *
+ * Principle: state is never conveyed by colour alone. The cockpit palette uses
+ * colour as reinforcement; every state that matters also carries text (LIVE /
+ * LAST KNOWN / NOT LOADED / DISABLED / LOCKED) or a shape. These blocks make
+ * the structure survive when the palette is replaced by the OS or flattened by
+ * a high-contrast preference.
+ */
+
+/* ---------------------------------------------------------------------------
+   Windows High Contrast / forced-colors
+   --------------------------------------------------------------------------- */
+
+@media (forced-colors: active) {
+  /* Let the OS drive colour. Backgrounds painted with rgba() and gradients are
+     otherwise preserved by the forced-colors engine and can swallow text. */
+  :root {
+    --color-bg: Canvas;
+    --color-bg-gradient: none;
+    --color-bg-panel: Canvas;
+    --color-surface: Canvas;
+    --color-surface-hover: Highlight;
+    --color-border: CanvasText;
+    --color-border-active: Highlight;
+    --color-border-subtle: CanvasText;
+    --color-backdrop: Canvas;
+    --color-fg: CanvasText;
+    --color-fg-muted: CanvasText;
+    --color-fg-unknown: GrayText;
+
+    --uiv3-bg: Canvas;
+    --uiv3-surface: Canvas;
+    --uiv3-border: CanvasText;
+    --uiv3-text-primary: CanvasText;
+    --uiv3-text-dim: CanvasText;
+    --uiv3-accent: Highlight;
+    --uiv3-accent-ok: CanvasText;
+    --uiv3-accent-warn: CanvasText;
+  }
+
+  body,
+  .uiv3-cockpit-frame {
+    background: Canvas;
+    background-image: none;
+    color: CanvasText;
+  }
+
+  /* Decorative gradients and glows must not paint over OS colours. */
+  .uiv3-corner-frame,
+  .uiv3-corner-frame-inner,
+  .dashboard-uiv3-card,
+  .support-card,
+  .ocv-page,
+  .view {
+    background-image: none;
+    box-shadow: none;
+  }
+
+  /* Panels need a real border once translucent fills are dropped, otherwise
+     card boundaries disappear entirely in High Contrast. */
+  .dashboard-uiv3-card,
+  .dashboard-uiv3-location,
+  .support-card,
+  .intel-domain-panel,
+  .uiv3-corner-frame {
+    border: 1px solid CanvasText;
+  }
+
+  /* Interactive controls must remain visibly interactive. */
+  .cmd-btn,
+  .ocv-btn,
+  button,
+  .uiv3-tab,
+  .intel-domain-tab,
+  .search-panel-mode {
+    border: 1px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    forced-color-adjust: none;
+  }
+
+  .cmd-btn:hover,
+  .ocv-btn:hover,
+  button:hover,
+  .uiv3-tab:hover,
+  .intel-domain-tab:hover,
+  .search-panel-mode:hover {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* Selected tab state is otherwise carried by an accent underline that the
+     forced palette flattens away. */
+  .uiv3-tab[aria-current="page"],
+  .uiv3-tab.is-active,
+  .intel-domain-tab[aria-selected="true"],
+  .search-panel-mode[aria-selected="true"],
+  .search-panel-mode.is-active {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+
+  /* Disabled controls must stay distinguishable from merely unselected ones. */
+  [aria-disabled="true"],
+  button:disabled,
+  .cmd-btn:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+
+  /* Focus is the single most important indicator to preserve. */
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  /* Status dots carry meaning; give them an outline so they survive as shapes
+     rather than vanishing into the background. */
+  .ocv-status-dot,
+  .uiv3-status-dot,
+  [class*="status-dot"] {
+    border: 1px solid CanvasText;
+    forced-color-adjust: none;
+  }
+
+  /* Freshness/posture pills read as text plus a border, never colour alone. */
+  .dashboard-uiv3-location-pill,
+  [class*="-pill"],
+  [class*="-chip"],
+  [class*="-badge"] {
+    border: 1px solid CanvasText;
+    color: CanvasText;
+    background: Canvas;
+  }
+
+  /* The boot curtain and modal backdrops must not obscure content when the OS
+     palette replaces their translucency. */
+  .uiv3-boot-curtain,
+  .modal-backdrop,
+  .ocv-modal-backdrop {
+    background: Canvas;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   prefers-contrast: more
+   --------------------------------------------------------------------------- */
+
+@media (prefers-contrast: more) {
+  :root {
+    /* Raise dim text to full foreground: the muted tone is the main
+       readability complaint against the cockpit palette. */
+    --color-fg: #ffffff;
+    --color-fg-muted: #d7d7e4;
+    --color-fg-unknown: #b6b6c8;
+    --color-border: rgba(255, 255, 255, 0.55);
+    --color-border-subtle: rgba(255, 255, 255, 0.32);
+
+    --uiv3-text-primary: #ffffff;
+    --uiv3-text-dim: #d7d7e4;
+    --uiv3-border: rgba(255, 255, 255, 0.55);
+  }
+
+  .dashboard-uiv3-card,
+  .dashboard-uiv3-location,
+  .support-card,
+  .intel-domain-panel {
+    border-width: 2px;
+  }
+
+  :focus-visible {
+    outline-width: 3px;
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   prefers-contrast: less
+   --------------------------------------------------------------------------- */
+
+@media (prefers-contrast: less) {
+  :root {
+    --color-border: rgba(140, 160, 180, 0.12);
+    --uiv3-border: rgba(140, 160, 180, 0.12);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Focus visibility floor
+   ---------------------------------------------------------------------------
+   Applies in every mode. Keyboard-only operation is a Phase 10 acceptance
+   criterion, and a focus ring that is merely a colour shift fails under
+   greyscale, colour-vision deficiency, and forced-colors alike.
+   --------------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--uiv3-accent, var(--color-border-active, #ff8800));
+  outline-offset: 2px;
+}
+
+/* Never remove the ring without replacing it. */
+:focus:not(:focus-visible) {
+  outline: none;
+}

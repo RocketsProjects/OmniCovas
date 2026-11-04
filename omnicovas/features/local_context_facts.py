@@ -42,6 +42,7 @@ from omnicovas.core.state_manager import (
     StateManager,
     TelemetrySource,
 )
+from omnicovas.features import odyssey_inventory
 from omnicovas.features.rebuy import calculate_rebuy
 from omnicovas.knowledge_base import load_knowledge_base
 
@@ -71,6 +72,9 @@ MODULES_INFO_FILE = "ModulesInfo.json"
 OUTFITTING_FILE = "Outfitting.json"
 SHIPYARD_FILE = "Shipyard.json"
 STATUS_FILE = "Status.json"
+BACKPACK_FILE = "Backpack.json"
+SHIP_LOCKER_FILE = "ShipLocker.json"
+FC_MATERIALS_FILE = "FCMaterials.json"
 
 NO_LOCAL_STATION_CONTEXT = "No local station context observed yet"
 NO_LOCAL_SYSTEM_CONTEXT = "No local system context observed yet"
@@ -78,6 +82,9 @@ NO_LOCAL_STATION_SERVICES = "No local station services observed yet"
 NO_LOCAL_MARKET_SNAPSHOT = "No local snapshot for this station"
 NO_LOCAL_OUTFITTING_SNAPSHOT = "No verified local outfitting snapshot"
 NO_LOCAL_SHIPYARD_SNAPSHOT = "No verified local shipyard snapshot"
+NO_LOCAL_BACKPACK_SNAPSHOT = "No verified local backpack snapshot"
+NO_LOCAL_SHIP_LOCKER_SNAPSHOT = "No verified local ship locker snapshot"
+NO_LOCAL_FC_MATERIALS_SNAPSHOT = "No verified local FC materials snapshot"
 NO_LOCAL_CARGO_SNAPSHOT = "No local cargo snapshot observed yet"
 NO_LOCAL_MODULE_LOADOUT = "No local module loadout observed yet"
 NO_VERIFIED_SOURCE = "No Verified Source"
@@ -88,6 +95,12 @@ DISABLED = "Disabled"
 KNOWLEDGE_REFERENCE = "knowledge_reference"
 
 _PHASE9_HISTORY_LIMIT = 8
+_PHASE9_BGS_KB_CACHE: dict[str, Any] = {
+    "initialized": False,
+    "fingerprint": None,
+    "entry": None,
+    "degraded": False,
+}
 _BGS_REDEEM_TYPES = frozenset({"bounty", "CombatBond"})
 _POWERPLAY_MERIT_FIELDS = frozenset({"Merits", "Merit", "MeritValue"})
 _POWERPLAY_OBSERVED_FIELD_ALLOWLIST = frozenset(
@@ -240,8 +253,11 @@ def build_cargo_hold_snapshot(
     cargo_inventory dict cannot carry. SRV / Suit vessels yield an empty
     snapshot (filter applied by the caller).
     """
+    inventory_raw = event.get("Inventory")
+    inventory_supplied = isinstance(inventory_raw, list)
+    inventory_entries = inventory_raw if isinstance(inventory_raw, list) else []
     inventory: list[CargoItem] = []
-    for entry in event.get("Inventory") or []:
+    for entry in inventory_entries:
         if not isinstance(entry, dict):
             continue
         name = entry.get("Name")
@@ -261,10 +277,17 @@ def build_cargo_hold_snapshot(
                 mission_id=_int_or_none(entry.get("MissionID")),
             )
         )
+    total_count = _int_or_none(event.get("Count"))
+    if total_count is None and inventory_supplied:
+        total_count = sum(item.count for item in inventory)
+    inventory_complete = inventory_supplied or total_count == 0
+
     return CargoHoldSnapshot(
         vessel=_string_or_none(event.get("Vessel")) or "Ship",
         capacity=capacity,
         inventory=inventory,
+        total_count=total_count,
+        inventory_complete=inventory_complete,
         source=JOURNAL_SOURCE,
         source_event=source_event,
         event_timestamp=_string_or_none(event.get("timestamp")),
@@ -485,6 +508,9 @@ def local_context_snapshot_payload(
     modules_info_path: Path | None = None,
     journal_dir_path: Path | None = None,
     status_path: Path | None = None,
+    backpack_path: Path | None = None,
+    ship_locker_path: Path | None = None,
+    fc_materials_path: Path | None = None,
 ) -> dict[str, Any]:
     """Compose the top-level Local Context snapshot payload.
 
@@ -505,6 +531,9 @@ def local_context_snapshot_payload(
         shipyard_path=shipyard_path,
         cargo_path=cargo_path,
         modules_info_path=modules_info_path,
+        backpack_path=backpack_path,
+        ship_locker_path=ship_locker_path,
+        fc_materials_path=fc_materials_path,
     )
     session_payload = session_activity_payload(state, hydration)
     market_payload = market_snapshot_payload(state, market_path=market_path)
@@ -527,6 +556,15 @@ def local_context_snapshot_payload(
         "module_loadout": module_loadout_payload(
             state, modules_info_path=modules_info_path
         ),
+        "backpack_snapshot": backpack_snapshot_payload(
+            state, backpack_path=backpack_path
+        ),
+        "ship_locker_snapshot": ship_locker_snapshot_payload(
+            state, ship_locker_path=ship_locker_path
+        ),
+        "fc_materials_snapshot": fc_materials_snapshot_payload(
+            state, fc_materials_path=fc_materials_path
+        ),
         "wallet_snapshot": wallet_snapshot_payload(state),
         "missing_sources": _missing_sources(
             state,
@@ -534,6 +572,9 @@ def local_context_snapshot_payload(
             outfitting_path=outfitting_path,
             shipyard_path=shipyard_path,
             cargo_path=cargo_path,
+            backpack_path=backpack_path,
+            ship_locker_path=ship_locker_path,
+            fc_materials_path=fc_materials_path,
         ),
         "nullprovider_safe": True,
     }
@@ -684,6 +725,21 @@ def session_activity_payload(
         truth_class = TRUTH_UNKNOWN
         caveat = "Local files were present but no usable activity signal was derived."
         fallback = NO_VERIFIED_SOURCE
+    elif getattr(hydration, "journal_dir_present", None) is False:
+        # An absent Elite directory is not a session that has yet to start.
+        # Waiting for it is futile: nothing will ever be written to a path
+        # that does not exist. Reporting this as "waiting" told the Commander
+        # to wait for data that could never arrive.
+        elite_session_state = "no_local_path"
+        source = "unavailable"
+        freshness = NOT_LOADED
+        truth_class = TRUTH_UNKNOWN
+        caveat = (
+            "The Elite Dangerous folder OmniCOVAS reads was not found. No local "
+            "Journal or companion data can be read until it exists. Open "
+            "Settings / Sources diagnostics to review the local source path."
+        )
+        fallback = NO_VERIFIED_SOURCE
     else:
         elite_session_state = "waiting"
         source = "unavailable"
@@ -710,8 +766,22 @@ def session_activity_payload(
         "last_journal_file": hydration.last_journal_file,
         "last_game_activity_at": last_game_activity_at,
         "journal_files_scanned": list(hydration.journal_files_scanned),
+        # Startup exit criterion 3 (Phase 11 Dev Guide §C): local source path
+        # posture. A class, not a path — the startup proof channel excludes
+        # file paths.
+        "local_path_posture": _local_path_posture(
+            getattr(hydration, "journal_dir_present", None)
+        ),
         "nullprovider_safe": True,
     }
+
+
+def _local_path_posture(present: bool | None) -> str:
+    if present is True:
+        return "present"
+    if present is False:
+        return "missing"
+    return "unknown"
 
 
 def wallet_snapshot_payload(state: StateManager | None) -> dict[str, Any]:
@@ -778,10 +848,66 @@ def wallet_snapshot_payload(state: StateManager | None) -> dict[str, Any]:
         "carrier_balance": carrier_balance,
     }
     unavailable = [name for name, payload in fields.items() if payload["value"] is None]
+    observations = snap.balance_observations if snap is not None else []
     return {
         **fields,
+        "balance_history": [
+            {
+                "value": obs.value,
+                "source": _balance_observation_source_label(obs.source),
+                "timestamp": obs.timestamp,
+            }
+            for obs in observations
+        ],
+        "observed_session_change": _observed_session_change_payload(observations),
         "missing_sources": unavailable.copy(),
         "unavailable_fields": unavailable,
+        "nullprovider_safe": True,
+    }
+
+
+def _balance_observation_source_label(source_name: str) -> str:
+    if source_name == "STATUS_JSON":
+        return STATUS_FILE
+    if source_name == "JOURNAL":
+        return JOURNAL_SOURCE
+    return source_name.lower() if source_name else "unknown"
+
+
+def _observed_session_change_payload(observations: list[Any]) -> dict[str, Any]:
+    """FU-014: arithmetic over source-backed balance observations.
+
+    This is observed-balance-change evidence only — explicitly not a
+    transaction record (money-event field shapes are not repo-verified).
+    """
+    if len(observations) < 2:
+        return {
+            "value": None,
+            "from_value": None,
+            "to_value": None,
+            "first_observed_at": None,
+            "last_observed_at": None,
+            "caveat": (
+                "Fewer than two source-backed balance observations this app "
+                "session; no observed change can be computed."
+            ),
+            "fallback": UNKNOWN,
+            "nullprovider_safe": True,
+        }
+    first = observations[0]
+    last = observations[-1]
+    return {
+        "value": last.value - first.value,
+        "from_value": first.value,
+        "to_value": last.value,
+        "first_observed_at": first.timestamp,
+        "last_observed_at": last.timestamp,
+        "caveat": (
+            "Observed balance change between the first and latest "
+            "source-backed balance observations this app session. "
+            "Arithmetic over observations only — not a transaction record."
+        ),
+        "fallback": None,
         "nullprovider_safe": True,
     }
 
@@ -1162,6 +1288,338 @@ def shipyard_snapshot_payload(
     }
 
 
+def backpack_snapshot_payload(
+    state: StateManager | None,
+    *,
+    backpack_path: Path | None = None,
+) -> dict[str, Any]:
+    """Local Backpack.json (Odyssey) on-foot inventory snapshot.
+
+    Write-triggered local screen snapshot only — not continuous live
+    inventory, not provider-backed. Per Local Data Surface Reference v1.0
+    the file carries the Items / Components / Consumables / Data list
+    containers; per-entry fields are preserved verbatim from the local file
+    without asserting Frontier field semantics beyond the registry.
+    """
+    raw, read_status, _snapshot_path = _read_companion_json_with_status(
+        BACKPACK_FILE, backpack_path
+    )
+    if raw is None:
+        return _not_loaded_odyssey_inventory_payload(
+            read_status,
+            source_file=BACKPACK_FILE,
+            storage_location=odyssey_inventory.STORAGE_BACKPACK,
+            fallback=NO_LOCAL_BACKPACK_SNAPSHOT,
+            subject="on-foot inventory",
+        )
+    return _odyssey_inventory_payload(
+        raw,
+        source_file=BACKPACK_FILE,
+        storage_location=odyssey_inventory.STORAGE_BACKPACK,
+        caveat_lead=(
+            "Odyssey on-foot inventory (commander-observed) from local "
+            "Backpack.json; a write-triggered local snapshot, not continuous "
+            "live inventory and not provider-backed."
+        ),
+    )
+
+
+def ship_locker_snapshot_payload(
+    state: StateManager | None,
+    *,
+    ship_locker_path: Path | None = None,
+) -> dict[str, Any]:
+    """Local ShipLocker.json (Odyssey) ship locker inventory snapshot.
+
+    Write-triggered local screen snapshot only — not continuous live
+    inventory, not provider-backed. Same Items / Components / Consumables /
+    Data container shape as Backpack.json per Local Data Surface Reference.
+    """
+    raw, read_status, _snapshot_path = _read_companion_json_with_status(
+        SHIP_LOCKER_FILE, ship_locker_path
+    )
+    if raw is None:
+        return _not_loaded_odyssey_inventory_payload(
+            read_status,
+            source_file=SHIP_LOCKER_FILE,
+            storage_location=odyssey_inventory.STORAGE_SHIP_LOCKER,
+            fallback=NO_LOCAL_SHIP_LOCKER_SNAPSHOT,
+            subject="ship locker inventory",
+        )
+    return _odyssey_inventory_payload(
+        raw,
+        source_file=SHIP_LOCKER_FILE,
+        storage_location=odyssey_inventory.STORAGE_SHIP_LOCKER,
+        caveat_lead=(
+            "Odyssey ship locker inventory (commander-observed) from local "
+            "ShipLocker.json; a write-triggered local snapshot, not "
+            "continuous live inventory and not provider-backed."
+        ),
+    )
+
+
+def fc_materials_snapshot_payload(
+    state: StateManager | None,
+    *,
+    fc_materials_path: Path | None = None,
+) -> dict[str, Any]:
+    """Local FCMaterials.json fleet-carrier materials trader snapshot.
+
+    Reflects the last time the carrier Materials Trader screen was opened.
+    Not live, not global availability, not provider-backed. Per Local Data
+    Surface Reference v1.0 the file carries MarketID, CarrierName, and
+    Items[]; per-entry fields are preserved verbatim from the local file.
+    """
+    raw, read_status, _snapshot_path = _read_companion_json_with_status(
+        FC_MATERIALS_FILE, fc_materials_path
+    )
+    if raw is None:
+        caveat_map = {
+            "malformed": (
+                "FCMaterials.json could not be parsed as a valid local "
+                "snapshot. Malformed companion files are not proof of "
+                "materials absence."
+            ),
+            "unreadable": (
+                "FCMaterials.json could not be read. Unreadable companion "
+                "files are not proof of materials absence."
+            ),
+        }
+        caveat = caveat_map.get(
+            read_status,
+            (
+                "No verified local FC materials snapshot has been loaded. "
+                "Missing companion files are not proof of materials absence."
+            ),
+        )
+        return {
+            "source": FC_MATERIALS_FILE,
+            "source_event": None,
+            "source_file": FC_MATERIALS_FILE,
+            "event_timestamp": None,
+            "observed_at": None,
+            "freshness": NOT_LOADED,
+            "status": NOT_LOADED,
+            "truth_class": TRUTH_UNKNOWN,
+            "caveat": caveat,
+            "fallback": NO_LOCAL_FC_MATERIALS_SNAPSHOT,
+            "market_id": None,
+            "carrier_name": None,
+            "item_count": None,
+            "items": None,
+            "nullprovider_safe": True,
+        }
+
+    caveat_parts = [
+        (
+            "Known FC materials snapshot from local FCMaterials.json; "
+            "reflects the last opened carrier Materials Trader screen, "
+            "not live or global availability, and not provider-backed."
+        )
+    ]
+    status = "loaded"
+    items_raw = raw.get("Items")
+    if isinstance(items_raw, list):
+        items = [deepcopy(entry) for entry in items_raw if isinstance(entry, dict)]
+        item_count: int | None = len(items)
+    else:
+        items = None
+        item_count = None
+        if "Items" not in raw:
+            caveat_parts.append(
+                "Items field is missing; material rows were not loaded from this file."
+            )
+        else:
+            caveat_parts.append(
+                "Items field is not a list; material rows were not loaded "
+                "from this file."
+            )
+        status = "items_not_loaded"
+
+    return {
+        "source": FC_MATERIALS_FILE,
+        "source_event": _string_or_none(raw.get("event")),
+        "source_file": FC_MATERIALS_FILE,
+        "event_timestamp": _string_or_none(raw.get("timestamp")),
+        "observed_at": _string_or_none(raw.get("timestamp")),
+        "freshness": FRESH,
+        "status": status,
+        "truth_class": TRUTH_LOCAL_SCREEN_SNAPSHOT,
+        "caveat": " ".join(caveat_parts),
+        "fallback": None,
+        "market_id": raw.get("MarketID"),
+        "carrier_name": _string_or_none(raw.get("CarrierName")),
+        "item_count": item_count,
+        "items": items,
+        "nullprovider_safe": True,
+    }
+
+
+_ODYSSEY_INVENTORY_CATEGORIES = ("Items", "Components", "Consumables", "Data")
+
+
+def _odyssey_inventory_payload(
+    raw: dict[str, Any],
+    *,
+    source_file: str,
+    storage_location: str,
+    caveat_lead: str,
+) -> dict[str, Any]:
+    """Shared loaded-payload shape for Backpack.json / ShipLocker.json.
+
+    The raw containers and the legacy ``*_count`` fields (entry counts, not
+    quantities) are unchanged.  ``materials`` / ``categories`` carry the
+    normalized quantities from :mod:`omnicovas.features.odyssey_inventory`.
+    """
+    caveat_parts = [caveat_lead]
+    status = "loaded"
+    categories: dict[str, list[dict[str, Any]] | None] = {}
+    counts: dict[str, int | None] = {}
+    for category in _ODYSSEY_INVENTORY_CATEGORIES:
+        key = category.lower()
+        entries_raw = raw.get(category)
+        if isinstance(entries_raw, list):
+            entries = [
+                deepcopy(entry) for entry in entries_raw if isinstance(entry, dict)
+            ]
+            categories[key] = entries
+            counts[key] = len(entries)
+        else:
+            categories[key] = None
+            counts[key] = None
+            if category not in raw:
+                caveat_parts.append(
+                    f"{category} field is missing; those rows were not "
+                    "loaded from this file."
+                )
+            else:
+                caveat_parts.append(
+                    f"{category} field is not a list; those rows were not "
+                    "loaded from this file."
+                )
+            status = "categories_partially_loaded"
+
+    present_counts = [count for count in counts.values() if count is not None]
+    total_entry_count = sum(present_counts) if present_counts else None
+
+    observed_at, observation_time_state = odyssey_inventory.observation_time(
+        raw.get("timestamp")
+    )
+    normalized = odyssey_inventory.normalize_snapshot(
+        raw,
+        storage_location=storage_location,
+        source_file=source_file,
+        observed_at=observed_at,
+    )
+    if normalized["malformed_entry_count"]:
+        caveat_parts.append(
+            f"{normalized['malformed_entry_count']} entr"
+            f"{'y was' if normalized['malformed_entry_count'] == 1 else 'ies were'} "
+            "not objects and could not be read; quantities are incomplete."
+        )
+    caveat_parts.append(odyssey_inventory.FRESHNESS_POLICY)
+
+    return {
+        "source": source_file,
+        "source_event": _string_or_none(raw.get("event")),
+        "source_file": source_file,
+        "storage_location": storage_location,
+        "event_timestamp": _string_or_none(raw.get("timestamp")),
+        "observed_at": observed_at,
+        "observation_time_state": observation_time_state,
+        # A readable file proves what was written, not that it is current.
+        "freshness": odyssey_inventory.FRESHNESS_UNKNOWN,
+        "freshness_policy": odyssey_inventory.FRESHNESS_POLICY,
+        "source_state": (
+            odyssey_inventory.SOURCE_AVAILABLE
+            if status == "loaded"
+            else odyssey_inventory.SOURCE_PARTIAL
+        ),
+        "status": status,
+        "truth_class": TRUTH_LOCAL_SCREEN_SNAPSHOT,
+        "caveat": " ".join(caveat_parts),
+        "fallback": None,
+        "materials": normalized["materials"],
+        "categories": normalized["categories"],
+        "malformed_entry_count": normalized["malformed_entry_count"],
+        "quantities_complete": normalized["quantities_complete"],
+        "items": categories["items"],
+        "components": categories["components"],
+        "consumables": categories["consumables"],
+        "data": categories["data"],
+        "items_count": counts["items"],
+        "components_count": counts["components"],
+        "consumables_count": counts["consumables"],
+        "data_count": counts["data"],
+        "total_entry_count": total_entry_count,
+        "nullprovider_safe": True,
+    }
+
+
+def _not_loaded_odyssey_inventory_payload(
+    read_status: str,
+    *,
+    source_file: str,
+    storage_location: str,
+    fallback: str,
+    subject: str,
+) -> dict[str, Any]:
+    if read_status == "malformed":
+        caveat = (
+            f"{source_file} could not be parsed as a valid local snapshot. "
+            f"Malformed companion files are not proof of empty {subject}."
+        )
+    elif read_status == "unreadable":
+        caveat = (
+            f"{source_file} could not be read. Unreadable companion files "
+            f"are not proof of empty {subject}."
+        )
+    else:
+        caveat = (
+            f"No verified local {subject} snapshot has been loaded. Missing "
+            f"companion files are not proof of empty {subject}."
+        )
+    unavailable = odyssey_inventory.unavailable_snapshot()
+    return {
+        "source": source_file,
+        "source_event": None,
+        "source_file": source_file,
+        "storage_location": storage_location,
+        "event_timestamp": None,
+        "observed_at": None,
+        "observation_time_state": odyssey_inventory.TIME_UNAVAILABLE,
+        "freshness": NOT_LOADED,
+        "freshness_policy": odyssey_inventory.FRESHNESS_POLICY,
+        "source_state": (
+            read_status
+            if read_status
+            in {
+                odyssey_inventory.SOURCE_MALFORMED,
+                odyssey_inventory.SOURCE_UNREADABLE,
+            }
+            else odyssey_inventory.SOURCE_MISSING
+        ),
+        "status": NOT_LOADED,
+        "truth_class": TRUTH_UNKNOWN,
+        "caveat": caveat,
+        "fallback": fallback,
+        "materials": unavailable["materials"],
+        "categories": unavailable["categories"],
+        "malformed_entry_count": unavailable["malformed_entry_count"],
+        "quantities_complete": unavailable["quantities_complete"],
+        "items": None,
+        "components": None,
+        "consumables": None,
+        "data": None,
+        "items_count": None,
+        "components_count": None,
+        "consumables_count": None,
+        "data_count": None,
+        "total_entry_count": None,
+        "nullprovider_safe": True,
+    }
+
+
 def cargo_hold_payload(
     state: StateManager | None,
     *,
@@ -1187,6 +1645,7 @@ def cargo_hold_payload(
 
     if file_raw is not None and prefer_file:
         items_raw = file_raw.get("Inventory")
+        inventory_complete = isinstance(items_raw, list)
         inventory = (
             [
                 _cargo_item_dict_from_file(entry)
@@ -1212,12 +1671,21 @@ def cargo_hold_payload(
             "capacity": _int_or_none(file_raw.get("Capacity"))
             or (state.snapshot.cargo_capacity if state is not None else None),
             "inventory": inventory,
-            "total_count": _int_or_none(file_raw.get("Count"))
-            or sum(int(it.get("count") or 0) for it in inventory),
+            "inventory_complete": inventory_complete,
+            "total_count": (
+                file_count
+                if (file_count := _int_or_none(file_raw.get("Count"))) is not None
+                else (
+                    sum(int(it.get("count") or 0) for it in inventory)
+                    if inventory_complete
+                    else None
+                )
+            ),
             "nullprovider_safe": True,
         }
 
     if journal_snapshot is not None:
+        inventory_complete = journal_snapshot.inventory_complete
         return {
             "source": journal_snapshot.source,
             "source_event": journal_snapshot.source_event,
@@ -1228,13 +1696,20 @@ def cargo_hold_payload(
             "caveat": (
                 "Local cargo snapshot from the most recent Cargo journal "
                 "event; Stolen and MissionID flags preserved."
+                if inventory_complete
+                else (
+                    "The most recent Cargo journal event reported the total "
+                    "count without an item breakdown. Unknown item details "
+                    "are not treated as an empty cargo hold."
+                )
             ),
             "fallback": None,
             "vessel": journal_snapshot.vessel,
             "capacity": journal_snapshot.capacity
             or (state.snapshot.cargo_capacity if state is not None else None),
             "inventory": [asdict(item) for item in journal_snapshot.inventory],
-            "total_count": sum(item.count for item in journal_snapshot.inventory),
+            "inventory_complete": inventory_complete,
+            "total_count": journal_snapshot.total_count,
             "nullprovider_safe": True,
         }
 
@@ -1253,6 +1728,7 @@ def cargo_hold_payload(
         "vessel": None,
         "capacity": state.snapshot.cargo_capacity if state is not None else None,
         "inventory": None,
+        "inventory_complete": None,
         "total_count": None,
         "nullprovider_safe": True,
     }
@@ -1375,16 +1851,21 @@ def _market_only_station_context_payload(
     market_id = _int_or_none(market_payload.get("market_id"))
     if station_name is None and star_system is None and market_id is None:
         return None
+    market_freshness = _string_or_none(market_payload.get("freshness"))
+    market_caveat = _string_or_none(market_payload.get("caveat"))
     return {
         "source": MARKET_FILE,
         "source_event": "Market",
         "source_file": MARKET_FILE,
         "event_timestamp": _string_or_none(market_payload.get("event_timestamp")),
-        "freshness": MARKET_SNAPSHOT_ONLY,
+        # Freshness and context scope are separate.  Preserve ``stale`` so an
+        # old Market.json observation cannot masquerade as current location.
+        "freshness": market_freshness or FRESH,
         "truth_class": TRUTH_LOCAL_SCREEN_SNAPSHOT,
         "caveat": (
             "Station market snapshot available. Full station context will "
             "refresh on the next Docked or Location journal event."
+            + (f" {market_caveat}" if market_caveat else "")
         ),
         "fallback": None,
         "context_kind": MARKET_SNAPSHOT_ONLY,
@@ -1811,6 +2292,15 @@ def _station_context_stale_reasons(
             f"current station is {live.current_station}, snapshot station is "
             f"{ctx.station_name}"
         )
+    if (
+        live.current_system is not None
+        and ctx.star_system is not None
+        and live.current_system != ctx.star_system
+    ):
+        reasons.append(
+            f"current system is {live.current_system}, snapshot system is "
+            f"{ctx.star_system}"
+        )
     if market_payload is not None:
         live_market_id = market_payload.get("market_id")
         if (
@@ -2095,6 +2585,9 @@ def _missing_sources(
     outfitting_path: Path | None,
     shipyard_path: Path | None,
     cargo_path: Path | None,
+    backpack_path: Path | None = None,
+    ship_locker_path: Path | None = None,
+    fc_materials_path: Path | None = None,
 ) -> list[str]:
     missing: list[str] = []
     market_raw = _read_companion_json(MARKET_FILE, market_path)
@@ -2128,6 +2621,12 @@ def _missing_sources(
         missing.append("cargo_hold")
     if state is None or not state.snapshot.modules:
         missing.append("module_loadout")
+    if _read_companion_json(BACKPACK_FILE, backpack_path) is None:
+        missing.append("backpack_snapshot")
+    if _read_companion_json(SHIP_LOCKER_FILE, ship_locker_path) is None:
+        missing.append("ship_locker_snapshot")
+    if _read_companion_json(FC_MATERIALS_FILE, fc_materials_path) is None:
+        missing.append("fc_materials_snapshot")
     if state is None or (
         state.snapshot.credit_balance is None
         and state.snapshot.rebuy_cost is None
@@ -2428,12 +2927,7 @@ def _phase9_unsupported_claim(
 
 
 def _phase9_bgs_knowledge_references() -> list[dict[str, Any]]:
-    kb_dir = Path(__file__).resolve().parents[1] / "knowledge_base"
-    try:
-        entry = load_knowledge_base(kb_dir).get("bgs_mechanics", "bgs_tick")
-    except Exception:
-        logger.exception("Failed to load BGS knowledge reference")
-        return []
+    entry = _load_phase9_bgs_knowledge_entry()
     if entry is None or entry.needs_review:
         return []
     return [
@@ -2459,6 +2953,65 @@ def _phase9_bgs_knowledge_references() -> list[dict[str, Any]]:
             "confidence": entry.confidence,
         }
     ]
+
+
+def _phase9_bgs_kb_dir() -> Path:
+    return Path(__file__).resolve().parents[1] / "knowledge_base"
+
+
+def _phase9_bgs_kb_fingerprint(kb_dir: Path) -> tuple[object, ...]:
+    """Cheaply detect an installed/updated KB without reparsing it per request."""
+    try:
+        if not kb_dir.is_dir():
+            return ("missing", str(kb_dir))
+        files: list[tuple[str, int, int]] = []
+        for path in sorted(kb_dir.glob("*.json")):
+            stat = path.stat()
+            files.append((path.name, stat.st_mtime_ns, stat.st_size))
+        return ("present", str(kb_dir), *files)
+    except OSError as exc:
+        return ("unreadable", str(kb_dir), type(exc).__name__, str(exc))
+
+
+def _load_phase9_bgs_knowledge_entry() -> Any | None:
+    """Load once per KB version and latch a degraded result until files change."""
+    kb_dir = _phase9_bgs_kb_dir()
+    fingerprint = _phase9_bgs_kb_fingerprint(kb_dir)
+    cache = _PHASE9_BGS_KB_CACHE
+    if cache["initialized"] and cache["fingerprint"] == fingerprint:
+        return cache["entry"]
+
+    was_degraded = bool(cache["degraded"])
+    try:
+        entry = load_knowledge_base(kb_dir).get("bgs_mechanics", "bgs_tick")
+    except Exception as exc:
+        cache.update(
+            initialized=True,
+            fingerprint=fingerprint,
+            entry=None,
+            degraded=True,
+        )
+        if not was_degraded:
+            logger.exception(
+                "BGS knowledge reference unavailable; degraded result cached "
+                "until knowledge-base assets change"
+            )
+        else:
+            logger.debug(
+                "BGS knowledge reference remains unavailable after asset change: %s",
+                exc,
+            )
+        return None
+
+    cache.update(
+        initialized=True,
+        fingerprint=fingerprint,
+        entry=entry,
+        degraded=False,
+    )
+    if was_degraded:
+        logger.info("BGS knowledge reference recovered after asset change")
+    return entry
 
 
 def _phase9_source_payload(

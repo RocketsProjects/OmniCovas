@@ -14,6 +14,7 @@ See: Engineering Standards v1.0 §12 API module standards
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -24,6 +25,9 @@ from omnicovas.features import local_context_facts
 
 if TYPE_CHECKING:
     from omnicovas.core.state_manager import StateManager
+    from omnicovas.features.commander_memory import CommanderMemoryService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/intel/local-context", tags=["intel"])
 
@@ -35,12 +39,22 @@ _cargo_path: Path | None = None
 _modules_info_path: Path | None = None
 _journal_dir_path: Path | None = None
 _status_path: Path | None = None
+_backpack_path: Path | None = None
+_ship_locker_path: Path | None = None
+_fc_materials_path: Path | None = None
+_commander_memory: "CommanderMemoryService | None" = None
 
 
 def set_state_manager(state: "StateManager | None") -> None:
     """Inject the live StateManager into this router."""
     global _state  # noqa: PLW0603
     _state = state
+
+
+def set_commander_memory_service(service: "CommanderMemoryService | None") -> None:
+    """Inject the single Commander Memory owner for snapshot observation."""
+    global _commander_memory  # noqa: PLW0603
+    _commander_memory = service
 
 
 def set_snapshot_paths(
@@ -52,11 +66,15 @@ def set_snapshot_paths(
     modules_info_path: Path | None = None,
     journal_dir_path: Path | None = None,
     status_path: Path | None = None,
+    backpack_path: Path | None = None,
+    ship_locker_path: Path | None = None,
+    fc_materials_path: Path | None = None,
 ) -> None:
     """Inject companion JSON paths for focused tests only."""
     global _market_path, _outfitting_path, _shipyard_path  # noqa: PLW0603
     global _cargo_path, _modules_info_path  # noqa: PLW0603
     global _journal_dir_path, _status_path  # noqa: PLW0603
+    global _backpack_path, _ship_locker_path, _fc_materials_path  # noqa: PLW0603
     _market_path = market_path
     _outfitting_path = outfitting_path
     _shipyard_path = shipyard_path
@@ -64,6 +82,9 @@ def set_snapshot_paths(
     _modules_info_path = modules_info_path
     _journal_dir_path = journal_dir_path
     _status_path = status_path
+    _backpack_path = backpack_path
+    _ship_locker_path = ship_locker_path
+    _fc_materials_path = fc_materials_path
 
 
 def reset_snapshot_paths() -> None:
@@ -242,6 +263,7 @@ class CargoHoldSnapshotResponse(_ProvenanceBase):
     vessel: str | None
     capacity: int | None
     inventory: list[CargoItemResponse] | None
+    inventory_complete: bool | None
     total_count: int | None
 
 
@@ -274,6 +296,48 @@ class ModuleLoadoutSnapshotResponse(_ProvenanceBase):
     shield_generator: dict[str, Any]
 
 
+class OdysseyInventorySnapshotResponse(_ProvenanceBase):
+    """Local Backpack.json / ShipLocker.json Odyssey inventory snapshot.
+
+    Per-entry fields are preserved verbatim from the local file; OmniCOVAS
+    asserts only the four registry-documented list containers.  ``*_count``
+    fields count entries, never quantities; quantities live on the normalized
+    ``materials`` records and the per-category ``categories`` summaries.
+    Backpack and ShipLocker are separate sources and are never summed here.
+    """
+
+    storage_location: str
+    observed_at: str | None
+    observation_time_state: str
+    freshness_policy: str
+    source_state: str
+    status: str
+    materials: list[dict[str, Any]] | None
+    categories: dict[str, dict[str, Any]]
+    malformed_entry_count: int | None
+    quantities_complete: bool | None
+    items: list[dict[str, Any]] | None
+    components: list[dict[str, Any]] | None
+    consumables: list[dict[str, Any]] | None
+    data: list[dict[str, Any]] | None
+    items_count: int | None
+    components_count: int | None
+    consumables_count: int | None
+    data_count: int | None
+    total_entry_count: int | None
+
+
+class FcMaterialsSnapshotResponse(_ProvenanceBase):
+    """Local FCMaterials.json fleet-carrier materials trader snapshot."""
+
+    observed_at: str | None
+    status: str
+    market_id: Any
+    carrier_name: str | None
+    item_count: int | None
+    items: list[dict[str, Any]] | None
+
+
 class SessionActivityResponse(_ProvenanceBase):
     """Local Elite session activity derived from file activity, not generated_at."""
 
@@ -283,12 +347,46 @@ class SessionActivityResponse(_ProvenanceBase):
     last_journal_file: str | None
     last_game_activity_at: str | None
     journal_files_scanned: list[str]
+    # Startup exit criterion 3 (Phase 11 Dev Guide §C): local source path
+    # posture, as a class rather than a path. "missing" means the Elite
+    # directory is absent, which is materially different from an empty one:
+    # nothing will ever be written to a path that does not exist.
+    local_path_posture: str
 
 
 class WalletFieldResponse(_ProvenanceBase):
     """Single source-backed wallet value."""
 
     value: int | None
+
+
+class BalanceObservationResponse(BaseModel):
+    """One source-backed credit-balance observation (FU-014)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    value: int
+    source: str
+    timestamp: str | None
+
+
+class ObservedSessionChangeResponse(BaseModel):
+    """Observed balance change over this session's observations (FU-014).
+
+    Arithmetic over source-backed observations only — never a transaction
+    record.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    value: int | None
+    from_value: int | None
+    to_value: int | None
+    first_observed_at: str | None
+    last_observed_at: str | None
+    caveat: str
+    fallback: str | None
+    nullprovider_safe: bool
 
 
 class WalletSnapshotResponse(BaseModel):
@@ -300,6 +398,8 @@ class WalletSnapshotResponse(BaseModel):
     rebuy: WalletFieldResponse
     loan: WalletFieldResponse
     carrier_balance: WalletFieldResponse
+    balance_history: list[BalanceObservationResponse]
+    observed_session_change: ObservedSessionChangeResponse
     missing_sources: list[str]
     unavailable_fields: list[str]
     nullprovider_safe: bool
@@ -320,6 +420,9 @@ class LocalContextSnapshotResponse(BaseModel):
     shipyard_snapshot: LocalShipyardSnapshotResponse
     cargo_hold: CargoHoldSnapshotResponse
     module_loadout: ModuleLoadoutSnapshotResponse
+    backpack_snapshot: OdysseyInventorySnapshotResponse
+    ship_locker_snapshot: OdysseyInventorySnapshotResponse
+    fc_materials_snapshot: FcMaterialsSnapshotResponse
     wallet_snapshot: WalletSnapshotResponse
     missing_sources: list[str]
     nullprovider_safe: bool
@@ -333,6 +436,19 @@ async def get_local_context_snapshot() -> dict[str, Any]:
     companion JSON reads. No external lookups. Missing sources surface as
     freshness="not_loaded" with explicit fallback wording.
     """
+    payload = build_local_context_snapshot()
+    if _commander_memory is not None:
+        try:
+            await _commander_memory.observe_local_context(payload)
+        except Exception:
+            # Memory is an observed-history subscriber. A persistence fault must
+            # never make the current local-context owner unavailable.
+            logger.exception("Commander Memory could not observe local context")
+    return payload
+
+
+def build_local_context_snapshot() -> dict[str, Any]:
+    """Build the current local-context payload without duplicating source reads."""
     return local_context_facts.local_context_snapshot_payload(
         _state,
         market_path=_market_path,
@@ -342,4 +458,7 @@ async def get_local_context_snapshot() -> dict[str, Any]:
         modules_info_path=_modules_info_path,
         journal_dir_path=_journal_dir_path,
         status_path=_status_path,
+        backpack_path=_backpack_path,
+        ship_locker_path=_ship_locker_path,
+        fc_materials_path=_fc_materials_path,
     )
