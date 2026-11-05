@@ -50,6 +50,20 @@ Built by an Elite Dangerous player for fellow Commanders, OmniCOVAS welcomes bug
 
 Interested in contributing code? Please read [Contributing](CONTRIBUTING.md) and [contact the maintainer](mailto:rocketsprojects.git@gmail.com) before submitting a patch or pull request; code contributions require prior agreement.
 
+
+## Join the community
+
+Whether you're following development, have an idea, or just want to talk with fellow Commanders, you're welcome to join the conversation:
+
+- [GitHub Discussions](https://github.com/RocketsProjects/OmniCovas/discussions) — ask questions, share ideas, and discuss the project.
+- [OmniCOVAS Discord](https://discord.gg/9QNv5VMz) — connect with the community and follow along as OmniCOVAS grows.
+
+## Support OmniCOVAS
+
+OmniCOVAS is a personal project built with a lot of time and care. If you'd like to support its continued development, you can [sponsor the project on GitHub](https://github.com/sponsors/RocketsProjects).
+
+Sponsorship is always optional and genuinely appreciated. Sharing feedback, reporting issues, and being part of the community help just as much.
+
 ---
 
 OmniCOVAS is free for personal, noncommercial use and **source-available, not open source**. See the [License](LICENSE.md) and [Security Policy](SECURITY.md). It is an independent, unofficial Elite Dangerous companion and is not affiliated with Frontier Developments.
