@@ -1,0 +1,19 @@
+title: "[Question] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome, Commander! Ask a specific question about using or building OmniCOVAS.
+        Please search existing discussions first, and do not post private commander
+        information, credentials, unredacted logs, or security vulnerabilities.
+  - type: textarea
+    id: question
+    attributes:
+      label: What would you like to know?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What have you already tried?
+      description: Optional. Share the OmniCOVAS commit and tool versions if relevant.

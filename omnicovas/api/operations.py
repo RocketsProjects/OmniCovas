@@ -61,6 +61,13 @@ _activity_log: ActivityLog | None = None
 _gate: ConfirmationGate = ConfirmationGate.denying()
 _ai_provider: Any = None
 _objectives: OperationsObjectiveService | None = None
+_mining_prospector: Any = None
+
+
+def set_mining_prospector(service: Any) -> None:
+    global _mining_prospector  # noqa: PLW0603
+    _mining_prospector = service
+
 
 # PB14-R1: change / complete / clear / purge are protected. They reuse the one
 # shared Week 13 confirmation queue rather than introducing a second gate:
@@ -510,12 +517,18 @@ async def get_mining_workflow() -> dict[str, Any]:
             objective = await _objectives.get_current("mining")
         except Exception:  # noqa: BLE001 - an unreadable store is Unknown
             objective = None
-    return await mining_workflow.build_workflow(
+    result = await mining_workflow.build_workflow(
         _state,
         _session_factory,
         objective=objective,
         route_active=_active_route_destination() is not None,
     )
+    result["prospector"] = (
+        await _mining_prospector.snapshot()
+        if _mining_prospector
+        else {"state": "unavailable", "latest": None, "reports": []}
+    )
+    return result
 
 
 @router.get("/combat/workflow")

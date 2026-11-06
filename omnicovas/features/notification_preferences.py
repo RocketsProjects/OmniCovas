@@ -31,6 +31,7 @@ def default_profile() -> JsonDict:
     return {
         "profile": "Minimal",
         "quiet": False,
+        "mining_target_alerts": False,
         "overlay_glances": False,
         "duration": 4,
         "categories": {name: True for name in CATEGORIES},
@@ -71,6 +72,7 @@ def normalize_profile(raw: Any, *, strict: bool = False) -> JsonDict:
     return {
         "profile": _choice(raw, "profile", PROFILES, base["profile"], strict),
         "quiet": _flag(raw, "quiet", base["quiet"], strict),
+        "mining_target_alerts": _flag(raw, "mining_target_alerts", False, strict),
         "overlay_glances": _flag(raw, "overlay_glances", False, strict),
         "duration": _choice(raw, "duration", DURATIONS, base["duration"], strict),
         "categories": {
@@ -164,6 +166,7 @@ def effective(stored: JsonDict, device: JsonDict) -> Preferences:
         overlay=device["overlay"],
         overlay_glances=stored["overlay_glances"],
         quiet=stored["quiet"],
+        mining_target_alerts=stored["mining_target_alerts"],
         duration=stored["duration"],
         disabled=disabled,
     )

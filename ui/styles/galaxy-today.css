@@ -1,0 +1,34 @@
+/* Independent news widget; Identity and Readiness retain their styling. */
+.galaxy-today {display:flex;align-items:center;gap:14px;min-height:60px;padding:5px 12px;border:1px solid #394d62;border-radius:5px;background:linear-gradient(110deg,#192b3c,#101924);width:100%;}
+.galaxy-today:hover {border-color:#9aafc1;background-color:#203142;}
+.galaxy-brand {color:#dfb578;font-size:14px;white-space:nowrap;}
+.galaxy-copy {display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+.galaxy-meta {font-size:12px;line-height:1.1;color:#a9c1d4;}
+.galaxy-headline {font-size:16px;line-height:1.1;color:#eaf1fa;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;}
+.galaxy-arrow {font-size:25px;color:#deb279;}
+.commander-home:has(.galaxy-today) {grid-template-rows:minmax(156px,1.15fr) minmax(134px,1fr) 60px;}
+.galaxy-reader {display:grid;gap:8px;}
+.galaxy-reader .rcd-button {min-height:44px;}
+.galaxy-reader-controls,.galaxy-pager {display:flex;align-items:center;gap:10px;justify-content:space-between;}
+.galaxy-reader-controls .rcd-button {flex:1;}
+.rcd-dialog .galaxy-reader p {margin:0;font-size:14px;line-height:1.4;}
+.galaxy-news-list {display:grid;gap:6px;}
+.galaxy-news-item {display:flex;flex-direction:column;gap:3px;text-align:left;padding:8px 12px;width:100%;min-height:58px;}
+.galaxy-item-date,.galaxy-attribution,.galaxy-feed-state,.galaxy-article-date {color:#aac0d2;font-size:13px;}
+.galaxy-item-title {font-size:17px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;}
+.galaxy-article-title {font-size:23px;line-height:1.2;margin:0;overflow-wrap:anywhere;color:#edf4ff;}
+.rcd-dialog .galaxy-excerpt {font-size:17px;line-height:1.5;}
+.galaxy-address {overflow-wrap:anywhere;color:#a5b6c9;}
+.galaxy-reading-details {border-top:1px solid #3c5062;}
+.galaxy-reading-details summary {min-height:44px;display:flex;align-items:center;cursor:pointer;color:#aebfd0;font-size:14px;}
+.galaxy-reading-details summary::before {content:'+ ';padding-right:8px;color:#e1b678;}
+.galaxy-reading-details[open] summary::before {content:'− ';}
+.galaxy-reading-details summary:focus-visible {outline:2px solid #ffb35a;outline-offset:-2px;}
+.galaxy-reader-status:empty {display:none;}
+@media(max-height:640px) {.commander-home:has(.galaxy-today){gap:8px;grid-template-rows:minmax(156px,1fr) minmax(134px,1fr) 60px;}.galaxy-reader{gap:5px;}.galaxy-news-item{padding:5px 10px;}.galaxy-item-title{font-size:16px;}}
+@media(min-height:441px) and (max-height:520px) and (min-width:521px) {
+  .commander-home:has(.galaxy-today){grid-template-rows:minmax(156px,1fr) minmax(152px,1fr) 44px;}
+  .galaxy-today{min-height:44px;padding:4px 12px;}
+  .galaxy-headline{-webkit-line-clamp:1;}
+}
+@media(max-height:440px),(max-width:520px){.commander-home:has(.galaxy-today){grid-template-rows:auto auto auto;}.galaxy-today{min-height:64px;}}

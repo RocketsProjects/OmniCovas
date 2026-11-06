@@ -44,6 +44,22 @@ Shell.uiv3FrameState = {
 
 let uiv3FrameViewModelsPromise = null;
 let uiv3FrameRefreshPromise = null;
+let widgetScopeEpoch = 0;
+const widgetSubject = (state) => ({ commander_profile_key: state?.commander_name ?? null, ship_id: state?.current_ship_id ?? null });
+const widgetSubjectKey = (subject) => JSON.stringify([subject?.commander_profile_key ?? null, subject?.ship_id ?? null]);
+
+function getWidgetSnapshot() {
+  const frame = Shell.uiv3FrameState;
+  return { subject: widgetSubject(frame.publicState), factSubject: frame.factSubject,
+    publicState: frame.publicState, shipState: frame.shipState,
+    shipProfile: frame.shipProfile || null,
+    galaxyToday: frame.galaxyToday || null,
+    localContextRaw: frame.localContextRaw, location: frame.location,
+    connected: Shell.connected && frame.sourceError !== true, sessionState: Shell.eliteSessionState,
+    blockedCargoTimestamp: frame.blockedCargoTimestamp || null };
+}
+
+function emitWidgetSnapshot() { emit('widget-snapshot', null); }
 
 /* ── Small helpers ── */
 function sleep(ms) {
@@ -145,6 +161,7 @@ function updateUiv3ActiveTab(routeName) {
       tab.removeAttribute('aria-current');
     }
   });
+  Shell.responsiveNavigation?.refresh();
 }
 
 function isDisabledSystemsTab(target) {
@@ -212,6 +229,7 @@ Shell.sessionActivityState = null;
    live journal output. State pushes that the backend can synthesize from
    stale local files are NOT included. */
 const JOURNAL_EVENT_TYPES = new Set([
+  'MINING_PROSPECTOR_UPDATED',
   'FSD_JUMP', 'FSDJump',
   'DOCKED', 'Docked',
   'UNDOCKED', 'Undocked',
@@ -673,11 +691,16 @@ async function fetchUiv3FrameJson(path) {
 }
 
 async function refreshUiv3FrameSnapshots() {
+  // Public news is independent of the telemetry batch and cannot delay it.
+  if (window.location.hash.split('?')[0] === '#/dashboard') refreshGalaxyToday();
   if (!Shell.httpBase) {
     renderUiv3Frame();
     return;
   }
   if (uiv3FrameRefreshPromise) return uiv3FrameRefreshPromise;
+
+  const scopeEpoch = widgetScopeEpoch;
+  const subject = widgetSubject(Shell.uiv3FrameState.publicState);
 
   uiv3FrameRefreshPromise = Promise.all([
     fetchUiv3FrameJson('/pillar1/ship-state'),
@@ -685,8 +708,13 @@ async function refreshUiv3FrameSnapshots() {
     fetchUiv3FrameJson('/navigation/snapshot'),
     fetchUiv3FrameJson('/source/health'),
     loadUiv3FrameViewModels().catch(() => null),
-  ]).then(([shipState, localContextRaw, navSnap, sourceSnap, viewModels]) => {
+    fetchUiv3FrameJson('/readiness/ship-profile'),
+  ]).then(([shipState, localContextRaw, navSnap, sourceSnap, viewModels, shipProfile]) => {
+    if (scopeEpoch !== widgetScopeEpoch) return;
     const frame = Shell.uiv3FrameState;
+    frame.factSubject = subject;
+    frame.shipProfile = shipProfile;
+    frame.sourceError = !localContextRaw;
     if (shipState) frame.shipState = shipState;
     if (localContextRaw) {
       frame.localContextRaw = localContextRaw;
@@ -712,24 +740,87 @@ async function refreshUiv3FrameSnapshots() {
       frame.location = uiv3FrameLocationFallback(frame.shipState, frame.navSnap);
     }
     renderUiv3Frame();
+    emitWidgetSnapshot();
   }).finally(() => {
     uiv3FrameRefreshPromise = null;
+    if (scopeEpoch !== widgetScopeEpoch) refreshUiv3FrameSnapshots();
   });
 
   return uiv3FrameRefreshPromise;
 }
 
+let galaxyRequest = null;
+let galaxyPreferenceEpoch = 0;
+async function refreshGalaxyToday() {
+  if (!Shell.httpBase) return null;
+  if (galaxyRequest) return galaxyRequest;
+  const epoch = galaxyPreferenceEpoch;
+  galaxyRequest = fetch(`${Shell.httpBase}/galaxy-today`).then(async response => {
+    if (!response.ok) throw new Error('News unavailable');
+    const data = await response.json();
+    if (epoch !== galaxyPreferenceEpoch) return Shell.uiv3FrameState.galaxyToday || null;
+    Shell.uiv3FrameState.galaxyToday = data;
+    emitWidgetSnapshot();
+    return data;
+  }).catch(() => {
+    if (epoch !== galaxyPreferenceEpoch) return Shell.uiv3FrameState.galaxyToday || null;
+    const previous = Shell.uiv3FrameState.galaxyToday;
+    if (previous) Shell.uiv3FrameState.galaxyToday = { ...previous, state: 'cached', error: 'bridge_unavailable', can_update: false };
+    emitWidgetSnapshot();
+    return Shell.uiv3FrameState.galaxyToday || null;
+  }).finally(() => { galaxyRequest = null; });
+  return galaxyRequest;
+}
+
+async function updateGalnet() {
+  if (!Shell.httpBase) throw new Error('The local bridge is unavailable.');
+  const response = await fetch(`${Shell.httpBase}/galaxy-today/update`, {method:'POST'});
+  if (!response.ok) throw new Error('The news update could not be requested.');
+  const data = await response.json();
+  Shell.uiv3FrameState.galaxyToday = data;
+  emitWidgetSnapshot();
+  return data;
+}
+
+async function setGalnetEnabled(enabled) {
+  if (!Shell.httpBase) throw new Error('The local bridge is unavailable.');
+  galaxyPreferenceEpoch++;
+  const response = await fetch(`${Shell.httpBase}/week13/privacy/toggles/galnet_news`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({enabled})
+  });
+  if (!response.ok) throw new Error('The news preference could not be saved.');
+  // A read started before the consent change must not restore its old value.
+  if (galaxyRequest) await galaxyRequest;
+  return enabled ? updateGalnet() : refreshGalaxyToday();
+}
+Shell.refreshGalaxyToday = refreshGalaxyToday;
+Shell.updateGalnet = updateGalnet;
+Shell.setGalnetEnabled = setGalnetEnabled;
+
 function updateUiv3FrameFromPublicState(state) {
   if (state && typeof state === 'object') {
+    const frame = Shell.uiv3FrameState;
+    const previous = widgetSubject(frame.publicState);
+    const next = widgetSubject(state);
+    if (widgetSubjectKey(previous) !== widgetSubjectKey(next)) {
+      widgetScopeEpoch++;
+      if (previous.commander_profile_key || previous.ship_id !== null) {
+        frame.blockedCargoTimestamp = frame.localContextRaw?.cargo_hold?.event_timestamp || frame.blockedCargoTimestamp || null;
+      }
+      frame.shipState = frame.localContextRaw = frame.localContext = frame.navSnap = frame.location = null;
+      frame.factSubject = null;
+      frame.shipProfile = null;
+    }
     Shell.uiv3FrameState.publicState = state;
   }
+  emitWidgetSnapshot();
   renderUiv3Frame();
   refreshUiv3FrameSnapshots();
 }
 
 /* Re-evaluate Elite session every 15s so we slip from Active to Last
    known automatically once journal activity goes quiet. */
-setInterval(recomputeEliteSessionState, 15_000);
+setInterval(() => { recomputeEliteSessionState(); emitWidgetSnapshot(); }, 15_000);
 
 /* ── Timer cleanup ── */
 function clearReconnectTimer() {
@@ -1498,8 +1589,18 @@ function applyRouteTransferArrival(routeName, root, options = {}) {
   const target = resolveRouteTransferTarget(root, intent, options);
   const unavailable = !target;
   const banner = createRouteTransferBanner(intent, target, unavailable);
-
-  root.prepend(banner);
+  const deckHeading=root.querySelector('.rcd-workspace-heading');
+  if(deckHeading) {
+    // Responsive Pilot decks retain a return path, not a route/proof receipt.
+    // Reviewing a notice already on this route needs only the focused Detail.
+    if(intent.originRoute !== intent.targetRoute || unavailable) {
+      const back=banner.querySelector('.route-arrival-return');
+      banner.classList.add('rcd-arrival');
+      if(unavailable)banner.replaceChildren(createRouteTransferLine('Unavailable','Open the relevant task from this deck.'),back);
+      else banner.replaceChildren(back);
+      deckHeading.prepend(banner);
+    }
+  } else root.prepend(banner);
 
   if (target) {
     target.classList.add('route-handoff-target--active');
@@ -1624,6 +1725,31 @@ document.addEventListener('DOMContentLoaded', () => {
      boot signals (bridge discovery, first state, Elite session state). */
   window.BootCurtain?.start?.();
   restoreDensityMode();
+  import('./responsive-navigation.js').then(({ installResponsiveNavigation }) => {
+    Shell.responsiveNavigation = installResponsiveNavigation();
+  });
+  const statusDialog = document.getElementById('rcd-status-dialog');
+  const statusBody = document.getElementById('rcd-status-body');
+  if (statusDialog && statusBody) {
+    ['uiv3-identity-band', 'uiv3-left-rail', 'uiv3-bottom-spine'].forEach((id) => {
+      const node = document.getElementById(id);
+      if (node) statusBody.appendChild(node);
+    });
+    document.getElementById('rcd-status-button')?.addEventListener('click', () => {
+      const attention = document.querySelector('.ocv-attention');
+      if (attention) statusDialog.append(attention);
+      statusDialog.showModal();
+    });
+    statusDialog.querySelector('[data-rcd-close]').addEventListener('click', () => statusDialog.close());
+    statusDialog.addEventListener('close', () => {
+      const attention = statusDialog.querySelector('.ocv-attention');
+      if (attention) document.body.append(attention);
+      document.getElementById('rcd-status-button')?.focus({ preventScroll: true });
+    });
+    window.OmniEvents.addEventListener('route-changed', () => {
+      if (statusDialog.open) statusDialog.close();
+    });
+  }
   updateUiv3Clock();
   setInterval(updateUiv3Clock, 30_000);
   navigate(window.location.hash || '#/dashboard');
@@ -1636,6 +1762,28 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ── Expose for views/devtools/tests ── */
 window.OmniEvents.addEventListener('state', (event) => updateUiv3FrameFromPublicState(event.detail));
 window.OmniEvents.addEventListener('bridge-connected', refreshUiv3FrameSnapshots);
+window.OmniEvents.addEventListener('bridge-disconnected', emitWidgetSnapshot);
+// Shared facts must also follow real Journal arrivals. Several core handlers
+// forward the raw event without a derived LOCATION_CHANGED notification.
+// Coalesce bursts at the existing transport owner, never inside each widget.
+let frameEventRefreshTimer = null;
+const FRAME_FACT_EVENTS = new Set([
+  'CARGO_CHANGED', 'SHIP_STATE_CHANGED', 'LOADOUT_CHANGED', 'LOCATION_CHANGED', 'FSD_JUMP_COMPLETED',
+  'Location', 'LOCATION', 'Docked', 'DOCKED', 'Undocked', 'UNDOCKED', 'FSDJump', 'FSD_JUMP',
+  'CarrierJump', 'NavRoute', 'NavRouteClear', 'Cargo', 'Status',
+  'HULL_DAMAGE', 'HULL_CRITICAL_25', 'HULL_CRITICAL_10', 'SHIELDS_DOWN', 'SHIELDS_UP',
+  'FUEL_LOW', 'FUEL_CRITICAL', 'HEAT_WARNING', 'HEAT_DAMAGE',
+]);
+window.OmniEvents.addEventListener('event', (event) => {
+  const type = event.detail?.event_type || event.detail?.event;
+  if (['SHIP_STATE_CHANGED', 'LOADOUT_CHANGED', 'COMMANDER_CHANGED'].includes(type)) fetchState();
+  if (FRAME_FACT_EVENTS.has(type) && frameEventRefreshTimer === null) {
+    frameEventRefreshTimer = setTimeout(() => {
+      frameEventRefreshTimer = null;
+      refreshUiv3FrameSnapshots();
+    }, 250);
+  }
+});
 window.OmniEvents.addEventListener('elite-session-state', () => {
   renderUiv3Frame();
   refreshUiv3FrameSnapshots();
@@ -1673,6 +1821,7 @@ Shell.recomputeEliteSessionState = recomputeEliteSessionState;
 Shell.updateUiv3ActiveTab = updateUiv3ActiveTab;
 Shell.renderUiv3Frame = renderUiv3Frame;
 Shell.refreshUiv3FrameSnapshots = refreshUiv3FrameSnapshots;
+Shell.getWidgetSnapshot = getWidgetSnapshot;
 Shell.applyDensityMode = applyDensityMode;
 Shell.restoreDensityMode = restoreDensityMode;
 /* Test seam for the vitals formatters, matching the pattern used by the

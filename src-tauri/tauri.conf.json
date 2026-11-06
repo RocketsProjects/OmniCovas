@@ -32,7 +32,7 @@
         "resizable": false,
         "focus": false,
         "focusable": false,
-        "visible": false,
+        "visible": true,
         "x": 100,
         "y": 100
       }

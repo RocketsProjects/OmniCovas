@@ -164,6 +164,7 @@ class NotificationShadow:
         self._prefs_cache: tuple[tuple[Any, ...], Preferences] | None = None
         self._display_cache: tuple[tuple[Any, ...], dict[str, Any]] | None = None
         self.presenter = Presenter(self.configured_owner())
+        self.mining_prospector: Any = None
         self.publish: Callable[[dict[str, Any]], Awaitable[None]] | None = None
 
     def capture_scope(self, event: dict[str, Any]) -> Scope:
@@ -340,6 +341,10 @@ class NotificationShadow:
             o = CURRENT_OBSERVATION.get()
             if o is not None:
                 candidates = adapters.projection(event, self.state, o)
+                if self.mining_prospector:
+                    candidate = self.mining_prospector.candidate_for(o)
+                    if candidate:
+                        candidates.append(candidate)
                 if o.event_type != "Status":
                     for provider in self.opportunity_providers:
                         for payload in provider()[:50]:
@@ -688,6 +693,8 @@ class NotificationShadow:
             else:
                 self.director.overlay_available = True
             self.director.configure(await self.preferences(self.scope.commander), now)
+            if self.mining_prospector:
+                self.director.retire_prospector(self.mining_prospector.current, now)
             # Conditions first, in observed order: they never wait behind
             # ordinary frames and cannot be crowded out by them.
             batch = sorted(
@@ -708,6 +715,12 @@ class NotificationShadow:
                         presence=frame.presence,
                     )
                 for c in frame.candidates:
+                    if (
+                        c.copy_key == "prospector"
+                        and self.mining_prospector
+                        and not self.mining_prospector.current(c)
+                    ):
+                        continue
                     self.director.ingest(c, now)
                     self.evaluated += 1
             latest = self.latest_context
@@ -1034,6 +1047,10 @@ def wire(
     broadcaster: ShipStateBroadcaster,
     service: NotificationShadow,
 ) -> None:
+    if service.mining_prospector:
+        dispatcher.register_observer(
+            service.mining_prospector.observe, service.capture_scope
+        )
     dispatcher.register_observer(service.observe_projection, service.capture_scope)
     for kind in adapters.BROADCAST_TYPES:
         broadcaster.subscribe(kind, service.observe_broadcast)

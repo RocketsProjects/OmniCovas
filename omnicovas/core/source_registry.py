@@ -38,6 +38,7 @@ class SourceCapability(str, Enum):
     SHIPYARD = "shipyard"
     OUTFITTING = "outfitting"
     ROUTE_PLANNING = "route_planning"
+    GALNET_NEWS = "galnet_news"
     TRAFFIC = "traffic"
     COMBAT_LOG = "combat_log"
     EXOBIOLOGY = "exobiology"

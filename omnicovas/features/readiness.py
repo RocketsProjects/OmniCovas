@@ -28,11 +28,17 @@ No providers, no thresholds beyond those already ratified, no game action.
 from __future__ import annotations
 
 import logging
+import math
+from datetime import datetime, timezone
+from types import SimpleNamespace
 from typing import Any
 
 from omnicovas.core.state_manager import StateManager
 from omnicovas.features.fuel import _FUEL_LOW_FRACTION
+from omnicovas.features.heat_management import _HEAT_WARNING_FRACTION
 from omnicovas.features.hull_triggers import _HULL_25_FRACTION
+from omnicovas.features.local_context_facts import wallet_snapshot_payload
+from omnicovas.features.operations_economy import known_cargo
 
 logger = logging.getLogger(__name__)
 
@@ -420,6 +426,334 @@ def ship_profile(state: StateManager) -> dict[str, Any]:
         "role_fit": fit,
         "caveat": READINESS_CAVEAT,
         "nullprovider_safe": True,
+        "watch": ship_watch(state),
+    }
+
+
+# A display trust window, not an Elite mechanic or a readiness score. Static
+# loadout facts remain bound to their ship; dynamic observations age out.
+SHIP_WATCH_RECENT_SECONDS = 300
+
+
+def _watch_time(value: str | None) -> datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def ship_watch(state: StateManager, *, now: datetime | None = None) -> dict[str, Any]:
+    """Contextual, source-bound ship observations for the Dashboard.
+
+    Uses this engine's canonical threshold checks. Unlike operation readiness,
+    a full hold is not a blocker and a docked shield state is not a danger.
+    Nothing here declares a ship prepared for an unselected activity.
+    """
+    now = now or datetime.now(timezone.utc)
+    snap = state.snapshot
+
+    def timestamp(key: str) -> str | None:
+        source = state.get_field_source(key)
+        return source.timestamp if source else None
+
+    commander_at = _watch_time(timestamp("commander_name"))
+    ship_at = _watch_time(timestamp("current_ship_id"))
+    bound = bool(snap.commander_name and snap.current_ship_id is not None)
+    binding = max(commander_at, ship_at) if commander_at and ship_at else None
+
+    def observe(
+        key: str, *, fixed: bool = False, boolean: bool = False, commander: bool = False
+    ) -> dict[str, Any]:
+        value = getattr(snap, key)
+        at = _watch_time(timestamp(key))
+        scope_at = commander_at if commander else binding
+        usable = bool(bound and scope_at and at and scope_at <= at <= now)
+        if boolean:
+            usable = usable and isinstance(value, bool)
+        else:
+            usable = (
+                usable
+                and isinstance(value, (int, float))
+                and not isinstance(value, bool)
+                and math.isfinite(value)
+                and value >= 0
+            )
+        if key == "hull_health" and usable and value > 1:
+            usable = False
+        age = (now - at).total_seconds() if at else None
+        return {
+            "value": value if usable else None,
+            "observed_at": timestamp(key) if usable else None,
+            "quality": (
+                "unknown"
+                if not usable
+                else "recorded"
+                if fixed
+                else "recent"
+                if age is not None and age <= SHIP_WATCH_RECENT_SECONDS
+                else "stale"
+            ),
+        }
+
+    fields = {
+        "hull": observe("hull_health"),
+        "shields": observe("shield_up", boolean=True),
+        "fuel": observe("fuel_main"),
+        "fuel_capacity": observe("fuel_capacity_main", fixed=True),
+        "heat": observe("heat_level"),
+        "docked": observe("is_docked", boolean=True),
+        # Credits belong to the commander, not the latest Loadout/ShipID event.
+        "credits": observe("credit_balance", commander=True),
+        "rebuy": observe("rebuy_cost", fixed=True),
+    }
+    modules_at = _watch_time(timestamp("modules"))
+    # A later loadout/module observation may have changed the insured fit,
+    # even if a Loadout omitted ShipID or Rebuy. Keep the old quote out of
+    # current coverage rather than assuming the outfit still costs the same.
+    rebuy_at = _watch_time(fields["rebuy"]["observed_at"])
+    if modules_at and rebuy_at and rebuy_at < modules_at:
+        fields["rebuy"] = {"value": None, "observed_at": None, "quality": "unknown"}
+    fitted = (
+        shield_generator_fitted(snap)
+        if bound and binding and modules_at and binding <= modules_at <= now
+        else None
+    )
+    fields["shield_fitted"] = {
+        "value": fitted,
+        "observed_at": timestamp("modules") if fitted is not None else None,
+        "quality": "recorded" if fitted is not None else "unknown",
+    }
+    concerns = []
+    hull = fields["hull"]["value"]
+    if (
+        fields["hull"]["quality"] == "recent"
+        and hull is not None
+        and round(hull * 100, 1) < 100
+    ):
+        check = _hull_check(SimpleNamespace(hull_health=hull))
+        concerns.append(
+            {
+                "id": "hull",
+                "severity": "warning"
+                if check["status"] == STATUS_ATTENTION
+                else "note",
+                "label": "Hull damage recorded",
+                "action": "Check repair services when convenient."
+                if hull >= _HULL_25_FRACTION
+                else "Avoid further damage and seek repairs when safe.",
+            }
+        )
+    main, capacity = fields["fuel"]["value"], fields["fuel_capacity"]["value"]
+    fuel_check = _fuel_check(
+        SimpleNamespace(fuel_main=main, fuel_capacity_main=capacity)
+    )
+    if (
+        fields["fuel"]["quality"] == "recent"
+        and fuel_check["status"] == STATUS_ATTENTION
+    ):
+        concerns.append(
+            {
+                "id": "fuel",
+                "severity": "warning",
+                "label": "Fuel low",
+                "action": (
+                    "Check your in-game fuel display and consider refuelling "
+                    "before further travel. No remaining range is inferred."
+                ),
+            }
+        )
+    elif (
+        fields["fuel"]["quality"] == "recent"
+        and main is not None
+        and capacity is not None
+        and capacity > 0
+        and main > capacity
+    ):
+        concerns.append(
+            {
+                "id": "fuel",
+                "severity": "note",
+                "label": "Fuel readings disagree",
+                "action": (
+                    "Main-tank quantity exceeds recorded capacity. Recheck the "
+                    "tank in Elite before planning further travel."
+                ),
+            }
+        )
+    docked, shields = fields["docked"], fields["shields"]
+    if (
+        shields["quality"] == "recent"
+        and shields["value"] is False
+        and fitted is True
+        and docked["quality"] == "recent"
+        and docked["value"] is False
+    ):
+        concerns.append(
+            {
+                "id": "shields",
+                # Undocked does not establish flight: landed/on-foot context
+                # is not represented by this snapshot. Keep this a reminder.
+                "severity": "note",
+                "label": "Shields down · undocked",
+                "action": (
+                    "A shield generator is recorded, with shields down and "
+                    "the ship undocked. This does not establish whether you "
+                    "are flying. Check shield power and recharge in Elite "
+                    "before flight."
+                ),
+            }
+        )
+    heat = fields["heat"]
+    if (
+        heat["quality"] == "recent"
+        and heat["value"] is not None
+        and heat["value"] >= _HEAT_WARNING_FRACTION
+    ):
+        concerns.append(
+            {
+                "id": "heat",
+                "severity": "warning",
+                "label": "Heat elevated",
+                "action": (
+                    "Check your in-game heat display and reduce heat exposure "
+                    "when safe."
+                ),
+            }
+        )
+    finance = rebuy_observations(state, now=now)
+    cargo = known_cargo(state)
+    cargo_at = _watch_time(cargo.get("event_timestamp"))
+    cargo_valid = bool(
+        bound
+        and binding
+        and cargo_at
+        and binding <= cargo_at <= now
+        and cargo.get("vessel") == "Ship"
+        and cargo.get("observed")
+    )
+    cargo_summary: dict[str, Any] = {
+        "observed": cargo_valid,
+        "observed_at": cargo.get("event_timestamp") if cargo_valid else None,
+        "total_count": cargo.get("total_count") if cargo_valid else None,
+        "limpets": cargo.get("limpets") if cargo_valid else None,
+        "goods": sum(
+            entry["count"]
+            for group in ("sellable", "mission", "stolen")
+            for entry in cargo[group]
+        )
+        if cargo_valid
+        else None,
+    }
+    if (
+        cargo_valid
+        and cargo_summary["limpets"] + cargo_summary["goods"]
+        != cargo_summary["total_count"]
+    ):
+        cargo_summary["observed"] = False
+    return {
+        "subject": {
+            "commander_profile_key": snap.commander_name,
+            "ship_id": snap.current_ship_id,
+        },
+        "max_dynamic_age_seconds": SHIP_WATCH_RECENT_SECONDS,
+        "fields": fields,
+        "concerns": concerns,
+        "rebuy": finance,
+        "cargo": cargo_summary,
+        "caveat": (
+            "Recorded checks only; no activity-specific readiness or remaining "
+            "fuel range is inferred."
+        ),
+    }
+
+
+def rebuy_observations(
+    state: StateManager, *, now: datetime | None = None
+) -> dict[str, Any]:
+    """Recorded wallet and compatible comparison, distinct from current cover.
+
+    Use the same financial source selector as Commander Profile. A balance is
+    commander-scoped; a quote must also belong to the current ship/loadout.
+    Historical arithmetic compares observations, never asserts simultaneous
+    funds or future solvency. Keep the recorded figures even when comparison
+    fails, so failure of a check is not presented as absence of a record.
+    """
+    now = now or datetime.now(timezone.utc)
+    snap = state.snapshot
+    wallet = wallet_snapshot_payload(state)
+
+    def source_at(key: str) -> str | None:
+        source = state.get_field_source(key)
+        return source.timestamp if source else None
+
+    commander_at = _watch_time(source_at("commander_name"))
+    ship_at = _watch_time(source_at("current_ship_id"))
+    modules_at = _watch_time(source_at("modules"))
+    credits, quote = wallet["credits"], wallet["rebuy"]
+    credit_at = _watch_time(credits["event_timestamp"])
+    quote_at = _watch_time(quote["event_timestamp"])
+    reason = None
+    if not snap.commander_name or not commander_at or commander_at > now:
+        reason = "commander_unconfirmed"
+    elif credits["value"] is None:
+        reason = "missing_credits"
+    elif quote["value"] is None:
+        reason = "missing_rebuy"
+    elif not credit_at or not quote_at or credit_at > now or quote_at > now:
+        reason = "times_unconfirmed"
+    elif credit_at < commander_at or quote_at < commander_at:
+        reason = "commander_changed"
+    elif snap.current_ship_id is None or not ship_at or ship_at > now:
+        reason = "ship_unconfirmed"
+    elif "estimated" in quote["caveat"].lower():
+        reason = "estimated_rebuy"
+    elif quote_at < ship_at:
+        reason = "quote_before_ship"
+    elif modules_at and quote_at < modules_at:
+        reason = "quote_before_loadout"
+    elif any(
+        not isinstance(field["value"], (int, float))
+        or isinstance(field["value"], bool)
+        or not math.isfinite(field["value"])
+        or field["value"] < 0
+        for field in (credits, quote)
+    ):
+        reason = "invalid_amount"
+    historical = "unknown"
+    shortfall = None
+    if reason is None:
+        check = _rebuy_check(
+            SimpleNamespace(credit_balance=credits["value"], rebuy_cost=quote["value"])
+        )
+        historical = "shortfall" if check["status"] == STATUS_ATTENTION else "covered"
+        shortfall = max(0, quote["value"] - credits["value"])
+    recent = bool(
+        credit_at
+        and 0 <= (now - credit_at).total_seconds() <= SHIP_WATCH_RECENT_SECONDS
+    )
+    # A newer quote may follow spending on a ship or its outfit. Retain a
+    # legitimate older commander balance for historical arithmetic, but do
+    # not promote it to current affordability across that change.
+    balance_after_quote = bool(credit_at and quote_at and credit_at >= quote_at)
+    return {
+        "coverage": historical if recent and balance_after_quote else "unknown",
+        "historical_coverage": historical,
+        "shortfall": shortfall,
+        "reason": reason
+        or (
+            "balance_stale"
+            if not recent
+            else "balance_before_quote"
+            if not balance_after_quote
+            else None
+        ),
+        "recorded": {"credits": credits, "rebuy": quote},
+        "commander_observed_at": source_at("commander_name"),
+        "ship_observed_at": source_at("current_ship_id"),
+        "loadout_observed_at": source_at("modules"),
     }
 
 

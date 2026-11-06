@@ -1,0 +1,73 @@
+name: Bug report
+description: Report a reproducible OmniCOVAS problem.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve OmniCOVAS. Search existing issues first.
+        **Privacy:** Never post API keys, access tokens, private commander details,
+        complete Journal files, unredacted logs, or security vulnerabilities here.
+        For security issues, follow [the private reporting policy](https://github.com/RocketsProjects/OmniCovas/security/policy).
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area affected
+      options:
+        - Startup, installation, or packaging
+        - Dashboard or commander state
+        - Engineering or outfitting
+        - Navigation or exploration
+        - Intel, operations, or other data
+        - Overlay, HUD, or accessibility
+        - Settings, privacy, or external sources
+        - Other or unsure
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: OmniCOVAS version or commit
+      description: Include the commit SHA if building from source; write "unknown" if unavailable.
+      placeholder: "Commit or version"
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+      description: Describe the observable problem without personal commander information.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest repeatable sequence; note if it is intermittent.
+      placeholder: "1. Open ...\n2. Select ...\n3. Observe ..."
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows version, game mode, and any relevant companion tool versions.
+      placeholder: "Windows 11; Elite Dangerous Odyssey; ..."
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence or extra context
+      description: Optional screenshots or short excerpts after removing names, identifiers, paths, and secrets.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked that this public report contains no credentials, private commander data, or security-sensitive reproduction details.
+          required: true

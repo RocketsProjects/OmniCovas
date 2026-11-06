@@ -81,7 +81,14 @@ def commodity_key(name: Any) -> str:
     token = str(name or "").strip().lower()
     if not token:
         return ""
-    return _COMMODITY_STRIP.sub("", token)
+    token = re.sub(r"[\s_-]+", "", _COMMODITY_STRIP.sub("", token))
+    # Source symbols vs player names, verified against EDCD/FDevIDs commodity
+    # rows 128673848 and 128924332 (2026-11-05); no runtime provider lookup.
+    return {
+        "lowtemperaturediamonds": "lowtemperaturediamond",
+        "voidopal": "opal",
+        "voidopals": "opal",
+    }.get(token, token)
 
 
 def display_name(item: dict[str, Any]) -> str:
@@ -119,6 +126,8 @@ def known_cargo(
         # manifest is Unknown; it is never read as an empty hold.
         return {
             "observed": False,
+            "event_timestamp": payload.get("event_timestamp"),
+            "vessel": payload.get("vessel"),
             "reason": payload.get("fallback")
             or (
                 "The most recent cargo reading reported a total without an item "
@@ -171,6 +180,8 @@ def known_cargo(
 
     return {
         "observed": True,
+        "event_timestamp": payload.get("event_timestamp"),
+        "vessel": payload.get("vessel"),
         "reason": None,
         "capacity": payload.get("capacity"),
         "total_count": payload.get("total_count"),

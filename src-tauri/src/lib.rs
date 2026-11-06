@@ -994,6 +994,28 @@ async fn show_overlay_test_banner(app: tauri::AppHandle) -> Result<(), String> {
     overlay::show_overlay(app).await
 }
 
+fn valid_galnet_article(url: &str) -> bool {
+    const PREFIX: &str = "https://www.elitedangerous.com/news/galnet/";
+    url.strip_prefix(PREFIX).is_some_and(|slug| {
+        !slug.is_empty()
+            && slug.len() <= 220
+            && slug
+                .bytes()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')
+    })
+}
+
+#[tauri::command]
+async fn open_galnet_article(app: tauri::AppHandle, url: String) -> Result<String, String> {
+    use tauri_plugin_shell::ShellExt;
+    if !valid_galnet_article(&url) {
+        return Err("Only original GalNet article links can be opened here.".into());
+    }
+    #[allow(deprecated)]
+    app.shell().open(&url, None).map_err(|e| e.to_string())?;
+    Ok(url)
+}
+
 #[tauri::command]
 async fn show_overlay_named_test_banner(
     app: tauri::AppHandle,
@@ -1106,6 +1128,7 @@ pub fn run() {
             overlay::set_overlay_click_through,
             show_overlay_test_banner,
             show_overlay_named_test_banner,
+            open_galnet_article,
             get_bridge_info
         ])
         .run(tauri::generate_context!())
@@ -1117,6 +1140,23 @@ mod tests {
     use super::*;
     use std::io::Read as _;
     use std::net::TcpListener;
+
+    #[test]
+    fn galnet_opener_accepts_only_canonical_article_slugs() {
+        assert!(valid_galnet_article(
+            "https://www.elitedangerous.com/news/galnet/test-story"
+        ));
+        for url in [
+            "javascript:alert(1)",
+            "https://www.elitedangerous.com.evil.test/news/galnet/test",
+            "https://www.elitedangerous.com/news/galnet/../login",
+            "https://www.elitedangerous.com/news/galnet/test?private=data",
+            "https://www.elitedangerous.com/news/galnet/",
+            "https://www.elitedangerous.com/news/galnet/feed.xml",
+        ] {
+            assert!(!valid_galnet_article(url));
+        }
+    }
 
     fn exists_none(_: &Path) -> bool {
         false

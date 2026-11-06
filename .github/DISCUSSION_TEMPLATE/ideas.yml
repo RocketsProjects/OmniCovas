@@ -1,0 +1,19 @@
+title: "[Idea] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are welcome, from early concepts to detailed workflows. For an
+        actionable proposal ready for tracking, use the Feature request issue form.
+        Keep discussion local-first, privacy-conscious, and within game rules.
+  - type: textarea
+    id: opportunity
+    attributes:
+      label: What Commander problem could this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: sketch
+    attributes:
+      label: What might the experience look like?
+      description: Optional. Describe a moment in the cockpit or a workflow you imagine.

@@ -588,9 +588,26 @@
       if (arrival) root.prepend(arrival);
       /* A handoff that arrived while this render was in flight wins over the
          controller's previous domain, otherwise the render undoes it. */
+      const transferredSearch = pendingTransferDomain === 'search';
       this._setDomain(pendingTransferDomain || this._activeDomain || 'system');
       this._applyInboundRouteTransfer(root);
+      // A mounted handoff may already have submitted the query and consumed
+      // its route intent while this async render was in flight. Rebuilding
+      // the controls must keep that explicit search and its owned results.
+      this._restoreSearch(root, transferredSearch);
       pendingTransferDomain = null;
+    }
+
+    _restoreSearch(root, transferredSearch = false) {
+      const selected=this._lastQuery;
+      if(!selected?.query?.trim())return;
+      const input=root.querySelector('.search-panel-input');
+      if(input){ input.value=selected.query;input.setAttribute('data-mode',selected.mode); }
+      window.Uiv3Frame?.setUiv3TabSelection(root.querySelector('.search-panel-modes'),selected.mode,{
+        selector:'.search-panel-mode',valueAttribute:'data-mode',
+      });
+      const resultDomain=selected.mode==='commodity'?'commodities':selected.mode==='module'?'modules':selected.mode;
+      if(transferredSearch || this._activeDomain===resultDomain)this.handleSearch(selected.query,selected.mode);
     }
 
     /* PB10-R5 (Phase 10 reconciliation): consume an inbound RouteTransferIntent

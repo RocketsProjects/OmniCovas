@@ -8,11 +8,13 @@ const HOTKEY: &str = "Ctrl+Shift+O";
 
 /// Initialize the overlay window and register the Ctrl+Shift+O global hotkey.
 ///
-/// The overlay is made click-through and shown once here, parked at 1x1. On
-/// Windows only the first show of a window created unfocused is
-/// non-activating (tao uses SW_SHOWNOACTIVATE once, then SW_SHOW), so the
-/// overlay is never hidden and re-shown afterwards: it is moved, sized and
-/// parked instead, which never activates it or takes focus from the game.
+/// The overlay is created visible (see tauri.conf.json) and is made
+/// click-through and parked at 1x1 here. On Windows only a show during the
+/// creation of an unfocused window is non-activating: tao uses
+/// SW_SHOWNOACTIVATE then, and from 0.37 it clears that marker when creation
+/// ends, so a later first show() would be SW_SHOW and take the foreground.
+/// The overlay is never hidden and re-shown afterwards: it is moved, sized
+/// and parked instead, which never activates it or takes focus from the game.
 ///
 /// Hotkey failure is logged but does not crash the app — overlay still works
 /// via present/park commands from JS.

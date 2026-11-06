@@ -104,6 +104,7 @@ class ShipProfileResponse(BaseModel):
     role_fit: RoleFitBody
     caveat: str
     nullprovider_safe: bool
+    watch: dict[str, Any]
 
 
 @router.get("", response_model=ReadinessResponse)

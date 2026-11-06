@@ -18,6 +18,7 @@ const node = (tag, cls = '', text) => {
 };
 
 const DESTINATIONS = {
+  mining: { route: '/operations', label: 'Review prospector report' },
   exploration: { route: '/operations', label: 'Review in Operations' },
   engineering: { route: '/engineering', label: 'Review in Engineering' },
   'activity-log': { route: '/activity-log', label: 'Review in Activity Log' },
@@ -95,6 +96,8 @@ export function createAttentionLane({ shell = window.Shell, events = window.Omni
       originRoute: route,
       originPackage: 'Notifications',
       targetRoute: target.route,
+      targetEntityId: slot.destination === 'mining' ? 'mining' : undefined,
+      targetSectionId: slot.destination === 'mining' ? 'operations-mining-workspace' : undefined,
       targetLabel: slot.heading,
       reason: 'Review what this notice was about.',
       returnLabel: 'Back',

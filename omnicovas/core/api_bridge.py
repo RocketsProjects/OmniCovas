@@ -27,9 +27,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import socket
 import time
 from collections import deque
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -213,6 +215,11 @@ class ApiBridge:
             activity_log if activity_log is not None else ActivityLog()
         )
         self._session_factory = session_factory
+        self.operations_objectives = (
+            OperationsObjectiveService(session_factory, self._confirmation_activity_log)
+            if session_factory
+            else None
+        )
         self._commander_memory = commander_memory_service
         # PB10-R6: stated explicitly. The only production consumers of this
         # gate are advisory (Phase 9 campaign AI draft; route-activation
@@ -246,6 +253,13 @@ class ApiBridge:
                 else None
             ),
         )
+        from omnicovas.features.mining_prospector import MiningProspector
+
+        self.mining_prospector = MiningProspector(
+            self.operations_objectives, self.notification_shadow, notify=self.push_event
+        )
+        self.notification_shadow.mining_prospector = self.mining_prospector
+        self._confirmation_activity_log.observe(self.mining_prospector.observe_activity)
         self._confirmation_activity_log.observe(
             self.notification_shadow.observe_activity
         )
@@ -301,6 +315,9 @@ class ApiBridge:
             commander_memory_service.add_forget_hook(
                 purge=self.notification_shadow.purge_profile,
                 after=self.notification_shadow.after_forget,
+            )
+            commander_memory_service.add_forget_hook(
+                after=self.mining_prospector.after_forget
             )
         self.notification_shadow.opportunity_providers = (
             self.galactic_intelligence.recent_opportunities,
@@ -459,11 +476,8 @@ class ApiBridge:
         operations_router.set_activity_log(self._confirmation_activity_log)
         operations_router.set_confirmation_gate(self._gate)
         if self._session_factory is not None:
-            operations_router.set_objective_service(
-                OperationsObjectiveService(
-                    self._session_factory, self._confirmation_activity_log
-                )
-            )
+            operations_router.set_objective_service(self.operations_objectives)
+        operations_router.set_mining_prospector(self.mining_prospector)
         app.include_router(operations_router.router)
 
         # Phase 4 (PB04-06): Combat session, mission, rewards/rank, loadout readiness
@@ -503,6 +517,29 @@ class ApiBridge:
         # Activity Log export authorization + staged export proof.
         activity_log_router.set_activity_log(self._confirmation_activity_log)
         app.include_router(activity_log_router.router)
+
+        # Public, unpersonalized news has its own consent and bounded cache.
+        # It never blocks local telemetry and never enables another provider.
+        from omnicovas.api import galaxy_today as galaxy_today_router
+        from omnicovas.api import source as source_router_api
+        from omnicovas.core.source_registry import SourceRegistry
+        from omnicovas.features.galnet import GalnetReader
+
+        news_registry = source_router_api.get_source_registry()
+        if news_registry is None:
+            news_registry = SourceRegistry()
+            source_router_api.set_source_registry(news_registry)
+        self._galnet_reader = GalnetReader(
+            cache_path=Path(os.environ.get("APPDATA", str(Path.home())))
+            / "OmniCOVAS"
+            / "cache"
+            / "galnet-news-v1.json",
+            enabled=lambda: self._vault.get("privacy_galnet_news") == "true",
+            registry=news_registry,
+            activity_log=self._confirmation_activity_log,
+        )
+        galaxy_today_router.set_reader(self._galnet_reader)
+        app.include_router(galaxy_today_router.router)
 
         @app.get("/health")  # type: ignore[misc,untyped-decorator,unused-ignore]
         async def health() -> dict[str, Any]:

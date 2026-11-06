@@ -720,6 +720,7 @@ class PrivacyController {
       ai_provider_calls: "AI Provider API Calls",
       crash_reports: "Crash Reports",
       usage_analytics: "Usage Analytics",
+      galnet_news: "GalNet News Updates",
     };
     return labels[key] || key;
   }

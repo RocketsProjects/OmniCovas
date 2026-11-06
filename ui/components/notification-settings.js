@@ -138,10 +138,14 @@ export function createNotificationSettings({ fetchJson, sendJson, openTab = null
     behaviour.append(node('legend', '', 'Behaviour'));
     behaviour.append(checkbox('ns-quiet', form.quiet, 'Quiet mode',
       'Holds every non-critical notice. Critical ship alerts still appear.', (v) => { form.quiet = v; }));
+    behaviour.append(checkbox('ns-mining-targets', form.mining_target_alerts === true,
+      'Prospector target-find alerts',
+      'Optional notices when a new prospector report contains your selected Mining Target. Also available from Mining → Prospector. Quiet mode still holds these notices.',
+      (v) => { form.mining_target_alerts = v; }));
     behaviour.append(checkbox('ns-overlay-glances', form.overlay_glances,
       'Show non-critical notices in the in-game overlay',
       'Off by default. When off, milestones appear only in this window. Never on during combat or interdiction, and a critical alert always replaces a notice.',
-      (v) => { form.overlay_glances = v; }, { disabled: form.profile === 'Minimal' }));
+      (v) => { form.overlay_glances = v; }, { disabled: form.profile === 'Minimal' && !form.mining_target_alerts }));
     behaviour.append(select('ns-duration', 'How long a notice stays',
       DURATIONS.map((s) => [s, `${s} seconds`]), form.duration, (v) => { form.duration = Number(v); }));
     behaviour.append(node('p', 'ns-help',

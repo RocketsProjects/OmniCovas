@@ -425,6 +425,7 @@ PRIVACY_TOGGLES = frozenset(
         "ai_provider_calls",
         "crash_reports",
         "usage_analytics",
+        "galnet_news",
     }
 )
 
@@ -441,6 +442,12 @@ PHASE6_PROVIDER_LOCK_REASON = (
 )
 
 PRIVACY_DESCRIPTIONS = {
+    "galnet_news": (
+        "Allow public GalNet RSS updates while the Dashboard is open, at most "
+        "once per 15 minutes. Only a fixed public feed request is sent to "
+        "Frontier; no commander identity, gameplay data or credentials. "
+        "A short attributed copy is kept locally for offline reading."
+    ),
     "eddn_submission": (
         "EDDN market submission/read-cache consent placeholder. "
         f"{PHASE6_PROVIDER_LOCK_REASON}"
@@ -500,6 +507,10 @@ async def set_privacy_toggle(
         )
 
     enabled = body.get("enabled", False)
+    if toggle_key == "galnet_news" and not isinstance(enabled, bool):
+        raise HTTPException(
+            status_code=400, detail="GalNet consent must be true or false"
+        )
     vault = _ensure_vault()
     if toggle_key in PHASE6_LOCKED_PROVIDER_TOGGLES:
         vault.set(f"privacy_{toggle_key}", "false")

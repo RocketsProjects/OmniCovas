@@ -46,6 +46,24 @@
   const WORKSPACE_VM_URL = '../view-models/operations-workspaces.js';
   const LOCAL_CONTEXT_VM_URL = '../view-models/local-context.js';
   const LOCAL_CONTEXT_SURFACES_URL = '../components/local-context-surfaces.js';
+  let _deckPlatform = null;
+  let _widgetSelectors = null;
+  let _miningDeck = null;
+  let _miningPage = 0;
+  let _workflowSubject = null;
+  let _workflowTarget = null;
+  let _modeReadEpoch = 0;
+  let _loadEpoch = 0;
+  let _lastSeenWidgetScope = null;
+  const deckPromise = Promise.all([
+    import('../components/widget-host.js'),
+    import('../components/widget-registry.js'),
+    import('../view-models/widget-snapshot.js'),
+    import('../components/mining-tracking.js'),
+  ]).then(([host, registry, selectors, tracking]) => {
+    _deckPlatform = { ...host, ...tracking, miningManifest: registry.miningManifest };
+    _widgetSelectors = selectors;
+  });
 
   let _primitives = null;
   let _commanderVM = null;
@@ -898,6 +916,11 @@
      shows what the store returned, so a write that did not land cannot be
      rendered as though it had. */
   async function reloadObjective(operation) {
+    if (operation === 'mining') {
+      await refreshOperationInputs(operation);
+      if (_manualOperation === operation && getRoot() !== null) renderWorkspace(operation);
+      return;
+    }
     const payload = await fetchJson(`/operations/objectives/${encodeURIComponent(operation)}`);
     if (_manualOperation !== operation) return;
     inputs.commanderObjective = payload;
@@ -2679,6 +2702,7 @@
    * Idle selector (Correction #7 — preserved exactly, now uses v3 chrome)
    * ────────────────────────────────────────────── */
   function renderIdleSelector() {
+    disposeMiningDeck();
     const root = getRoot();
     if (!root || !_primitives || !_commanderVM) return;
     const { createOperationSelector } = _primitives;
@@ -2922,8 +2946,11 @@
      Commander has since selected. */
   async function refreshOperationInputs(operation) {
     if (!needsModeInputs(operation)) return false;
+    const epoch = ++_modeReadEpoch;
+    const subject = window.Shell?.getWidgetSnapshot?.().subject || null;
     const resolved = await loadOperationInputs(operation);
-    if (_manualOperation !== operation) return false;
+    if (_manualOperation !== operation || epoch !== _modeReadEpoch
+      || (_widgetSelectors && _widgetSelectors.subjectKey(subject) !== _widgetSelectors.subjectKey(window.Shell?.getWidgetSnapshot?.().subject))) return false;
     inputs.readiness = resolved.readiness;
     inputs.readinessPending = false;
     inputs.explorationSnapshot = resolved.explorationSnapshot;
@@ -2936,10 +2963,13 @@
     inputs.combatPending = false;
     inputs.commanderObjective = resolved.commanderObjective;
     inputs.commanderObjectivePending = false;
+    _workflowSubject = subject;
+    _workflowTarget = _widgetSelectors?.objectiveKey(resolved.commanderObjective?.objective);
     return true;
   }
 
   function selectOperation(id) {
+    if(id==='mining' && _widgetSelectors)_lastSeenWidgetScope=_widgetSelectors.subjectKey(window.Shell?.getWidgetSnapshot?.().subject);
     _manualOperation = id;
     writeManualOperation(id);
     /* Invalidate first: no readiness, blocker or next action from the previous
@@ -2956,10 +2986,289 @@
     });
   }
 
+  let _miningDialog = null;
+  let _prospectorDialog = null;
+  let _objectiveDialogSignature = null;
+
+  function disposeMiningDeck() {
+    if (_miningDeck) _miningPage = _miningDeck.page;
+    _miningDeck?.dispose();
+    _miningDeck = null;
+    _miningDialog?.close();
+    _miningDialog = null;
+    _prospectorDialog?.close(); _prospectorDialog=null;
+    document.body.classList.remove('rcd-deck-active');
+  }
+
+  function miningWidgetSnapshot() {
+    return { ...(window.Shell?.getWidgetSnapshot?.() || {}),
+      miningWorkflow: inputs.miningWorkflow, workflowSubject: _workflowSubject,
+      workflowOperation: 'mining', workflowTarget: _workflowTarget,
+      objective: inputs.commanderObjective?.objective || null,
+      objectiveAvailable: inputs.commanderObjective?.available === true };
+  }
+
+  function openMiningTracking(trigger) {
+    const scope = _widgetSelectors.subjectKey(miningWidgetSnapshot().subject);
+    const scopeReady = Boolean(miningWidgetSnapshot().subject?.commander_profile_key)
+      && scope === _widgetSelectors.subjectKey(_workflowSubject);
+    const record = scopeReady ? inputs.commanderObjective?.objective || null : null;
+    const revision = JSON.stringify(record);
+    const stillCurrent = () => _manualOperation === 'mining'
+      && scope === _widgetSelectors.subjectKey(miningWidgetSnapshot().subject)
+      && revision === JSON.stringify(inputs.commanderObjective?.objective || null);
+    const workflow = _widgetSelectors.miningWorkflowForSnapshot(miningWidgetSnapshot());
+    const cargo = _widgetSelectors.selectWidget('CMD-06', miningWidgetSnapshot());
+    const observed = [...(workflow?.prospector?.latest?.composition || []).map(row => row.name),
+      ...(workflow?.cargo?.sellable || []).map(row => row.name)];
+    const content = _deckPlatform.createMiningTracking({ record, observed,
+      capacity: cargo.display.state === 'unknown' ? null : miningWidgetSnapshot().localContextRaw?.cargo_hold?.capacity,
+      available: scopeReady && inputs.commanderObjective?.available === true,
+      pending: !scopeReady || inputs.commanderObjectivePending, busy: _objectiveBusy,
+      onCancel: () => { if (_miningDialog === dialog) dialog.close(); },
+      async onSave(target) {
+        if (!stillCurrent()) throw new Error('Commander, ship or saved plan changed. Reopen ore tracking before saving.');
+        if (record?.state !== 'completed' && record?.target_commodity === target.commodity && record?.target_quantity === target.quantity) {
+          if (_miningDialog === dialog) dialog.close(); return;
+        }
+        if (record) {
+          if (_miningDialog === dialog) dialog.close();
+          await runProtectedObjectiveAction('mining', 'change', target.text, target);
+        } else {
+          await submitFirstObjective('mining', target.text, target);
+          if (_objectiveStatus?.tone === 'error') throw new Error(_objectiveStatus.message);
+          if (_miningDialog === dialog) dialog.close();
+        }
+      },
+      onAction(action) {
+        if (!stillCurrent()) return;
+        if (_miningDialog === dialog) dialog.close(); runProtectedObjectiveAction('mining', action);
+      },
+    });
+    const dialog = _deckPlatform.openDeckDetail({ title: 'Track an ore', content, trigger,
+      onClose: () => { if (_miningDialog === dialog) _miningDialog = null; } });
+    _miningDialog = dialog;
+    dialog.dataset.miningSubject = scope;
+    dialog.dataset.miningWaiting = String(!scopeReady || inputs.commanderObjectivePending || inputs.commanderObjective?.available !== true);
+    content.querySelector('input')?.focus({preventScroll:true});
+  }
+
+  function prospectorDetail(includeSettings = true) {
+    const workflow = _widgetSelectors.miningWorkflowForSnapshot(miningWidgetSnapshot());
+    const data = workflow?.prospector;
+    const root = safeEl('section','rcd-prospector-detail');
+    const tabs=safeEl('nav','rcd-task-actions');tabs.setAttribute('aria-label','Prospector sections');
+    const content=safeEl('section','rcd-prospector-reading');content.dataset.prospectorPanel='latest';
+    const history=safeEl('section','rcd-prospector-history-panel');history.dataset.prospectorPanel='recent';history.hidden=true;
+    const settings=safeEl('section','rcd-prospector-settings');settings.dataset.prospectorPanel='alerts';settings.hidden=true;
+    const session=safeEl('section','rcd-mining-session');session.dataset.prospectorPanel='session';session.hidden=true;
+    const select=key=>{
+      root.dataset.activeTab=key;
+      root.querySelectorAll('[data-prospector-panel]').forEach(panel=>{panel.hidden=panel.dataset.prospectorPanel!==key;});
+      tabs.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.prospectorTab===key)));
+    };
+    for(const [key,label] of [['latest','Latest scan'],['recent','Recent scans'],['alerts','Alerts'],['session','Yield & sales']]){
+      const button=safeEl('button','rcd-button',label);button.type='button';button.dataset.prospectorTab=key;
+      button.addEventListener('click',()=>select(key));tabs.append(button);
+    }
+    root.append(tabs,content,history,settings,session);select('latest');
+    const recorded=workflow?.session;
+    session.append(safeEl('h3','','Recorded yield & sales'));
+    session.append(safeEl('p','',recorded?.refined_observed && Number.isFinite(recorded.refined_tonnes)
+      ? `${recorded.refined_tonnes.toLocaleString()} t refined in recorded events` : 'Refined quantity has not been observed.'));
+    (recorded?.refined_top || []).forEach(row=>session.append(safeEl('p','',`${row.name}: ${row.tonnes} t refined`)));
+    session.append(safeEl('p','',Number.isFinite(recorded?.sales_recorded) ? `${recorded.sales_recorded} recorded sales` : 'Sales have not been checked.'));
+    if(Number.isFinite(recorded?.sale_revenue))session.append(safeEl('p','',`${recorded.sale_revenue.toLocaleString()} Cr received from recorded sales`));
+    if(Number.isFinite(recorded?.realised_profit))session.append(safeEl('p','',`${recorded.realised_profit.toLocaleString()} Cr profit with a recorded cost basis`));
+    session.append(safeEl('p','','Refined events, ore still aboard and sold cargo are different totals. Old cargo in your hold is not counted as newly refined; market price estimates are not earnings.'));
+    const target = data?.target;
+    content.append(safeEl('p','',target ? `Checking reports for ${target}.` : 'Every report shows its composition. Choose an ore only if you want target-find alerts.'));
+    const report=data?.latest;
+    if (!report) content.append(safeEl('p','','Waiting for a new prospector report from Elite. Fire a prospector limpet at an asteroid in the game. Older journal replay does not trigger an alert.'));
+    else {
+      content.append(safeEl('h3','',!target ? 'No target selected for this report' : report.matched ? report.depleted ? 'Target reported · asteroid depleted' : 'Your target was reported' : report.composition_observed ? 'Target not reported in this sample' : 'Target not confirmed · incomplete report'));
+      content.append(safeEl('p','',`Scanned ${report.observed_at ? new Date(report.observed_at).toLocaleTimeString() : 'at an unknown time'}. This is the last scan; remaining material can change as you mine.`));
+      content.append(safeEl('p','',report.remaining == null ? 'Remaining percentage not reported.' : `${report.remaining}% remaining at this observation.`));
+      const table=safeEl('table','rcd-manifest');table.append(safeEl('caption','','Prospector composition'));
+      (report.composition || []).forEach(row=>{const tr=safeEl('tr');tr.append(safeEl('th','',row.name),safeEl('td','',row.proportion==null?'Not reported':`${row.proportion}%`));table.append(tr);});content.append(table);
+      if(report.core)content.append(safeEl('p','',`Core mineral reported: ${report.core}. Core extraction requires its own equipment and steps.`));
+      if(report.material_content)content.append(safeEl('p','',`Material content category: ${report.material_content}. This category is separate from ore proportions.`));
+    }
+    history.append(safeEl('p','',data && Array.isArray(data.reports) && Number.isInteger(data.matching_reports)
+      ? `${data.matching_reports} matching scans among the latest ${data.reports.length}. Current Commander, ship and session only; repeat scans can be of the same asteroid.` : 'Recent scan history is not available.'));
+    const list=safeEl('ul','rcd-prospector-history');
+    (data?.reports || []).forEach(r=>list.append(safeEl('li','',`${new Date(r.observed_at).toLocaleTimeString()}: ${r.depleted?'Depleted':r.matched?'Target reported':r.composition_observed?'Target not reported':'Incomplete report'}${r.proportion==null?'':` · ${r.proportion}%`}`)));
+    history.append(list);
+    const track = safeEl('button','rcd-button',target ? 'Change tracked ore' : 'Track an ore from this report'); track.type='button';
+    track.addEventListener('click',()=>openMiningTracking(document.querySelector('[data-rcd-track-ore]')));content.append(track);
+    if(!includeSettings)return root;
+    settings.append(safeEl('h3','','Target-find alerts'));
+    settings.append(safeEl('p','','Optional notices for new matching reports. Critical ship alerts keep priority. Quiet mode, combat holds and your overlay choices still apply.'));
+    const status=safeEl('p','','Reading your notification preference…');status.setAttribute('role','status');settings.append(status);
+    const scope=_widgetSelectors.subjectKey(window.Shell?.getWidgetSnapshot?.().subject);
+    fetchJson('/notifications/preferences').then(payload=>{
+      if(!settings.isConnected||scope!==_widgetSelectors.subjectKey(window.Shell?.getWidgetSnapshot?.().subject))return;
+      if(!payload?.preferences){status.textContent='Notification settings are unavailable. Nothing changed.';return;}
+      const button=safeEl('button','rcd-button','');button.type='button';button.dataset.prospectorAlerts='';
+      let enabled=payload.preferences.mining_target_alerts===true;
+      const label=()=>{button.textContent=enabled?'Target-find alerts: On':'Enable target-find alerts';button.setAttribute('aria-pressed',String(enabled));};label();
+      status.textContent=enabled?'Alerts are enabled for this Commander.':'Alerts are off for this Commander.';settings.append(button);
+      button.addEventListener('click',async()=>{
+        button.disabled=true;
+        try{
+          const latest=await fetchJson('/notifications/preferences');
+          if(!latest?.preferences||scope!==_widgetSelectors.subjectKey(window.Shell?.getWidgetSnapshot?.().subject))throw new Error('Commander changed or settings unavailable. Nothing changed.');
+          const response=await fetch(`${apiBase()}/notifications/preferences`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({preferences:{...latest.preferences,mining_target_alerts:!enabled}})});
+          if(!response.ok)throw new Error('Could not save this preference. Nothing changed.');
+          enabled=!enabled;label();status.textContent=enabled?'Enabled. A new matching prospector report can now produce a notice.':'Target-find alerts are off. Reports remain available here.';
+        }catch(error){status.textContent=error.message;}finally{button.disabled=false;}
+      });
+    });
+    return root;
+  }
+
+  function renderMiningDeck(root, ctx) {
+    const activeRoute = window.location.hash.split('#').filter(Boolean)[0];
+    if (activeRoute && activeRoute !== '/operations') { disposeMiningDeck(); return; }
+    document.body.classList.add('rcd-deck-active');
+    const snapshot=miningWidgetSnapshot();
+    const scope = _widgetSelectors.subjectKey(snapshot.subject);
+    const scopeReady=Boolean(snapshot.subject?.commander_profile_key) && scope===_widgetSelectors.subjectKey(_workflowSubject);
+    if(_miningDialog?.open && _miningDialog.dataset.miningSubject !== scope)_miningDialog.close();
+    const record=scopeReady ? inputs.commanderObjective?.objective : null;
+    const manifest = _deckPlatform.miningManifest(record,_widgetSelectors.miningWorkflowForSnapshot(snapshot));
+    const manifestKey = JSON.stringify(manifest);
+    const oreLabel = record?.state === 'active' ? record.target_commodity : null;
+    const resumeTracking = _miningDialog?.open && _miningDialog.dataset.miningWaiting === 'true'
+      && scopeReady && !inputs.commanderObjectivePending && inputs.commanderObjective?.available === true;
+    if (_miningDeck?.root.isConnected && _miningDeck.root.dataset.manifest !== manifestKey) {
+      _miningPage = _miningDeck.page; _miningDeck.dispose(); _miningDeck = null;
+      _miningDialog?.close();_prospectorDialog?.close();
+    }
+    if (_miningDeck?.root.isConnected) {
+      _miningDeck.refresh();
+      const track=root.querySelector('[data-rcd-track-ore]');
+      if(track)track.textContent=oreLabel ? `Tracking: ${oreLabel}` : 'Track an ore';
+      if(resumeTracking)openMiningTracking(track);
+      if(_prospectorDialog?.open){
+        const previous=_prospectorDialog.querySelector('.rcd-prospector-detail');
+        if(previous){
+          const next=prospectorDetail(false), settings=previous.querySelector('.rcd-prospector-settings');
+          const focus=document.activeElement, tab=previous.dataset.activeTab || 'latest';
+          if(settings)next.querySelector('.rcd-prospector-settings').replaceWith(settings);
+          previous.replaceWith(next);next.querySelector(`[data-prospector-tab="${tab}"]`)?.click();
+          if(focus?.isConnected)focus.focus({preventScroll:true});
+        }
+      }
+      return;
+    }
+    const wrap = safeEl('section', 'rcd-workspace operations-workspace operations-mining-deck');
+    wrap.id = 'operations-mining-workspace';
+    wrap.dataset.operation = 'mining';
+    wrap.dataset.operationConfidence = 'manual';
+    wrap.setAttribute('aria-labelledby','operations-title');
+    const alert = _primitives.createInterruptBanner(ctx?.interrupts || [], {onResolveAction:{label:'Open Activity Log',href:'#/activity-log'}});
+    if (alert) wrap.append(alert);
+    const heading = safeEl('header','rcd-workspace-heading');
+    const previousReturn=root.querySelector('.rcd-workspace-heading .rcd-arrival');
+    if(previousReturn)heading.append(previousReturn);
+    const h1 = safeEl('h1','','Mining'); h1.id='operations-title';
+    const actions=safeEl('div','rcd-mining-header-actions');
+    const track=safeEl('button','rcd-button',oreLabel ? `Tracking: ${oreLabel}` : 'Track an ore');track.type='button';track.dataset.rcdTrackOre='';
+    track.addEventListener('click',()=>openMiningTracking(track));
+    const prospector=safeEl('button','rcd-button','Reports & alerts');prospector.type='button';prospector.dataset.rcdProspector='';
+    prospector.addEventListener('click',()=>{
+      const dialog=_deckPlatform.openDeckDetail({title:'Prospector reports',content:prospectorDetail(),trigger:prospector,onClose:()=>{if(_prospectorDialog===dialog)_prospectorDialog=null;}});
+      _prospectorDialog=dialog;
+    });
+    actions.append(track,prospector);heading.append(h1,actions);
+    const task=buildOpsV3EngineeringTaskCard(inputs);
+    if(task){
+      const plan=safeEl('button','rcd-button','Ship plan');plan.type='button';plan.dataset.rcdShipPlan='';
+      plan.addEventListener('click',()=>_deckPlatform.openDeckDetail({title:'Active ship plan',content:buildOpsV3EngineeringTaskCard(inputs),trigger:plan}));
+      actions.append(plan);
+    }
+    wrap.append(heading,buildOpsV3ModeBar('mining',selectOperation));
+    _miningDeck = _deckPlatform.createWidgetDeck({
+      instances:manifest, context:'Mining deck', initialPage:_miningPage,
+      getSnapshot:miningWidgetSnapshot,
+      subscribe(update) {
+        window.OmniEvents?.addEventListener('widget-snapshot',update);
+        return () => window.OmniEvents?.removeEventListener('widget-snapshot',update);
+      },
+      onPage(page) { _miningPage=page; },
+      renderDetail(instance, payload) {
+        if (instance.widgetId === 'ops.mining.prospector') return prospectorDetail();
+        if (instance.widgetId === 'ops.mining.next-step') return miningNextDetail(payload);
+        return null;
+      },
+      onDetail(instance, dialog) {
+        if(instance.widgetId === 'ops.mining.prospector') _prospectorDialog=dialog;
+      },
+      detailContent(instance) {
+        const content = safeEl('div','rcd-mining-widget-actions rcd-task-actions');
+        if (instance.widgetId === 'ops.mining.fill') {
+          const change = safeEl('button','rcd-button','Change ore or quantity goal');change.type='button';
+          change.addEventListener('click',()=>openMiningTracking(track));content.append(change);
+        }
+        if (instance.widgetId === 'ship.cargo') {
+          const workflow=_widgetSelectors.miningWorkflowForSnapshot(miningWidgetSnapshot());
+          const buyers=(workflow?.handoffs || []).filter(h=>h.id==='intel_commodity')
+            .map(h=>({...h,label:`Find a buyer for ${h.query}`}));
+          const handoffs=buildEconomyHandoffs(buyers,'operations-mining-workspace');
+          if(handoffs)content.append(handoffs);
+        }
+        return content;
+      },
+    });
+    _miningDeck.root.dataset.manifest = manifestKey;
+    wrap.append(_miningDeck.root);
+    root.replaceChildren(wrap);
+    if(resumeTracking)openMiningTracking(track);
+    if(window.Shell?.getRouteTransferIntent?.('/operations')?.targetSectionId==='active_engineering_task')actions.querySelector('[data-rcd-ship-plan]')?.click();
+    window.Shell?.applyRouteTransferArrival?.('/operations',root);
+  }
+
+  function miningNextDetail(payload) {
+    const content = safeEl('section','rcd-mining-next-detail');
+    const workflow = _widgetSelectors.miningWorkflowForSnapshot(miningWidgetSnapshot());
+    const onward = () => {
+      const selected=(workflow?.handoffs || []).filter(h=>h.id==='intel_commodity' || (h.id==='navigation_route' && ['return_to_market','sell_mined'].includes(workflow?.step?.kind)));
+      if(!selected.length)return;
+      const handoffs=buildEconomyHandoffs(selected.map(h=>h.id==='intel_commodity'?{...h,label:`Find a buyer for ${h.query}`} : h),'operations-mining-workspace');
+      if(handoffs)content.append(handoffs);
+      content.append(safeEl('p','','Buyer search opens Intel for your ore. Available prices depend on market observations; a sale is never guaranteed.'));
+    };
+    content.append(safeEl('p','rcd-detail-value',payload.display.headline));
+    if(payload.display.state === 'unknown' || payload.display.state === 'stale') {
+      content.append(safeEl('p','','Open Elite and let OmniCOVAS receive fresh ship and cargo readings before relying on setup advice. Your tracked ore is kept.'));
+      onward();
+      return content;
+    }
+    const full=payload.display.headline === 'Make room for ore';
+    if(full)content.append(safeEl('p','','No cargo space remains at this reading. Limpets also occupy cargo space; a full hold of limpets is not a hold full of mined ore. Manage space in Elite before collecting more cargo.'));
+    if(workflow?.step?.kind === 'fit_equipment') {
+      content.append(safeEl('p','','The last recorded loadout did not show all laser-mining equipment. Check the current ship in Elite; a missing observation is not proof a module is absent now.'));
+      const table=safeEl('table','rcd-manifest');table.append(safeEl('caption','','Last recorded mining equipment'));
+      Object.values(workflow.equipment?.capabilities || {}).forEach(cap=>{
+        const row=safeEl('tr');row.append(safeEl('th','',cap.label),safeEl('td','',cap.state==='fitted'?'Observed fitted':cap.state==='not_observed'?'Not seen in this loadout':'Not checked'));table.append(row);
+      });content.append(table);
+    } else if(!full)content.append(safeEl('p','',workflow?.step?.kind==='restock_limpets'
+      ? 'The recorded hold has no limpets. Restock in Elite before leaving the station.'
+      : 'Fire a prospector in Elite. Its reported minerals and percentages appear on this deck; target-find alerts are optional.'));
+    const actions=safeEl('div','rcd-task-actions');
+    const reports=safeEl('button','rcd-button','Review latest prospector');reports.type='button';
+    reports.addEventListener('click',()=>document.querySelector('[data-rcd-prospector]')?.click());actions.append(reports);
+    content.append(actions);
+    onward();
+    return content;
+  }
+
   /* ──────────────────────────────────────────────
    * Main workspace renderer (UI v3 restructured)
    * ────────────────────────────────────────────── */
   function renderWorkspace(operation) {
+    if (operation !== 'mining') disposeMiningDeck();
     if (operation === null || operation === undefined || operation === 'idle') {
       renderIdleSelector();
       return;
@@ -3009,6 +3318,11 @@
     inputs.sessionState = window.Shell?.eliteSessionState || inputs.sessionState;
     const ctx = deriveCommanderContext(inputs, operation);
     const ws  = deriveWorkspace(ctx.primaryOperation, inputs);
+
+    if (ctx.primaryOperation === 'mining' && _deckPlatform) {
+      renderMiningDeck(root, ctx, ws);
+      return;
+    }
 
     const wrap = safeEl('section', 'operations-workspace');
     wrap.setAttribute('aria-labelledby', 'operations-title');
@@ -3706,7 +4020,9 @@
   }
 
   async function loadAndRender() {
-    await Promise.all([primitivesPromise, commanderPromise, workspacePromise, localContextPromise, localSurfacesPromise]);
+    const loadEpoch = ++_loadEpoch;
+    const sourceSubject = window.Shell?.getWidgetSnapshot?.().subject || null;
+    await Promise.all([primitivesPromise, commanderPromise, workspacePromise, localContextPromise, localSurfacesPromise, deckPromise]);
     if (!_primitives || !_commanderVM || !_workspaceVM) {
       const missing = [
         !_primitives && 'shared controls',
@@ -3746,6 +4062,9 @@
          gives that intent something to land on. */
       fetchJson('/engineering/acquisition-plans'),
     ]);
+
+    if (loadEpoch !== _loadEpoch) return;
+    if (_widgetSelectors && _widgetSelectors.subjectKey(sourceSubject) !== _widgetSelectors.subjectKey(window.Shell?.getWidgetSnapshot?.().subject)) return loadAndRender();
 
     inputs.engineeringPlans = engineeringPlans;
     inputs.state = ship;
@@ -3822,6 +4141,32 @@
    * ────────────────────────────────────────────── */
   function bindEvents() {
     if (window.OmniEvents) {
+      window.OmniEvents.addEventListener('route-transfer-started', event => {
+        const intent=event.detail?.intent;
+        if(intent?.originPackage === 'Notifications' && intent.targetRoute === '/operations' && intent.targetEntityId === 'mining') {
+          selectOperation('mining').then(selected=>{
+            if(selected !== false && _manualOperation === 'mining' && window.location.hash.split('?')[0] === '#/operations')getRoot()?.querySelector('[data-rcd-prospector]')?.click();
+          });
+        }
+      });
+      window.OmniEvents.addEventListener('route-changed', (event) => {
+        if (event.detail?.route !== '/operations') disposeMiningDeck();
+      });
+      window.OmniEvents.addEventListener('widget-snapshot', () => {
+        const scope = _widgetSelectors?.subjectKey(window.Shell?.getWidgetSnapshot?.().subject);
+        if (_manualOperation === 'mining' && _widgetSelectors && scope !== _lastSeenWidgetScope) {
+          _lastSeenWidgetScope = scope;
+          _modeReadEpoch++;
+          inputs.miningWorkflow = null;
+          inputs.commanderObjective = null;
+          inputs.commanderObjectivePending = true;
+          _workflowSubject = null; _workflowTarget = null;
+          _miningDialog?.close(); _miningDialog=null;
+          _prospectorDialog?.close(); _prospectorDialog=null;
+          renderWorkspace('mining');
+          if (window.Shell?.getWidgetSnapshot?.().subject?.commander_profile_key) loadAndRender();
+        }
+      });
       window.OmniEvents.addEventListener('bridge-connected', loadAndRender);
       window.OmniEvents.addEventListener('event', (ev) => {
         const detail = ev.detail || {};
@@ -3832,22 +4177,27 @@
           fetchJson('/combat/snapshot').then((c) => { inputs.combat = c; renderWorkspace(_manualOperation); });
         }
         if (type === 'CARGO_CHANGED') {
+          const epoch = _loadEpoch;
+          const scope = _widgetSelectors?.subjectKey(window.Shell?.getWidgetSnapshot?.().subject);
           Promise.all([
             fetchJson('/pillar1/cargo'),
             fetchJson('/intel/local-context/snapshot'),
-          ]).then(([c, localContextSnap]) => {
+          ]).then(async ([c, localContextSnap]) => {
+            if (epoch !== _loadEpoch || scope !== _widgetSelectors?.subjectKey(window.Shell?.getWidgetSnapshot?.().subject)) return;
             inputs.cargo = c;
             inputs.localContext = _localContextVM?.deriveLocalContext(localContextSnap) || inputs.localContext;
+            if (_manualOperation === 'mining') await refreshOperationInputs('mining');
             renderWorkspace(_manualOperation);
           });
         }
         if (type === 'SHIP_STATE_CHANGED' || type === 'LOADOUT_CHANGED') {
           loadAndRender();
         }
+        if(type==='MINING_PROSPECTOR_UPDATED' && _manualOperation==='mining')refreshOperationInputs('mining').then(applied=>{if(applied)renderWorkspace('mining');});
       });
     }
     window.addEventListener('hashchange', () => {
-      if (window.location.hash === '#/operations') loadAndRender();
+      if (window.location.hash.split('#').filter(Boolean)[0] === '/operations') loadAndRender();
     });
   }
 
@@ -3885,6 +4235,9 @@
     /* R1-2 exploration workflow card — asserted directly against snapshot
        fixtures so the regression proves rendered behaviour. */
     buildOpsV3ExplorationCard,
+    // Source-contract renderer tests are separate from the delivered Mining
+    // deck's task tests. There is no runtime launcher for the legacy wall.
+    buildOpsV3MiningCard,
     /* R1-1 mode selection, including the async mode-input refresh. Returns the
        promise so tests await the resolved render rather than guessing at
        timing. */
@@ -3938,6 +4291,8 @@
       }
     },
     resetState() {
+      disposeMiningDeck();
+      _modeReadEpoch++; _loadEpoch++;
       Object.keys(inputs).forEach((k) => { inputs[k] = null; });
       _manualOperation = null;
       writeManualOperation(null);
@@ -3949,6 +4304,7 @@
       await workspacePromise;
       await localContextPromise;
       await localSurfacesPromise;
+      await deckPromise;
       return p;
     },
     /* Compatibility shims for older tests. */

@@ -163,6 +163,13 @@ def copy_for(c: Candidate) -> dict[str, Any]:
     area, heading, body = _GLANCE_COPY.get(
         c.copy_key, ("OmniCOVAS", "Notice", "Ready to review.")
     )
+    if c.copy_key == "prospector":
+        area, heading = "Mining", "Mining target found"
+        body = (
+            f"Target mineral reported at {c.value:g}%."
+            if c.value is not None
+            else "Target core mineral reported."
+        ) + " Review the latest prospector report in Mining."
     return {
         "severity": "notice",
         "label": f"OmniCOVAS · {area}",

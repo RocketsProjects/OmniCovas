@@ -1,0 +1,49 @@
+name: Feature request
+description: Propose a specific Commander-facing workflow or improvement.
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For open-ended brainstorming or general questions, use [Discussions](https://github.com/RocketsProjects/OmniCovas/discussions).
+        OmniCOVAS is local-first and advisory: requests for unattended gameplay automation,
+        bypassing permissions, or undisclosed data uploads are outside its design.
+  - type: textarea
+    id: need
+    attributes:
+      label: What are you trying to accomplish?
+      description: Explain the actual in-game or planning problem, not just a button or implementation idea.
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: What should the Commander experience be?
+      description: Describe the inputs, useful result, and when this should appear.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Best fitting area
+      options:
+        - Engineering and outfitting
+        - Exploration, exobiology, or navigation
+        - Combat, missions, Powerplay, or BGS
+        - Mining, trading, or markets
+        - Commander history, notifications, or dashboard
+        - Accessibility, voice, VR, or overlay
+        - Privacy, performance, or settings
+        - Other or cross-cutting
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Existing approach or related tools
+      description: Optional. Explain what you use now and what is missing.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I have not included private commander details, credentials, or security-sensitive information.
+          required: true

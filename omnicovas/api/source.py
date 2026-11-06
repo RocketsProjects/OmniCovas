@@ -42,6 +42,11 @@ def set_source_registry(registry: SourceRegistry | None) -> None:
     _registry = registry
 
 
+def get_source_registry() -> SourceRegistry | None:
+    """The shared source catalog for a source-specific production dispatcher."""
+    return _registry
+
+
 def register_plan(plan: WorkflowSourcePlan) -> None:
     """Record a WorkflowSourcePlan in the in-memory plan index.
 

@@ -271,6 +271,16 @@ class Director:
             and 0 <= now - c.observed_at <= limit
         )
 
+    def retire_prospector(self, current: Any, now: float) -> None:
+        """Only the latest report/selected target may wait in the attention slot."""
+        s = self.state
+        for key, candidate in list(s.deferred.items()):
+            if candidate.copy_key == "prospector" and not current(candidate):
+                del s.deferred[key]
+                self.emit(candidate, now, "expire", "prospector_superseded")
+        if s.visible and s.visible.copy_key == "prospector" and not current(s.visible):
+            self._clear_slot(now, "superseded")
+
     def current(self, condition: Condition, now: float) -> bool:
         """Is this condition's last accepted evidence still current?"""
         r = rule_for(condition.candidate.condition)

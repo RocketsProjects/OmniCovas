@@ -542,8 +542,11 @@ SYSTEM_NOTE_PROPOSAL_BLOCKED: Final[str] = "SYSTEM_NOTE_PROPOSAL_BLOCKED"
 # Audit aid: every constant exported by this module. Used by the Week 9
 # Critical Event Broadcaster audit test to guarantee no event-type
 # constant is referenced before it is declared here.
+MINING_PROSPECTOR_UPDATED: Final[str] = "MINING_PROSPECTOR_UPDATED"
+
 ALL_EVENT_TYPES: Final[frozenset[str]] = frozenset(
     {
+        MINING_PROSPECTOR_UPDATED,
         SHIP_STATE_CHANGED,
         LOADOUT_CHANGED,
         HULL_DAMAGE,

@@ -85,6 +85,7 @@ CONFIG_KEYS = frozenset(
         "privacy_ai_provider_calls",
         "privacy_crash_reports",
         "privacy_usage_analytics",
+        "privacy_galnet_news",
     }
 )
 

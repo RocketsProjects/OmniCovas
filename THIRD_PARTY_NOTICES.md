@@ -17,21 +17,21 @@ Build-only, development-only, declared-but-not-observed, and other-target packag
 
 ## Inventory summary
 
-The inventory contains **668 components**: **256 release-candidate components** and **412 retained non-release graph components**.
+The inventory contains **617 components**: **234 release-candidate components** and **383 retained non-release graph components**.
 
 | Ecosystem | Classification | Components |
 |---|---|---:|
-| npm | development-only | 94 |
+| npm | development-only | 84 |
 | python | build-only | 5 |
-| python | declared-runtime-not-observed-in-sidecar | 19 |
+| python | declared-runtime-not-observed-in-sidecar | 16 |
 | python | development-only | 19 |
-| python | packaged-development-tool | 6 |
-| python | packaged-runtime | 27 |
-| rust | build-only | 74 |
-| rust | release-runtime-graph | 223 |
-| rust | target-excluded | 201 |
+| python | packaged-development-tool | 9 |
+| python | packaged-runtime | 30 |
+| rust | build-only | 70 |
+| rust | release-runtime-graph | 195 |
+| rust | target-excluded | 189 |
 
-License metadata is present for **668** components; **0** are unknown and **0** are unknown without an explicit allowlisted disposition. Zero unknown metadata is not a legal clearance or an assertion that all obligations are satisfied.
+License metadata is present for **617** components; **0** are unknown and **0** are unknown without an explicit allowlisted disposition. Zero unknown metadata is not a legal clearance or an assertion that all obligations are satisfied.
 
 ## Qualified review required before publication
 
@@ -41,29 +41,32 @@ Metadata expressions containing review keywords in release classes:
 
 | Component | Version | Ecosystem | Evidence class | License |
 |---|---|---|---|---|
-| `cssparser` | 0.36.0 | rust | release-runtime-graph | MPL-2.0 |
+| `certifi` | 2026.10.23 | python | packaged-runtime | Mozilla Public License 2.0 (MPL 2.0) |
+| `cssparser` | 0.37.0 | rust | release-runtime-graph | MPL-2.0 |
 | `dtoa-short` | 0.3.5 | rust | release-runtime-graph | MPL-2.0 |
 | `option-ext` | 0.2.0 | rust | release-runtime-graph | MPL-2.0 |
-| `selectors` | 0.36.1 | rust | release-runtime-graph | MPL-2.0 |
+| `selectors` | 0.38.0 | rust | release-runtime-graph | MPL-2.0 |
 
 ## License-expression summary for release classes
 
 | Metadata expression | Components |
 |---|---:|
-| MIT OR Apache-2.0 | 109 |
-| MIT | 55 |
-| Apache-2.0 OR MIT | 25 |
+| MIT OR Apache-2.0 | 99 |
+| MIT | 43 |
+| Apache-2.0 OR MIT | 24 |
 | Unicode-3.0 | 15 |
-| BSD-3-Clause | 9 |
-| MIT/Apache-2.0 | 8 |
-| MIT License | 5 |
-| Unlicense OR MIT | 4 |
+| BSD-3-Clause | 10 |
+| Unlicense OR MIT | 7 |
+| MIT License | 4 |
+| MIT/Apache-2.0 | 4 |
 | MPL-2.0 | 4 |
-| MIT OR Apache-2.0 OR Zlib | 2 |
+| BSD License | 2 |
+| Apache-2.0 | 2 |
 | Unlicense/MIT | 2 |
-| BSD License | 1 |
+| Mozilla Public License 2.0 (MPL 2.0) | 1 |
 | MIT AND PSF-2.0 | 1 |
 | Apache-2.0 OR BSD-2-Clause | 1 |
+| BSD-2-Clause | 1 |
 | Python Software Foundation License | 1 |
 | Apache Software License OR MIT License | 1 |
 | PSF-2.0 | 1 |
@@ -75,138 +78,141 @@ Metadata expressions containing review keywords in release classes:
 | (Apache-2.0 OR MIT) AND BSD-3-Clause | 1 |
 | Apache-2.0 / MIT | 1 |
 | Zlib | 1 |
-| Apache-2.0 | 1 |
+| MIT OR Apache-2.0 OR Zlib | 1 |
 | Zlib OR Apache-2.0 OR MIT | 1 |
 | (MIT OR Apache-2.0) AND Unicode-3.0 | 1 |
-| BSD-2-Clause OR Apache-2.0 OR MIT | 1 |
 
 ## Release-class components
 
 | Component | Version | Ecosystem | Evidence class | License |
 |---|---|---|---|---|
 | `aiosqlite` | 0.22.1 | python | packaged-runtime | MIT License |
-| `annotated-doc` | 0.0.4 | python | packaged-runtime | MIT |
-| `annotated-types` | 0.7.0 | python | packaged-runtime | MIT License |
-| `anyio` | 4.14.2 | python | packaged-runtime | MIT |
-| `click` | 8.3.2 | python | packaged-runtime | BSD-3-Clause |
-| `colorama` | 0.4.6 | python | packaged-runtime | BSD License |
-| `fastapi` | 0.136.0 | python | packaged-runtime | MIT |
-| `greenlet` | 3.4.0 | python | packaged-runtime | MIT AND PSF-2.0 |
+| `annotated-doc` | 0.0.5 | python | packaged-runtime | MIT |
+| `annotated-types` | 0.8.0 | python | packaged-runtime | MIT |
+| `anyio` | 4.16.0 | python | packaged-runtime | MIT |
+| `ast_serialize` | 0.13.1 | python | packaged-development-tool | MIT |
+| `certifi` | 2026.10.23 | python | packaged-runtime | Mozilla Public License 2.0 (MPL 2.0) |
+| `click` | 8.5.0 | python | packaged-runtime | BSD-3-Clause |
+| `colorama` | 0.4.6 | python | packaged-development-tool | BSD License |
+| `fastapi` | 0.162.0 | python | packaged-runtime | MIT |
+| `greenlet` | 3.5.6 | python | packaged-runtime | MIT AND PSF-2.0 |
 | `h11` | 0.16.0 | python | packaged-runtime | MIT License |
-| `httptools` | 0.7.1 | python | packaged-runtime | MIT |
-| `idna` | 3.16 | python | packaged-runtime | BSD-3-Clause |
-| `librt` | 0.9.0 | python | packaged-development-tool | MIT |
-| `mypy` | 1.20.1 | python | packaged-development-tool | MIT |
-| `mypy_extensions` | 1.1.0 | python | packaged-development-tool | MIT |
+| `httpcore` | 1.0.9 | python | packaged-runtime | BSD-3-Clause |
+| `httptools` | 0.9.0 | python | packaged-runtime | MIT |
+| `httpx` | 0.28.1 | python | packaged-runtime | BSD License |
+| `idna` | 3.20 | python | packaged-runtime | BSD-3-Clause |
+| `librt` | 0.16.0 | python | packaged-development-tool | MIT |
+| `mypy` | 2.4.1 | python | packaged-development-tool | MIT |
+| `mypy_extensions` | 1.2.0 | python | packaged-development-tool | MIT |
+| `opentelemetry-api` | 1.45.2 | python | packaged-runtime | Apache-2.0 |
 | `packaging` | 26.3 | python | packaged-development-tool | Apache-2.0 OR BSD-2-Clause |
 | `psutil` | 7.2.2 | python | packaged-runtime | BSD-3-Clause |
-| `pydantic` | 2.13.2 | python | packaged-runtime | MIT |
-| `pydantic_core` | 2.46.2 | python | packaged-runtime | MIT |
-| `pytest` | 9.0.3 | python | packaged-development-tool | MIT |
-| `python-dotenv` | 1.2.2 | python | packaged-runtime | BSD-3-Clause |
-| `pywin32` | 311 | python | packaged-runtime | Python Software Foundation License |
+| `pydantic` | 2.14.3 | python | packaged-runtime | MIT |
+| `pydantic_core` | 2.50.4 | python | packaged-runtime | MIT |
+| `Pygments` | 2.21.0 | python | packaged-development-tool | BSD-2-Clause |
+| `pytest` | 9.2.0 | python | packaged-development-tool | MIT |
+| `python-dotenv` | 1.2.4 | python | packaged-runtime | BSD-3-Clause |
+| `pywin32` | 312 | python | packaged-runtime | Python Software Foundation License |
 | `PyYAML` | 6.0.3 | python | packaged-runtime | MIT License |
 | `setuptools` | 84.2.1 | python | packaged-development-tool | MIT |
 | `sniffio` | 1.3.1 | python | packaged-runtime | Apache Software License OR MIT License |
-| `SQLAlchemy` | 2.0.49 | python | packaged-runtime | MIT |
-| `starlette` | 1.3.1 | python | packaged-runtime | BSD-3-Clause |
-| `structlog` | 25.5.0 | python | packaged-runtime | MIT OR Apache-2.0 |
-| `typing-inspection` | 0.4.2 | python | packaged-runtime | MIT |
-| `typing_extensions` | 4.15.0 | python | packaged-runtime | PSF-2.0 |
-| `uvicorn` | 0.44.0 | python | packaged-runtime | BSD-3-Clause |
+| `SQLAlchemy` | 2.1.8 | python | packaged-runtime | MIT |
+| `starlette` | 1.10.0 | python | packaged-runtime | BSD-3-Clause |
+| `structlog` | 26.1.0 | python | packaged-runtime | MIT OR Apache-2.0 |
+| `typing-inspection` | 0.4.5 | python | packaged-runtime | MIT |
+| `typing_extensions` | 4.16.0 | python | packaged-runtime | PSF-2.0 |
+| `uvicorn` | 0.54.0 | python | packaged-runtime | BSD-3-Clause |
 | `watchdog` | 6.0.0 | python | packaged-runtime | Apache Software License |
-| `watchfiles` | 1.1.1 | python | packaged-runtime | MIT License |
-| `websockets` | 16.0 | python | packaged-runtime | BSD-3-Clause |
-| `ahash` | 0.7.8 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `aho-corasick` | 1.1.4 | rust | release-runtime-graph | Unlicense OR MIT |
-| `alloc-no-stdlib` | 2.0.4 | rust | release-runtime-graph | BSD-3-Clause |
-| `alloc-stdlib` | 0.2.2 | rust | release-runtime-graph | BSD-3-Clause |
-| `anyhow` | 1.0.102 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `arrayvec` | 0.7.6 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `base64` | 0.22.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `watchfiles` | 1.3.0 | python | packaged-runtime | MIT License |
+| `websockets` | 17.4 | python | packaged-runtime | BSD-3-Clause |
+| `aho-corasick` | 1.1.5 | rust | release-runtime-graph | Unlicense OR MIT |
+| `alloc-no-stdlib` | 3.0.0 | rust | release-runtime-graph | BSD-3-Clause |
+| `alloc-stdlib` | 0.3.0 | rust | release-runtime-graph | BSD-3-Clause |
+| `anyhow` | 1.0.104 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `base64` | 0.23.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `bit-set` | 0.8.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
 | `bit-vec` | 0.8.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `bitflags` | 2.11.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `bitvec` | 1.0.1 | rust | release-runtime-graph | MIT |
-| `borsh` | 1.6.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `brotli` | 8.0.2 | rust | release-runtime-graph | BSD-3-Clause AND MIT |
-| `brotli-decompressor` | 5.0.0 | rust | release-runtime-graph | BSD-3-Clause/MIT |
+| `bitflags` | 1.3.2 | rust | release-runtime-graph | MIT/Apache-2.0 |
+| `bitflags` | 2.13.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `brotli` | 9.1.1 | rust | release-runtime-graph | BSD-3-Clause AND MIT |
+| `brotli-decompressor` | 6.2.0 | rust | release-runtime-graph | BSD-3-Clause/MIT |
 | `bs58` | 0.5.1 | rust | release-runtime-graph | MIT/Apache-2.0 |
-| `byte-unit` | 5.2.0 | rust | release-runtime-graph | MIT |
-| `bytecheck` | 0.6.12 | rust | release-runtime-graph | MIT |
-| `byteorder` | 1.5.0 | rust | release-runtime-graph | Unlicense OR MIT |
-| `bytes` | 1.11.1 | rust | release-runtime-graph | MIT |
-| `camino` | 1.2.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `bytes` | 1.12.1 | rust | release-runtime-graph | MIT |
+| `camino` | 1.2.6 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `cargo-platform` | 0.1.9 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `cargo_metadata` | 0.19.2 | rust | release-runtime-graph | MIT |
-| `cfb` | 0.7.3 | rust | release-runtime-graph | MIT |
-| `cfg-if` | 1.0.4 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `chrono` | 0.4.44 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `cookie` | 0.18.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `crossbeam-channel` | 0.5.15 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `crossbeam-utils` | 0.8.21 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `cssparser` | 0.36.0 | rust | release-runtime-graph | MPL-2.0 |
-| `ctor` | 0.8.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `deranged` | 0.5.8 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `cfb` | 0.14.0 | rust | release-runtime-graph | MIT |
+| `cfg-if` | 1.0.5 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `chrono` | 0.4.45 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `cookie` | 0.18.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `core_detect` | 1.0.0 | rust | release-runtime-graph | MIT/Apache-2.0 |
+| `crossbeam-channel` | 0.5.17 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `crossbeam-utils` | 0.8.23 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `cssparser` | 0.37.0 | rust | release-runtime-graph | MPL-2.0 |
+| `ctor` | 1.0.13 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `defmt` | 1.2.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `deranged` | 0.5.9 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `derive_more` | 2.1.1 | rust | release-runtime-graph | MIT |
-| `dirs` | 6.0.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `dirs` | 7.0.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `dirs-sys` | 0.5.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `dom_query` | 0.27.0 | rust | release-runtime-graph | MIT |
+| `dom_query` | 0.28.0 | rust | release-runtime-graph | MIT |
 | `dpi` | 0.1.2 | rust | release-runtime-graph | Apache-2.0 AND MIT |
 | `dtoa` | 1.0.11 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `dtoa-short` | 0.3.5 | rust | release-runtime-graph | MPL-2.0 |
-| `dtor` | 0.3.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
 | `dunce` | 1.0.5 | rust | release-runtime-graph | CC0-1.0 OR MIT-0 OR Apache-2.0 |
 | `dyn-clone` | 1.0.20 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `encoding_rs` | 0.8.35 | rust | release-runtime-graph | (Apache-2.0 OR MIT) AND BSD-3-Clause |
-| `equivalent` | 1.0.2 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `erased-serde` | 0.4.10 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `encoding_rs` | 0.8.44 | rust | release-runtime-graph | (Apache-2.0 OR MIT) AND BSD-3-Clause |
+| `equivalent` | 1.0.3 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `erased-serde` | 0.4.11 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `fern` | 0.7.1 | rust | release-runtime-graph | MIT |
 | `fnv` | 1.0.7 | rust | release-runtime-graph | Apache-2.0 / MIT |
 | `foldhash` | 0.2.0 | rust | release-runtime-graph | Zlib |
 | `form_urlencoded` | 1.2.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `funty` | 2.0.0 | rust | release-runtime-graph | MIT |
-| `getrandom` | 0.2.17 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `getrandom` | 0.3.4 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `getrandom` | 0.4.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `glob` | 0.3.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `global-hotkey` | 0.7.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `getrandom` | 0.4.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `glob` | 0.3.4 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `global-hotkey` | 0.8.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
 | `hashbrown` | 0.12.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `hashbrown` | 0.17.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `hashbrown` | 0.17.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `heck` | 0.5.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `hex` | 0.4.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `html5ever` | 0.38.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `http` | 1.4.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `icu_collections` | 2.2.0 | rust | release-runtime-graph | Unicode-3.0 |
-| `icu_locale_core` | 2.2.0 | rust | release-runtime-graph | Unicode-3.0 |
-| `icu_normalizer` | 2.2.0 | rust | release-runtime-graph | Unicode-3.0 |
-| `icu_normalizer_data` | 2.2.0 | rust | release-runtime-graph | Unicode-3.0 |
-| `icu_properties` | 2.2.0 | rust | release-runtime-graph | Unicode-3.0 |
-| `icu_properties_data` | 2.2.0 | rust | release-runtime-graph | Unicode-3.0 |
-| `icu_provider` | 2.2.0 | rust | release-runtime-graph | Unicode-3.0 |
+| `html5ever` | 0.39.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `http` | 1.5.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `icu_collections` | 2.4.0 | rust | release-runtime-graph | Unicode-3.0 |
+| `icu_locale_core` | 2.4.0 | rust | release-runtime-graph | Unicode-3.0 |
+| `icu_normalizer` | 2.4.0 | rust | release-runtime-graph | Unicode-3.0 |
+| `icu_normalizer_data` | 2.4.0 | rust | release-runtime-graph | Unicode-3.0 |
+| `icu_properties` | 2.4.0 | rust | release-runtime-graph | Unicode-3.0 |
+| `icu_properties_data` | 2.4.0 | rust | release-runtime-graph | Unicode-3.0 |
+| `icu_provider` | 2.4.0 | rust | release-runtime-graph | Unicode-3.0 |
 | `idna` | 1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `idna_adapter` | 1.2.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `idna_adapter` | 1.2.2 | rust | release-runtime-graph | Apache-2.0 OR MIT |
 | `indexmap` | 1.9.3 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `indexmap` | 2.14.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `infer` | 0.19.0 | rust | release-runtime-graph | MIT |
+| `indexmap` | 2.14.2 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `infer` | 0.22.0 | rust | release-runtime-graph | MIT |
 | `itoa` | 1.0.18 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `json-patch` | 3.0.1 | rust | release-runtime-graph | MIT/Apache-2.0 |
-| `jsonptr` | 0.6.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `jiff` | 0.2.39 | rust | release-runtime-graph | Unlicense OR MIT |
+| `jiff-core` | 0.1.2 | rust | release-runtime-graph | Unlicense OR MIT |
+| `jiff-tzdb` | 0.1.9 | rust | release-runtime-graph | Unlicense OR MIT |
+| `jiff-tzdb-platform` | 0.1.3 | rust | release-runtime-graph | Unlicense OR MIT |
+| `json-patch` | 4.2.0 | rust | release-runtime-graph | MIT/Apache-2.0 |
+| `jsonptr` | 0.7.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `keyboard-types` | 0.7.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `libc` | 0.2.185 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `litemap` | 0.8.2 | rust | release-runtime-graph | Unicode-3.0 |
+| `keyboard-types` | 0.8.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `libc` | 0.2.191 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `litemap` | 0.8.3 | rust | release-runtime-graph | Unicode-3.0 |
 | `lock_api` | 0.4.14 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `log` | 0.4.29 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `markup5ever` | 0.38.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `memchr` | 2.8.0 | rust | release-runtime-graph | Unlicense OR MIT |
-| `mime` | 0.3.17 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `mio` | 1.2.0 | rust | release-runtime-graph | MIT |
-| `muda` | 0.19.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `log` | 0.4.35 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `markup5ever` | 0.39.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `memchr` | 2.8.3 | rust | release-runtime-graph | Unlicense OR MIT |
+| `mime` | 0.3.18 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `mio` | 1.2.4 | rust | release-runtime-graph | MIT |
+| `muda` | 0.20.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
 | `new_debug_unreachable` | 1.0.6 | rust | release-runtime-graph | MIT |
-| `num-conv` | 0.2.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `num-conv` | 0.2.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `num-traits` | 0.2.19 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `once_cell` | 1.21.4 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `open` | 5.3.4 | rust | release-runtime-graph | MIT |
+| `open` | 5.4.5 | rust | release-runtime-graph | MIT |
 | `option-ext` | 0.2.0 | rust | release-runtime-graph | MPL-2.0 |
 | `os_pipe` | 1.2.3 | rust | release-runtime-graph | MIT |
 | `parking_lot` | 0.12.5 | rust | release-runtime-graph | MIT OR Apache-2.0 |
@@ -215,135 +221,109 @@ Metadata expressions containing review keywords in release classes:
 | `phf` | 0.13.1 | rust | release-runtime-graph | MIT |
 | `phf_shared` | 0.13.1 | rust | release-runtime-graph | MIT |
 | `pin-project-lite` | 0.2.17 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `plist` | 1.8.0 | rust | release-runtime-graph | MIT |
-| `potential_utf` | 0.1.5 | rust | release-runtime-graph | Unicode-3.0 |
-| `powerfmt` | 0.2.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `ppv-lite86` | 0.2.21 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `plist` | 1.10.3 | rust | release-runtime-graph | MIT |
+| `potential_utf` | 0.1.6 | rust | release-runtime-graph | Unicode-3.0 |
+| `powerfmt` | 0.2.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `precomputed-hash` | 0.1.1 | rust | release-runtime-graph | MIT |
-| `proc-macro2` | 1.0.106 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `ptr_meta` | 0.1.4 | rust | release-runtime-graph | MIT |
-| `quick-xml` | 0.38.4 | rust | release-runtime-graph | MIT |
-| `quote` | 1.0.45 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `radium` | 0.7.0 | rust | release-runtime-graph | MIT |
-| `rand` | 0.8.6 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `rand_chacha` | 0.3.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `rand_core` | 0.6.4 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `proc-macro2` | 1.0.107 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `quick-xml` | 0.42.0 | rust | release-runtime-graph | MIT |
+| `quote` | 1.0.47 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `raw-window-handle` | 0.6.2 | rust | release-runtime-graph | MIT OR Apache-2.0 OR Zlib |
-| `ref-cast` | 1.0.25 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `regex` | 1.12.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `regex-automata` | 0.4.14 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `regex-syntax` | 0.8.10 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `rend` | 0.4.2 | rust | release-runtime-graph | MIT |
-| `rkyv` | 0.7.46 | rust | release-runtime-graph | MIT |
-| `rust_decimal` | 1.41.0 | rust | release-runtime-graph | MIT |
-| `rustc-hash` | 2.1.2 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `ref-cast` | 1.0.27 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `regex` | 1.13.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `regex-automata` | 0.4.18 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `regex-syntax` | 0.8.11 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `rustc-hash` | 2.1.3 | rust | release-runtime-graph | Apache-2.0 OR MIT |
 | `same-file` | 1.0.6 | rust | release-runtime-graph | Unlicense/MIT |
 | `schemars` | 0.8.22 | rust | release-runtime-graph | MIT |
 | `schemars` | 0.9.0 | rust | release-runtime-graph | MIT |
-| `schemars` | 1.2.1 | rust | release-runtime-graph | MIT |
+| `schemars` | 1.2.3 | rust | release-runtime-graph | MIT |
 | `scopeguard` | 1.2.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `seahash` | 4.1.0 | rust | release-runtime-graph | MIT |
-| `selectors` | 0.36.1 | rust | release-runtime-graph | MPL-2.0 |
+| `selectors` | 0.38.0 | rust | release-runtime-graph | MPL-2.0 |
 | `semver` | 1.0.28 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `serde` | 1.0.228 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `serde` | 1.0.229 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `serde-untagged` | 0.1.9 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `serde_core` | 1.0.228 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `serde_json` | 1.0.149 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `serde_spanned` | 1.1.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `serde_with` | 3.21.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `serde_core` | 1.0.229 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `serde_json` | 1.0.154 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `serde_spanned` | 1.1.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `serde_with` | 3.24.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `serialize-to-javascript` | 0.1.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `servo_arc` | 0.4.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `shared_child` | 1.1.1 | rust | release-runtime-graph | MIT |
+| `shared_child` | 1.1.2 | rust | release-runtime-graph | MIT |
 | `simdutf8` | 0.1.5 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `siphasher` | 1.0.2 | rust | release-runtime-graph | MIT/Apache-2.0 |
-| `smallvec` | 1.15.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `socket2` | 0.6.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `siphasher` | 1.0.4 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `smallvec` | 1.16.4 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `socket2` | 0.6.5 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `softbuffer` | 0.4.8 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `stable_deref_trait` | 1.2.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `string_cache` | 0.9.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `tao` | 0.35.2 | rust | release-runtime-graph | Apache-2.0 |
-| `tap` | 1.0.1 | rust | release-runtime-graph | MIT |
-| `tauri` | 2.11.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `tauri-plugin-global-shortcut` | 2.3.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `tauri-plugin-log` | 2.8.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `tauri-plugin-shell` | 2.3.5 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `tauri-plugin-window-state` | 2.4.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `tauri-runtime` | 2.11.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `tauri-runtime-wry` | 2.11.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `tauri-utils` | 2.9.3 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `tendril` | 0.5.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `thiserror` | 1.0.69 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `thiserror` | 2.0.18 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `time` | 0.3.47 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `time-core` | 0.1.8 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `tinystr` | 0.8.3 | rust | release-runtime-graph | Unicode-3.0 |
-| `tinyvec` | 1.11.0 | rust | release-runtime-graph | Zlib OR Apache-2.0 OR MIT |
-| `tinyvec_macros` | 0.1.1 | rust | release-runtime-graph | MIT OR Apache-2.0 OR Zlib |
-| `tokio` | 1.52.1 | rust | release-runtime-graph | MIT |
-| `toml` | 0.9.12+spec-1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `toml_datetime` | 0.7.5+spec-1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `toml_parser` | 1.1.2+spec-1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `toml_writer` | 1.1.1+spec-1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `tao` | 0.37.2 | rust | release-runtime-graph | Apache-2.0 |
+| `tauri` | 2.12.5 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `tauri-plugin-global-shortcut` | 2.4.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `tauri-plugin-log` | 2.10.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `tauri-plugin-shell` | 2.6.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `tauri-plugin-window-state` | 2.5.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `tauri-runtime` | 2.12.2 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `tauri-runtime-wry` | 2.12.3 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `tauri-utils` | 2.10.2 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `tendril` | 0.5.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `thiserror` | 2.0.21 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `time` | 0.3.55 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `time-core` | 0.1.9 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `tinystr` | 0.8.5 | rust | release-runtime-graph | Unicode-3.0 |
+| `tinyvec` | 1.13.3 | rust | release-runtime-graph | Zlib OR Apache-2.0 OR MIT |
+| `tokio` | 1.54.1 | rust | release-runtime-graph | MIT |
+| `toml` | 1.2.0+spec-1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `toml_datetime` | 1.1.2+spec-1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `toml_parser` | 1.1.5+spec-1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `toml_writer` | 1.2.0+spec-1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `tracing` | 0.1.44 | rust | release-runtime-graph | MIT |
 | `tracing-core` | 0.1.36 | rust | release-runtime-graph | MIT |
-| `tray-icon` | 0.23.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `tray-icon` | 0.25.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `typeid` | 1.0.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `unic-char-property` | 0.9.0 | rust | release-runtime-graph | MIT/Apache-2.0 |
-| `unic-char-range` | 0.9.0 | rust | release-runtime-graph | MIT/Apache-2.0 |
-| `unic-common` | 0.9.0 | rust | release-runtime-graph | MIT/Apache-2.0 |
-| `unic-ucd-ident` | 0.9.0 | rust | release-runtime-graph | MIT/Apache-2.0 |
-| `unic-ucd-version` | 0.9.0 | rust | release-runtime-graph | MIT/Apache-2.0 |
-| `unicode-ident` | 1.0.24 | rust | release-runtime-graph | (MIT OR Apache-2.0) AND Unicode-3.0 |
-| `unicode-segmentation` | 1.13.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `unicode-ident` | 1.0.27 | rust | release-runtime-graph | (MIT OR Apache-2.0) AND Unicode-3.0 |
+| `unicode-segmentation` | 1.13.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `url` | 2.5.8 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `urlpattern` | 0.3.0 | rust | release-runtime-graph | MIT |
-| `utf-8` | 0.7.6 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `utf8-width` | 0.1.8 | rust | release-runtime-graph | MIT |
-| `utf8_iter` | 1.0.4 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `uuid` | 1.23.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `value-bag` | 1.12.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `urlpattern` | 0.6.0 | rust | release-runtime-graph | MIT |
+| `utf8_iter` | 1.1.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `utf_types` | 1.0.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `uuid` | 1.29.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
 | `walkdir` | 2.5.0 | rust | release-runtime-graph | Unlicense/MIT |
-| `web_atoms` | 0.2.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `webview2-com` | 0.38.2 | rust | release-runtime-graph | MIT |
-| `webview2-com-sys` | 0.38.2 | rust | release-runtime-graph | MIT |
+| `web-time` | 1.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `web_atoms` | 0.2.6 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `webview2-com` | 0.39.1 | rust | release-runtime-graph | MIT |
+| `webview2-com-sys` | 0.39.1 | rust | release-runtime-graph | MIT |
 | `winapi-util` | 0.1.11 | rust | release-runtime-graph | Unlicense OR MIT |
-| `window-vibrancy` | 0.6.0 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `windows` | 0.61.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-collections` | 0.2.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-core` | 0.61.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-future` | 0.2.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-link` | 0.1.3 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `window-vibrancy` | 0.8.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `windows` | 0.62.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `windows-collections` | 0.3.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `windows-core` | 0.62.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `windows-future` | 0.3.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows-link` | 0.2.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-numerics` | 0.2.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-result` | 0.3.4 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-strings` | 0.4.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-sys` | 0.45.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `windows-numerics` | 0.3.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `windows-result` | 0.4.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `windows-strings` | 0.5.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows-sys` | 0.59.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows-sys` | 0.60.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows-sys` | 0.61.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-targets` | 0.42.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows-targets` | 0.52.6 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows-targets` | 0.53.5 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows-threading` | 0.1.0 | rust | release-runtime-graph | MIT OR Apache-2.0 |
+| `windows-threading` | 0.2.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows-version` | 0.1.7 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `windows_x86_64_msvc` | 0.42.2 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows_x86_64_msvc` | 0.52.6 | rust | release-runtime-graph | MIT OR Apache-2.0 |
 | `windows_x86_64_msvc` | 0.53.1 | rust | release-runtime-graph | MIT OR Apache-2.0 |
-| `winnow` | 0.7.15 | rust | release-runtime-graph | MIT |
-| `winnow` | 1.0.1 | rust | release-runtime-graph | MIT |
-| `writeable` | 0.6.3 | rust | release-runtime-graph | Unicode-3.0 |
-| `wry` | 0.55.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
-| `wyz` | 0.5.1 | rust | release-runtime-graph | MIT |
-| `yoke` | 0.8.2 | rust | release-runtime-graph | Unicode-3.0 |
-| `zerocopy` | 0.8.48 | rust | release-runtime-graph | BSD-2-Clause OR Apache-2.0 OR MIT |
-| `zerofrom` | 0.1.7 | rust | release-runtime-graph | Unicode-3.0 |
-| `zerotrie` | 0.2.4 | rust | release-runtime-graph | Unicode-3.0 |
-| `zerovec` | 0.11.6 | rust | release-runtime-graph | Unicode-3.0 |
-| `zmij` | 1.0.21 | rust | release-runtime-graph | MIT |
+| `winnow` | 1.0.5 | rust | release-runtime-graph | MIT |
+| `writeable` | 0.6.4 | rust | release-runtime-graph | Unicode-3.0 |
+| `wry` | 0.57.1 | rust | release-runtime-graph | Apache-2.0 OR MIT |
+| `yoke` | 0.8.4 | rust | release-runtime-graph | Unicode-3.0 |
+| `zerofrom` | 0.1.8 | rust | release-runtime-graph | Unicode-3.0 |
+| `zerotrie` | 0.2.5 | rust | release-runtime-graph | Unicode-3.0 |
+| `zerovec` | 0.11.9 | rust | release-runtime-graph | Unicode-3.0 |
+| `zmij` | 1.0.23 | rust | release-runtime-graph | MIT |
 
 ## Retained non-release graph evidence
 
-The durable inventory retains 412 additional components. See `sbom/dependency-license-inventory.csv` in the release directory or exact-commit CI evidence artifact for their versions, roles, licenses, and evidence classifications.
+The durable inventory retains 383 additional components. See `sbom/dependency-license-inventory.csv` in the release directory or exact-commit CI evidence artifact for their versions, roles, licenses, and evidence classifications.
 
 ## Elite Dangerous and Frontier Developments
 

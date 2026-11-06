@@ -1,15 +1,13 @@
 /**
- * OmniCOVAS Dashboard — Command Surface (UI v3 target rebuild).
+ * OmniCOVAS Dashboard — Command Surface (compact commander home, iteration 1).
  *
- * Authority: docs/internal/blueprints/OmniCOVAS_UI_UX_Master_Blueprint_v2_0_Human_Reference.md §9.1
+ * Authority: UI/UX Master Blueprint v2, ADRs 0003/0004/0005 and the
+ * Commander's Dashboard Design Iteration 1 commission.
  *
- * Dashboard answers "What matters right now?":
- *   1. InterruptBanner (critical states elevate over everything)
- *   2. WatchStrip      (compact ship/route vitals)
- *   3. CommandContextSpine (ship · system · station · destination)
- *   4. UI v3 Command Surface cards inside #dashboard-root
- *
- * Proof layer (collapsed) keeps source/route pins.
+ * Commander identity/location, ship watch, cargo and a recorded destination
+ * read the shared Shell snapshot. Focused details retain the global Director.
+ * Legacy formatter/schematic helpers below support existing component
+ * contracts and the shared connection surface, not a hidden old Dashboard.
  *
  * All dynamic values render via createElement + textContent per ADR 0003.
  * No invented data: only local Status / Loadout / Cargo / NavRoute / Heat.
@@ -34,6 +32,9 @@ import {
 import { deriveLocalContext } from '../view-models/local-context.js';
 import { formatActivityEventType } from '../utils/display-names.js';
 import { describeFreshness } from '../utils/freshness.js';
+import { createCommanderHome } from '../components/dashboard-command-deck.js';
+
+let commandHome = null;
 
 /* ── Utility helpers ── */
 const fmt = {
@@ -74,28 +75,6 @@ function heatClass(pct) {
 }
 
 /* ── Manual operation override persisted to localStorage. ── */
-const OPERATION_STORAGE_KEY = 'omnicovas.manualOperation';
-
-/* Smoke R3: Operations default is selector-only across the entire UI.
-   The Commander does not want legacy localStorage values reopening old
-   operations automatically; only an explicit current-session click opens
-   the workspace. On init we clear stale state and never read it back. */
-function readManualOperation() {
-  try {
-    window.localStorage?.removeItem(OPERATION_STORAGE_KEY);
-  } catch { /* localStorage unavailable */ }
-  return null;
-}
-
-function writeManualOperation(op) {
-  try {
-    if (op === null) window.sessionStorage?.removeItem(OPERATION_STORAGE_KEY);
-    else window.sessionStorage?.setItem(OPERATION_STORAGE_KEY, op);
-  } catch { /* localStorage unavailable; redux not required */ }
-}
-
-/* ── Legacy schematic / detail helpers retained for the detail drawer ── */
-
 function setCardState(cardId, state) {
   const card = el(cardId);
   if (!card) return;
@@ -554,16 +533,6 @@ function initializeDashboardPanelToggles() {
 /* ─────────────────────────────────────────────
    Fetch helpers
 ───────────────────────────────────────────── */
-async function fetchJSON(path) {
-  const base = window.Shell?.httpBase
-    || (window.OMNICOVAS_PORT ? `http://127.0.0.1:${window.OMNICOVAS_PORT}` : null);
-  if (!base) return null;
-  try {
-    const r = await fetch(`${base}${path}`);
-    return r.ok ? await r.json() : null;
-  } catch { return null; }
-}
-
 function safeEl(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -1140,19 +1109,6 @@ function getDashboardRoot() {
   return root;
 }
 
-function createDashboardTitle() {
-  const title = safeEl('h1', 'route-header-title dashboard-uiv3-route-title', 'Command');
-  title.id = 'dashboard-title';
-  return title;
-}
-
-function createDashboardBreadcrumb() {
-  const nav = safeEl('nav', 'dashboard-uiv3-breadcrumb');
-  nav.setAttribute('aria-label', 'Dashboard breadcrumb');
-  nav.append(safeEl('span', null, 'DASHBOARD'), safeEl('span', null, '>'), safeEl('span', null, 'COMMAND SURFACE'));
-  return nav;
-}
-
 function createMetricRow(label, value) {
   const row = safeEl('div', 'dashboard-uiv3-metric-row');
   row.append(safeEl('span', 'dashboard-uiv3-metric-label', label), safeEl('span', 'dashboard-uiv3-metric-value uiv3-tabnum', value));
@@ -1177,250 +1133,6 @@ function createActionLink(label, href, className = 'uiv3-command-button cmd-btn 
   return link;
 }
 
-function createDisabledAction(label, reason) {
-  const button = safeEl('button', 'dashboard-uiv3-ghost-action is-disabled', label);
-  button.type = 'button';
-  button.disabled = true;
-  button.setAttribute('aria-disabled', 'true');
-  if (reason) button.setAttribute('title', reason);
-  return button;
-}
-
-function createHero(model) {
-  const header = safeEl('header', 'dashboard-uiv3-hero dashboard-uiv3-hero--compact route-header');
-  const copy = safeEl('div', 'dashboard-uiv3-hero-copy');
-  copy.append(
-    createDashboardTitle(),
-    safeEl('p', 'route-header-status', 'Your current activity, ship watch, route, and next action.'),
-  );
-  const alert = safeEl('span', `dashboard-uiv3-alert-pill dashboard-uiv3-alert-pill--${model.alertKind}`);
-  alert.append(statusDot(model.alertKind === 'warn' ? 'warn' : 'ok'), document.createTextNode(model.alertLabel));
-  header.append(copy, alert);
-  return header;
-}
-
-function createCurrentOperationCard(model) {
-  const card = safeEl('article', 'dashboard-uiv3-card dashboard-uiv3-card--primary uiv3-corner-frame');
-  card.setAttribute('data-dashboard-zone', 'current-operation');
-  card.setAttribute('data-operation-confidence', model.operation.confidence);
-  const inner = safeEl('div', 'uiv3-corner-frame-inner dashboard-uiv3-card-inner');
-  inner.append(
-    safeEl('p', 'dashboard-uiv3-eyebrow', 'CURRENT ACTIVITY'),
-    safeEl('h2', 'dashboard-uiv3-card-title', model.operation.title),
-    safeEl('p', 'dashboard-uiv3-card-copy', model.operation.description),
-  );
-
-  /* PB10-R4: location is its own self-contained unit above the metric grid so
-     the Commander can always answer "where am I?" from the Dashboard. */
-  if (model.location) {
-    inner.appendChild(createLocationUnit(model.location));
-  }
-
-  const details = safeEl('details', 'dashboard-uiv3-details');
-  details.appendChild(safeEl('summary', 'dashboard-uiv3-card-action cmd-btn cmd-btn--quiet', 'Activity details'));
-  const meta = safeEl('div', 'dashboard-uiv3-card-meta');
-  meta.append(
-    createMetricRow('Last updated', model.snapshot),
-    createMetricRow('Entered by', model.operation.confidence === 'manual' ? 'You' : 'Game data'),
-  );
-  const facts = safeEl('dl', 'dashboard-uiv3-fact-row');
-  model.facts.filter(([, value]) => value !== 'Unknown' && value !== '—').forEach(([label, value]) => {
-    facts.append(safeEl('dt', 'dashboard-uiv3-fact-label', label), safeEl('dd', 'dashboard-uiv3-fact-value', value));
-  });
-  details.append(meta, facts);
-  inner.appendChild(details);
-
-  const actions = safeEl('div', 'dashboard-uiv3-actions');
-  actions.append(
-    createActionLink(model.operation.operation ? 'Open activity' : 'Choose activity', '#/operations', 'uiv3-command-button cmd-btn cmd-btn--primary'),
-  );
-  inner.appendChild(actions);
-  card.appendChild(inner);
-  return card;
-}
-
-function createRouteCard(model) {
-  const card = safeEl('article', 'dashboard-uiv3-card');
-  card.setAttribute('data-dashboard-zone', 'route-destination');
-  card.append(
-    safeEl('p', 'dashboard-uiv3-eyebrow', 'ROUTE'),
-    safeEl('h2', 'dashboard-uiv3-card-title', model.route.title),
-    model.route.destination === 'No route plotted'
-      ? safeEl('p', 'dashboard-uiv3-card-copy', 'Plot a route in Elite Dangerous or review saved routes.')
-      : safeEl('p', 'dashboard-uiv3-card-copy', model.route.summary),
-    createActionLink(model.route.action, '#/navigation', 'dashboard-uiv3-card-action cmd-btn cmd-btn--quiet'),
-  );
-  return card;
-}
-
-function createActivityCard(model) {
-  const card = safeEl('article', 'dashboard-uiv3-card');
-  card.setAttribute('data-dashboard-zone', 'recent-activity');
-  card.append(safeEl('p', 'dashboard-uiv3-eyebrow', 'RECENT ACTIVITY'), safeEl('h2', 'dashboard-uiv3-card-title', 'Recent Activity'));
-  if (model.activityEntries.length === 0) {
-    card.appendChild(safeEl('p', 'dashboard-uiv3-empty', 'No recent activity.'));
-  } else {
-    const list = safeEl('ul', 'dashboard-uiv3-activity-list');
-    model.activityEntries.forEach((entry) => {
-      const item = safeEl('li', 'dashboard-uiv3-activity-item');
-      item.append(
-        safeEl('span', 'dashboard-uiv3-activity-time', activityLogTimestamp(entry)),
-        safeEl('span', 'dashboard-uiv3-activity-type', activityLogType(entry)),
-        safeEl('span', 'dashboard-uiv3-activity-summary', activityLogSummary(entry)),
-      );
-      list.appendChild(item);
-    });
-    card.appendChild(list);
-  }
-  card.appendChild(createActionLink('Open Log', '#/activity-log', 'dashboard-uiv3-card-action cmd-btn cmd-btn--quiet'));
-  return card;
-}
-
-function familiarityVisits(memory) {
-  if (memory.visit_count === null) {
-    const seen = memory.observation_count ?? 0;
-    return `${seen} observation${seen === 1 ? '' : 's'}, visits not established`;
-  }
-  const visits = memory.visit_count ?? 0;
-  return `${visits} recorded visit${visits === 1 ? '' : 's'}`;
-}
-
-function createFamiliarityCard(model) {
-  if (!model.familiarity) return null;
-  const memory = model.familiarity;
-  const card = safeEl('article', 'dashboard-uiv3-card');
-  card.setAttribute('data-dashboard-zone', 'local-familiarity');
-  card.append(
-    safeEl('p', 'dashboard-uiv3-eyebrow', 'LOCAL FAMILIARITY'),
-    safeEl('h2', 'dashboard-uiv3-card-title', memory.display_name || 'Observed system'),
-    safeEl('p', 'dashboard-uiv3-card-copy',
-      `${memory.familiarity || 'Remembered'} · ${familiarityVisits(memory)}.`),
-    createMetricRow('Freshness', describeFreshness(memory).label),
-  );
-
-  const link = createActionLink(
-    'Open Observed Galaxy',
-    '#/intel',
-    'dashboard-uiv3-card-action cmd-btn cmd-btn--quiet',
-  );
-  link.addEventListener('click', (event) => {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    if (typeof window.Shell?.startRouteTransfer !== 'function') return;
-    event.preventDefault();
-    window.Shell.startRouteTransfer({
-      originRoute: '/dashboard',
-      originPackage: 'Dashboard',
-      originSectionId: 'dashboard-root',
-      targetRoute: '/intel',
-      targetSectionId: 'intel-domain-memory',
-      targetEntityId: memory.display_name || '',
-      targetLabel: 'Intel Observed Galaxy',
-      reason: 'Opening remembered local familiarity from the Dashboard.',
-      returnLabel: 'Return to Dashboard',
-      returnTarget: { route: '/dashboard' },
-    });
-  });
-  card.appendChild(link);
-  return card;
-}
-
-/* Quick Links: honest navigation shortcuts. Not commander-configurable pins —
-   real pinning does not exist yet, so this is labelled "Quick Links", not
-   "Pinned Tools" (PB-PHASE10-SUPER-03, Commander-reported issue #3).
-
-   PB10-R5 (Phase 10 reconciliation): these were previously bare hash links.
-   "Commodity Search" and "Module Search" were byte-identical `#/intel` links
-   that both landed on the Intel System brief — the destination was a valid
-   route, so route-walk smoke passed while the Commander never reached a
-   search. Each link now carries a RouteTransferIntent naming the destination
-   workspace (and, for search, the search mode), which also gives the arrival
-   banner and the return path to Dashboard. */
-const DASHBOARD_QUICK_LINKS = [
-  {
-    label: 'Commodity Search',
-    href: '#/intel',
-    targetRoute: '/intel',
-    targetSectionId: 'intel-domain-search',
-    targetEntityId: 'commodity',
-    targetLabel: 'Intel commodity search',
-    reason: 'Opening commodity search from the Dashboard.',
-  },
-  {
-    label: 'Module Search',
-    href: '#/intel',
-    targetRoute: '/intel',
-    targetSectionId: 'intel-domain-search',
-    targetEntityId: 'module',
-    targetLabel: 'Intel module search',
-    reason: 'Opening module search from the Dashboard.',
-  },
-  {
-    label: 'Engineering plans',
-    href: '#/engineering',
-    targetRoute: '/engineering',
-    targetSectionId: 'engineering-stage-plans',
-    targetEntityId: '',
-    targetLabel: 'Engineering plans',
-    reason: 'Opening engineering plans from the Dashboard.',
-  },
-];
-
-function startQuickLinkTransfer(entry) {
-  if (typeof window.Shell?.startRouteTransfer !== 'function') {
-    window.location.hash = entry.href;
-    return;
-  }
-
-  const started = window.Shell.startRouteTransfer({
-    originRoute: '/dashboard',
-    originPackage: 'Dashboard',
-    originSectionId: 'dashboard-root',
-    targetRoute: entry.targetRoute,
-    targetSectionId: entry.targetSectionId,
-    targetEntityId: entry.targetEntityId,
-    targetLabel: entry.targetLabel,
-    reason: entry.reason,
-    returnLabel: 'Return to Dashboard',
-    returnTarget: { route: '/dashboard' },
-  });
-
-  /* startRouteTransfer returns null for an unknown target route; fall back to
-     plain navigation rather than stranding the Commander. */
-  if (!started) {
-    window.location.hash = entry.href;
-  }
-}
-
-function createQuickLinksCard() {
-  const card = safeEl('article', 'dashboard-uiv3-card');
-  card.setAttribute('data-dashboard-zone', 'quick-links');
-  card.append(safeEl('p', 'dashboard-uiv3-eyebrow', 'QUICK LINKS'), safeEl('h2', 'dashboard-uiv3-card-title', 'Quick Links'));
-  const list = safeEl('div', 'dashboard-uiv3-tool-list');
-  DASHBOARD_QUICK_LINKS.forEach((entry) => {
-    const link = safeEl('a', 'dashboard-uiv3-tool-link cmd-btn cmd-btn--quiet');
-    /* Keep the href so the control stays a real link: middle-click, copy-link
-       and keyboard activation all keep working, and it degrades to plain
-       navigation if the handoff grammar is unavailable. */
-    link.setAttribute('href', entry.href);
-    link.setAttribute('data-quick-link', entry.targetEntityId
-      ? `${entry.targetRoute}:${entry.targetEntityId}`
-      : entry.targetRoute);
-    link.append(safeEl('span', 'dashboard-uiv3-tool-label', entry.label));
-    link.addEventListener('click', (event) => {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-        return;
-      }
-      event.preventDefault();
-      startQuickLinkTransfer(entry);
-    });
-    list.appendChild(link);
-  });
-  card.appendChild(list);
-  return card;
-}
-
-/* PB09-08: Phase 9 summary pins — summary/navigation only, no workflow ownership.
-   Each pin hides when its source state is Unknown / Not Loaded. */
 function createPhase9PinsSection() {
   const pins = [];
 
@@ -1479,19 +1191,18 @@ function createPhase9PinsSection() {
   return section;
 }
 
-function renderUiv3DashboardSurface(model) {
+function renderUiv3DashboardSurface() {
   const root = getDashboardRoot();
   if (!root) return;
-  const primary = createCurrentOperationCard(model);
-  const support = safeEl('section', 'dashboard-uiv3-support-grid');
-  support.append(createRouteCard(model), createActivityCard(model));
-  const familiarity = createFamiliarityCard(model);
-  if (familiarity) support.appendChild(familiarity);
-  support.appendChild(createQuickLinksCard());
-  const phase9Pins = createPhase9PinsSection();
-  const children = [createHero(model), primary, support];
-  if (phase9Pins) children.push(phase9Pins);
-  root.replaceChildren(...children);
+  document.body.classList.add('dashboard-home-active');
+  if (!commandHome || commandHome.root.parentNode !== root) {
+    commandHome?.dispose();
+    commandHome = createCommanderHome({ getSnapshot: () => ({
+      ...window.Shell?.getWidgetSnapshot?.(),
+      navSnap: window.Shell?.uiv3FrameState?.navSnap || null,
+    }) });
+    root.replaceChildren(commandHome.root);
+  } else commandHome.update();
 }
 
 function renderDashboardWatchRibbon(model) {
@@ -1648,14 +1359,23 @@ let _lastMemoryFamiliarity = null;
 let _lastPhase9Campaigns = null;
 let _lastPhase9BgsFacts = null;
 let _lastPhase9PowerplayFacts = null;
-let _manualOperation = readManualOperation();
+let _manualOperation = null;
 
 function mountCommandSurface() {
   if (!isDashboardRouteActive()) {
+    commandHome?.dispose(); commandHome = null;
+    document.body.classList.remove('dashboard-home-active');
     resetUiv3DashboardFrame();
     return;
   }
 
+  // The shell owns all reads, identity invalidation and observation timestamps.
+  const snapshot = window.Shell?.getWidgetSnapshot?.();
+  if (snapshot) {
+    _lastShipState = snapshot.shipState;
+    _lastLocalContextSnap = snapshot.localContextRaw;
+    _lastNavSnap = window.Shell?.uiv3FrameState?.navSnap || null;
+  }
   const input = {
     state: _lastShipState,
     heat:  _lastHeat,
@@ -1672,103 +1392,13 @@ function mountCommandSurface() {
   const ctx = deriveCommanderContext(input, _manualOperation);
   const dashboardModel = buildDashboardModel(input, ctx);
   renderUiv3DashboardFrame(dashboardModel);
-  renderUiv3DashboardSurface(dashboardModel);
+  renderUiv3DashboardSurface();
 }
 
 /* ─────────────────────────────────────────────
    Data load + event handlers
 ───────────────────────────────────────────── */
 
-async function refreshShipState(skipSurface = false) {
-  const s = await fetchJSON('/pillar1/ship-state');
-  if (s) {
-    _lastShipState = s;
-    window._lastShipState = s;
-    renderShipState(s);
-    renderHullShields(s, _lastLocalContextSnap || _lastMods);
-    renderFuel(s);
-    renderPips(s);
-    if (!skipSurface) mountCommandSurface();
-  }
-  return s;
-}
-
-async function refreshPips() {
-  const p = await fetchJSON('/pillar1/pips');
-  if (!p) return false;
-  if (p.sys != null) renderPipsGroup('pips-sys', p.sys);
-  if (p.eng != null) renderPipsGroup('pips-eng', p.eng);
-  if (p.wep != null) renderPipsGroup('pips-wep', p.wep);
-  return true;
-}
-
-async function loadDashboard() {
-  const [ship, cargo, heat, mods, navSnap, combat] = await Promise.all([
-    refreshShipState(true),
-    fetchJSON('/pillar1/cargo'),
-    fetchJSON('/pillar1/heat'),
-    fetchJSON('/pillar1/modules/summary'),
-    fetchJSON('/navigation/snapshot'),
-    fetchJSON('/combat/snapshot'),
-  ]);
-
-  _lastCargo   = cargo;
-  _lastHeat    = heat;
-  _lastMods    = mods;
-  _lastNavSnap = navSnap;
-  _lastCombat  = combat;
-
-  if (cargo) renderCargo(ship || {}, cargo.inventory);
-  if (heat)  renderHeat(heat);
-  if (mods)  renderModules(mods);
-  renderWallet(null);
-
-  mountCommandSurface();
-  renderShipSchematic(ship || {});
-  initializeDashboardPanelToggles();
-
-  const [intelSnap, sourceSnap, economicSnap, activityLog, engineeringSnap,
-    phase9Campaigns, phase9BgsFacts, phase9PowerplayFacts] = await Promise.all([
-    fetchJSON('/intel/snapshot'),
-    fetchJSON('/source/health'),
-    fetchJSON('/intel/economic/snapshot'),
-    fetchJSON('/activity-log'),
-    fetchJSON('/engineering/overview'),
-    /* PB09-08 Phase 9 summary pin sources — failures are non-fatal; pins hide on null */
-    fetchJSON('/operations/phase9/campaigns?state=active&limit=1').catch(() => null),
-    fetchJSON('/intel/phase9/bgs-facts').catch(() => null),
-    fetchJSON('/intel/phase9/powerplay-facts').catch(() => null),
-  ]);
-  _lastIntelSnap = intelSnap;
-  _lastSourceSnap = sourceSnap;
-  _lastEconomicSnap = economicSnap;
-  _lastActivityLog = activityLog;
-  _lastEngineeringSnap = engineeringSnap;
-  _lastPhase9Campaigns = phase9Campaigns;
-  _lastPhase9BgsFacts = phase9BgsFacts;
-  _lastPhase9PowerplayFacts = phase9PowerplayFacts;
-  _lastLocalContextSnap = await fetchJSON('/intel/local-context/snapshot');
-  const currentSystem = cleanText(_lastLocalContextSnap?.system_context?.star_system, null);
-  if (currentSystem) {
-    const memory = await fetchJSON(`/memory/observed?category=systems&q=${encodeURIComponent(currentSystem)}&limit=10&offset=0`);
-    _lastMemoryFamiliarity = Array.isArray(memory?.records)
-      ? memory.records.find((record) => String(record?.display_name || '').toLowerCase() === currentSystem.toLowerCase()) || null
-      : null;
-  } else {
-    _lastMemoryFamiliarity = null;
-  }
-  updateEliteSessionState(_lastLocalContextSnap);
-  renderWallet(_lastLocalContextSnap?.wallet_snapshot || null);
-  renderHullShields(_lastShipState || ship || {}, _lastLocalContextSnap || _lastMods);
-  renderShipState(_lastShipState || ship || {});
-  mountCommandSurface();
-}
-
-/* Correction #16 (repaired): the snapshot endpoint always returns a fresh
-   timestamp, so its presence proves local data exists but does NOT prove
-   Elite Dangerous is actively producing journal events. shell.js tracks
-   real journal arrivals over the WS bus; we just signal that snapshot
-   data exists so the state can promote from Waiting to Last known. */
 function updateEliteSessionState(localContextSnap) {
   if (!window.Shell) return;
   const loaded = (node) => node && node.freshness !== 'not_loaded';
@@ -1788,149 +1418,17 @@ function updateEliteSessionState(localContextSnap) {
   else window.Shell.recomputeEliteSessionState?.();
 }
 
-let shipRefreshTimer = null;
-let heatTtlTimer     = null;
 
-function requestShipStateRefresh(reason) {
-  if (shipRefreshTimer) return;
-  if (window.OMNICOVAS_DEBUG === true) console.log(`Dashboard: scheduling refresh, reason: ${reason}`);
-  shipRefreshTimer = setTimeout(() => {
-    refreshShipState();
-    shipRefreshTimer = null;
-  }, 250);
-}
-
-function mountDashboardWithoutBridge() {
+window.OmniEvents?.addEventListener('route-changed', () => {
   mountCommandSurface();
-  renderShipSchematic(_lastShipState || {});
-  initializeDashboardPanelToggles();
-}
-
-function scheduleDashboardLoad(attempts = 20) {
-  if (window.OMNICOVAS_PORT) loadDashboard();
-  else if (attempts > 0) setTimeout(() => scheduleDashboardLoad(attempts - 1), 1000);
-  else {
-    console.warn('Dashboard: Bridge not ready after multiple retries.');
-    mountDashboardWithoutBridge();
-  }
-}
-
-function onStateUpdate(_state) { requestShipStateRefresh('state_update'); }
-
-function onEvent(msg) {
-  const { event_type } = msg;
-  const type = event_type || msg.event;
-  if (String(type || '').toLowerCase().startsWith('engineering.')) {
-    fetchJSON('/engineering/overview').then((engineering) => {
-      if (engineering) {
-        _lastEngineeringSnap = engineering;
-        mountCommandSurface();
-      }
-    });
-  }
-  switch (type) {
-    case 'SHIP_STATE_CHANGED':
-    case 'LOADOUT_CHANGED':
-      loadDashboard();
-      break;
-    case 'Status':
-    case 'HULL_DAMAGE':
-    case 'HullDamage':
-    case 'HULL_CRITICAL_25':
-    case 'HULL_CRITICAL_10':
-    case 'SHIELDS_DOWN':
-    case 'ShieldsDown':
-    case 'ShieldDown':
-    case 'SHIELDS_UP':
-    case 'ShieldsUp':
-    case 'ShieldUp':
-    case 'FUEL_LOW':
-    case 'FUEL_CRITICAL':
-      requestShipStateRefresh(type);
-      break;
-    case 'HEAT_WARNING':
-    case 'HEAT_DAMAGE':
-      fetchJSON('/pillar1/heat').then(h => {
-        if (h) { renderHeat(h); _lastHeat = h; mountCommandSurface(); }
-      });
-      if (heatTtlTimer) clearTimeout(heatTtlTimer);
-      heatTtlTimer = setTimeout(() => {
-        heatTtlTimer = null;
-        fetchJSON('/pillar1/heat').then(h => {
-          if (h) { renderHeat(h); _lastHeat = h; mountCommandSurface(); }
-        });
-      }, 67000);
-      break;
-    case 'PIPS_CHANGED':
-    case 'PipsChanged':
-      refreshPips();
-      requestShipStateRefresh(type);
-      break;
-    case 'CARGO_CHANGED':
-      fetchJSON('/pillar1/cargo').then(c => {
-        if (c) {
-          _lastCargo = c;
-          renderCargo(_lastShipState || {}, c.inventory);
-          fetchJSON('/intel/local-context/snapshot').then((local) => {
-            _lastLocalContextSnap = local;
-            updateEliteSessionState(local);
-            mountCommandSurface();
-          });
-        }
-      });
-      break;
-    case 'MODULE_DAMAGED':
-    case 'MODULE_CRITICAL':
-      fetchJSON('/pillar1/modules/summary').then(m => {
-        if (m) { _lastMods = m; renderModules(m); mountCommandSurface(); }
-      });
-      break;
-    case 'INTERDICTION_STARTED':
-    case 'INTERDICTION_ENDED':
-    case 'COMBAT_STATE_CHANGED':
-      fetchJSON('/combat/snapshot').then(c => {
-        if (c) { _lastCombat = c; mountCommandSurface(); }
-      });
-      break;
-    case 'DESTROYED':
-      document.querySelectorAll('.card').forEach(c => c.classList.add('destroyed'));
-      ['dash-hull-value', 'dash-shield', 'dash-fuel-value'].forEach(id => {
-        const e = el(id); if (e) e.textContent = '—';
-      });
-      const shipTypeEl = el('dash-ship-type');
-      if (shipTypeEl) shipTypeEl.textContent = 'DESTROYED';
-      break;
-    case 'FSD_JUMP':
-    case 'FSDJump':
-    case 'DOCKED':
-    case 'Docked':
-    case 'UNDOCKED':
-    case 'Undocked':
-      fetchJSON('/intel/local-context/snapshot').then((local) => {
-        _lastLocalContextSnap = local;
-        updateEliteSessionState(local);
-        mountCommandSurface();
-      });
-      requestShipStateRefresh(type);
-      break;
-  }
-}
-
-/* ─────────────────────────────────────────────
-   Init
-───────────────────────────────────────────── */
-window.OmniEvents?.addEventListener('state', (ev) => onStateUpdate(ev.detail));
-window.OmniEvents?.addEventListener('event', (ev) => onEvent(ev.detail));
-
-window.addEventListener('hashchange', () => {
-  if (window.location.hash === '#/dashboard' || !window.location.hash) loadDashboard();
-  else resetUiv3DashboardFrame();
 });
+window.OmniEvents?.addEventListener('widget-snapshot', () => {
+  if (isDashboardRouteActive()) mountCommandSurface();
+});
+window.OmniEvents?.addEventListener('elite-session-state', () => commandHome?.update());
+window.OmniEvents?.addEventListener('bridge-disconnected', () => commandHome?.update());
 
-window.OmniEvents?.addEventListener('bridge-connected', loadDashboard);
-if (isDashboardRouteActive()) mountDashboardWithoutBridge();
-else resetUiv3DashboardFrame();
-scheduleDashboardLoad();
+mountCommandSurface();
 
 /* Test hook: exposes both legacy schematic/detail helpers and the new
  * v2 command surface entry points. Guards against double-assignment. */
@@ -1978,6 +1476,8 @@ if (typeof globalThis.__dashboardExports === 'undefined') {
     },
     __setManualOperation: (op) => { _manualOperation = op; },
     __resetSurface: () => {
+      commandHome?.dispose(); commandHome = null;
+      document.body.classList.remove('dashboard-home-active');
       _lastShipState = null; _lastHeat = null; _lastMods = null;
       _lastCargo = null; _lastNavSnap = null; _lastCombat = null;
       _lastIntelSnap = null; _lastEconomicSnap = null; _lastLocalContextSnap = null; _lastSourceSnap = null;

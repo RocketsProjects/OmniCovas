@@ -36,14 +36,18 @@ dependencies = [
     "psutil>=7.2.2",
     "pywin32>=311",
     "pyyaml>=6.0.3",
-    "sqlalchemy>=2.0.49",
+    # SQLAlchemy 2.1 makes greenlet opt-in; OmniCOVAS uses the asyncio API.
+    "sqlalchemy[asyncio]>=2.0.49",
     # Security floor: Starlette 1.3.1 fixes GHSA-82w8-qh3p-5jfq; it also includes
     # the hostname validation fixes tracked by GHSA-jp82-jpqv-5vv3 and
     # GHSA-86qp-5c8j-p5mr. Pinned directly to prevent resolver backsliding.
     "starlette>=1.3.1",
     "structlog>=25.5.0",
     "uvicorn[standard]>=0.44.0",
-    "watchdog>=6.0.0",
+    # Held below 7: its Windows emitter returns events only after a full quiet
+    # timeout, so sustained journal writes stall until they stop (measured 4-7 s
+    # against under 20 ms on 6.0.0). tests/test_journal_watcher.py guards this.
+    "watchdog>=6.0.0,<7",
 ]
 
 [build-system]

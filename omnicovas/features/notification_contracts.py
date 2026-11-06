@@ -30,6 +30,7 @@ COPY_KEYS = frozenset(
         "story",
         "materials",
         "summary",
+        "prospector",
     }
 )
 
@@ -148,6 +149,7 @@ class Preferences:
     duration: float = 4
     interval: float = 20
     max_per_minute: int = 2
+    mining_target_alerts: bool = False
 
     def __post_init__(self) -> None:
         if self.profile not in {"Minimal", "Flightdeck", "Explorer", "Custom"}:
@@ -178,6 +180,8 @@ class Preferences:
             if c.spoiler and not self.spoilers:
                 return "spoiler_protected"
             return None
+        if c.copy_key == "prospector":
+            return None if self.mining_target_alerts else "mining_targets_disabled"
         if self.profile == "Minimal":
             return "minimal_profile"
         if self.profile == "Explorer" and c.category not in {

@@ -1,0 +1,60 @@
+name: Compatibility report
+description: Report a Windows, Elite Dangerous, VR, overlay, or companion-tool interaction.
+title: "[Compatibility] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us identify the *exact combination* that does or does not work.
+        Do not share private logs, account details, tokens, complete Journal files,
+        or exploit/security details in public. See the [security policy](https://github.com/RocketsProjects/OmniCovas/security/policy).
+  - type: input
+    id: omnicovas
+    attributes:
+      label: OmniCOVAS version or commit
+      placeholder: "Commit SHA, version, or unknown"
+    validations:
+      required: true
+  - type: input
+    id: other-tools
+    attributes:
+      label: Other tools and exact versions
+      description: Name every relevant companion, mod, VR runtime, overlay, or driver and its version. Say "none" when not applicable.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system and game configuration
+      placeholder: "Windows 11; Odyssey; monitor or VR headset; runtime ..."
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Conflict or regression
+        - Works together as expected
+        - Uncertain or intermittent
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Setup, reproduction steps, and observations
+      description: Include launch/order dependencies and whether the result repeats.
+    validations:
+      required: true
+  - type: textarea
+    id: isolation
+    attributes:
+      label: Isolation checks already tried
+      description: Optional. For example, results with the other tool disabled or a previous version.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Before submitting
+      options:
+        - label: I removed secrets, private commander information, and sensitive machine data from this public report.
+          required: true

@@ -45,6 +45,11 @@
   <!-- v2 UI/UX redesign — Command Surface, operations workspaces, intel briefing -->
   <link rel="stylesheet" href="styles/command-surface.css" />
   <link rel="stylesheet" href="styles/uiv3-frame.css" />
+  <link rel="stylesheet" href="styles/responsive-deck.css" />
+  <link rel="stylesheet" href="styles/dashboard-command-deck.css" />
+  <link rel="stylesheet" href="styles/commander-identity.css" />
+  <link rel="stylesheet" href="styles/ship-readiness.css" />
+  <link rel="stylesheet" href="styles/galaxy-today.css" />
   <!-- PB10-R7 accessibility contrast accommodations: forced-colors /
        prefers-contrast / focus-visibility floor. Loaded last so the overrides
        win over route stylesheets without needing !important. -->
@@ -143,12 +148,18 @@
     </span>
   </div>
   <span class="uiv3-topbar-right">
+    <button id="rcd-status-button" class="rcd-button" type="button">Ship &amp; connection</button>
     <span class="uiv3-clock uiv3-tabnum" id="uiv3-clock" data-uiv3-topbar-item="time">--:-- UTC</span>
     <button class="uiv3-settings-button" id="uiv3-settings-button" type="button" data-uiv3-topbar-item="settings" aria-label="Open Settings">
       Settings
     </button>
   </span>
 </header>
+
+<dialog id="rcd-status-dialog" class="rcd-dialog" aria-labelledby="rcd-status-title">
+  <header class="rcd-dialog-header"><h2 id="rcd-status-title">Ship &amp; connection</h2><button class="rcd-button" type="button" data-rcd-close>Close</button></header>
+  <div class="rcd-dialog-body" id="rcd-status-body"></div>
+</dialog>
 
 <!-- ── Content area ── -->
 <section id="uiv3-identity-band" class="uiv3-identity-band" aria-label="Commander identity and current location">

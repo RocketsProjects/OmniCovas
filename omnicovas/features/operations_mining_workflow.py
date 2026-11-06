@@ -921,6 +921,8 @@ async def build_workflow(
         "target": target,
         "cargo": {
             "observed": cargo["observed"],
+            "event_timestamp": cargo.get("event_timestamp"),
+            "vessel": cargo.get("vessel"),
             "reason": cargo["reason"],
             "capacity": capacity,
             "total_count": total,
