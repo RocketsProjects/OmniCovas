@@ -13,7 +13,7 @@ See: omnicovas/api/navigation_bookmarks.py (session-factory pattern)
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict
@@ -268,68 +268,44 @@ class ExplorationEarningsResponse(BaseModel):
     nullprovider_safe: bool
 
 
+EvidenceStrength = Literal["strong", "moderate", "limited", "genus_only", "none"]
+
+
 class CandidateGenusRow(BaseModel):
-    """A genus whose conditions the body appears to meet. Never a confirmation."""
+    """A preliminary genus suggestion before the game names a body's genera.
+
+    Ranked from independent sightings under the same recorded conditions. It is
+    never a confirmation, and a genus absent from this list is not ruled out.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     genus: str
     basis: str
     note: str | None
+    evidence_strength: EvidenceStrength
+    similar_temperature_bodies: int
+    same_planet_atmosphere_bodies: int
+    top_species: list[str]
 
 
-class SentinelState(BaseModel):
-    """Read-only Exobiology Rule Sentinel state.
+class SpeciesCandidateRow(BaseModel):
+    """One species of a game-confirmed genus, with the evidence behind its rank.
 
-    A diagnostic summary, not a rule dump: how many of this Commander's own
-    confirmed samples the rules got wrong, and which exclusions are suspended
-    as a result. `canonical_dataset_modified` is served explicitly because the
-    guarantee it carries — that contradictions never rewrite the shipped rules
-    — is the whole reason the suspension mechanism is safe.
+    Counts are distinct bodies where the species was confirmed; they describe
+    sightings, not the chance of finding it here.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    ruleset_version: str
-    ruleset_sha256: str
-    evidence_records: int
-    supporting_observations: int
-    new_empirical_evidence: int
-    rule_contradictions: int
-    open_contradictions: int
-    suspended_predicates: int
-    affected_species: list[str]
-    predicate_state: str | None
-    canonical_dataset_modified: bool
-    source: str
-    note: str
-
-
-class CandidateBasis(BaseModel):
-    """Where candidate matching gets its rules, and how far to trust them.
-
-    `max_gravity_g` was removed here rather than kept for compatibility: it
-    published a universal 0.28g ceiling that the Phase 13 research and its
-    independent audit falsified, so continuing to serve it would be publishing
-    a known-wrong figure. The ruleset hash replaces it and lets a consumer tell
-    exactly which verified dataset produced a prediction.
-
-    `rule_branch_count` is served alongside the species count because occurrence
-    is evaluated per branch, not per species: 91 species carry 225 correlated
-    rule branches, and the branch count is what describes the real rule surface.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    truth_class: str
-    kb_entry: str
-    needs_review: bool
-    species_count: int
-    genus_count: int
-    rule_branch_count: int
-    ruleset_version: str
-    ruleset_sha256: str
-    sentinel: SentinelState
+    species: str
+    species_token: str
+    evidence_strength: EvidenceStrength
+    similar_temperature_bodies: int
+    same_planet_atmosphere_bodies: int
+    total_observed_bodies: int
+    sparse: bool
+    logged_by_commander: bool
 
 
 class SamplingProgressRow(BaseModel):
@@ -338,22 +314,104 @@ class SamplingProgressRow(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     species: str
+    # Variant_Localised from ScanOrganic, when the journal reported one.
+    variant: str | None = None
     stages_recorded: list[str]
     analysed: bool
 
 
+class GenusPredictionRow(BaseModel):
+    """A genus known on this body, and what is known or suggested about it.
+
+    `status` is `confirmed` once ScanOrganic names the species (no suggestion is
+    then shown), `ranked` when suggestions come from independent evidence,
+    `unrecognized` when the game named a genus this build holds no evidence for,
+    and `unavailable` when this build has no evidence at all.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    genus: str
+    genus_token: str | None
+    reported_by_scan: bool
+    status: Literal["confirmed", "ranked", "unrecognized", "unavailable"]
+    confirmed_species: list[SamplingProgressRow]
+    suggestions: list[SpeciesCandidateRow]
+    other_candidates: list[SpeciesCandidateRow]
+    candidate_count: int
+    ranking_basis: Literal["temperature_band", "planet_atmosphere", "genus_wide"] | None
+    similar_bodies_in_genus: int | None
+    note: str | None
+
+
+class RankingConditions(BaseModel):
+    """The recorded body conditions suggestions were ranked against."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    planet_class: str | None
+    atmosphere: str | None
+    temperature_band: str | None
+    complete: bool
+
+
+class CandidateBasis(BaseModel):
+    """Where species suggestions come from, and how far to trust them.
+
+    The legacy occurrence ruleset and its Rule Sentinel were retired by FU-021.
+    Suggestions now come from an independent aggregate of confirmed sightings in
+    Frontier journal events relayed by EDDN and archived by EDGalaxyData.
+
+    `state` is "unavailable" where this build has no usable evidence; `reason`
+    then says why, and the dataset fields stay null rather than reading as zero.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    state: Literal["available", "unavailable"]
+    reason: Literal["not_included", "invalid"] | None = None
+    truth_class: str
+    kb_entry: str
+    needs_review: bool
+    source_attribution: str
+    method_note: str
+    variant_note: str
+    sparse_body_threshold: int
+    suggestion_depth: int
+    dataset_id: str | None = None
+    dataset_sha256: str | None = None
+    species_count: int | None = None
+    genus_count: int | None = None
+    observed_bodies: int | None = None
+    environment_groups: int | None = None
+    archive_partitions: list[str] | None = None
+    sparse_species: list[str] | None = None
+
+
 class BiologicalSignalRow(BaseModel):
-    """One body's observed biological signals plus, if needed, candidates."""
+    """One body's recorded biology: facts first, suggestions after."""
 
     model_config = ConfigDict(extra="forbid")
 
     body_name: str
     star_system: str | None
-    # Observed fact from SAASignalsFound — never predicted.
-    biological_signal_count: int
+    # Observed fact from FSSBodySignals or SAASignalsFound — never predicted.
+    # None when only ScanOrganic records place biology on this body.
+    biological_signal_count: int | None
+    signal_source: Literal["FSSBodySignals", "SAASignalsFound", "ScanOrganic"]
+    # Genera reported by the surface scan or confirmed by ScanOrganic.
     observed_genera: list[str]
     genera_observed: bool
-    # Populated only when the journal did not already name the genera.
+    prediction_stage: Literal[
+        "genera_reported",
+        "preliminary",
+        "insufficient_conditions",
+        "unavailable",
+        "confirmed",
+    ]
+    ranking_conditions: RankingConditions
+    genus_predictions: list[GenusPredictionRow]
+    # Preliminary genus suggestions, only before the game names the genera.
     candidate_genera: list[CandidateGenusRow]
     species_sampled_here: list[str]
     sampling_progress: list[SamplingProgressRow]
@@ -365,14 +423,12 @@ class BiologicalSignalRow(BaseModel):
     surface_temperature: float | None
     surface_gravity_g: float | None
     landable: bool | None
-    # Primary star of the system, where one was recorded. Some genera are
-    # gated on it; absent means star-gated genera were not offered at all.
     parent_star_class: str | None
     signals_recorded_at: str | None
 
 
 class BiologicalSignalsResponse(BaseModel):
-    """Observed biological signals, with clearly separated candidate matching."""
+    """Recorded biology, with clearly separated independent suggestions."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -748,7 +804,7 @@ async def get_biological_signals(
     star_system: str | None = Query(default=None, max_length=128),
     limit: int | None = Query(default=None, ge=1, le=exobiology_intel.MAX_LIMIT),
 ) -> dict[str, Any]:
-    """Observed biological signals; candidate genera only where unreported."""
+    """Recorded biology per body, with independent species suggestions."""
     factory = _ensure_session_factory()
     return await exobiology_intel.biological_signals(
         factory, star_system=star_system, limit=limit

@@ -45,3 +45,7 @@
   font-weight: var(--font-weight-bold);
   width: 100px;
 }
+
+.credits-card {
+  margin-bottom: var(--space-4);
+}

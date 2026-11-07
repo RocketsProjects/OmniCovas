@@ -888,6 +888,21 @@ function waitForTauriBridgeReady(timeoutMs = TAURI_EVENT_WAIT_MS) {
       unlistenPromise = tauriListen('bridge-ready', (event) => {
         finish(event?.payload || null);
       });
+
+      /* The event fires once per core start. A reloaded page, or one that
+         subscribed after it fired, would otherwise wait out the whole timeout
+         for a bridge the native side already knows. Ask once the listener is
+         in place so a core that is still starting cannot slip between them. */
+      const invoke = window.__TAURI__?.core?.invoke;
+      if (typeof invoke === 'function') {
+        Promise.resolve(unlistenPromise)
+          .catch(() => {})
+          .then(() => invoke('get_bridge_info'))
+          .then((payload) => {
+            if (normalizeBridge(payload)) finish(payload);
+          })
+          .catch(() => { /* not ready yet; the event or the fallback resolves it */ });
+      }
     }
 
     setTimeout(() => finish(null), timeoutMs);
@@ -1827,6 +1842,6 @@ Shell.restoreDensityMode = restoreDensityMode;
 /* Test seam for the vitals formatters, matching the pattern used by the
    view modules. Exposed so the partial-capacity behaviour these encode is
    protected by tests rather than only by inspection. */
-globalThis.__shellFrameExports = { uiv3FrameCargo, uiv3FrameFuel, uiv3FramePct };
+globalThis.__shellFrameExports = { uiv3FrameCargo, uiv3FrameFuel, uiv3FramePct, waitForTauriBridgeReady };
 
 window.Shell = Shell;

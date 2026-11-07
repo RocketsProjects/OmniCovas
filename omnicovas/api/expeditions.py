@@ -59,14 +59,14 @@ async def _guard(call: Any) -> Any:
         ) from exc
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc
 
 
 def _object(body: Any) -> dict[str, Any]:
     if not isinstance(body, dict):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="The request body must be an object",
         )
     return body
@@ -279,7 +279,7 @@ async def mark_chapter(
     read = _object(body).get("read")
     if not isinstance(read, bool):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="read must be true or false",
         )
     result: dict[str, Any] = await _guard(

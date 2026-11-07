@@ -8,10 +8,10 @@
 *.toml text eol=lf
 *.lock text eol=lf
 
-# The exobiology ruleset ships as a byte-identical copy of its verified research
+# The exobiology journal-evidence asset ships as a byte-identical copy of its research
 # artifact, and a test asserts its SHA-256 against the file on disk. Under autocrlf
-# both copies are rewritten to CRLF at checkout, which makes that hash differ by
-# platform and breaks the drift guard the moment anyone checks out on Linux. Pinned
-# to LF so the shipped bytes are the bytes that were verified.
-omnicovas/data/exobiology_species_ruleset.json text eol=lf
+# it would be rewritten to CRLF at checkout, which makes that hash differ by
+# platform. Pinned to LF so the shipped bytes are the bytes that were reviewed. The
+# retired legacy ruleset research record keeps the same pin.
+omnicovas/data/exobiology_journal_evidence_v1.json text eol=lf
 evidence/research/exobiology-ruleset-20260817/*.json text eol=lf

@@ -71,14 +71,14 @@ async def _guard(call: Any) -> Any:
         ) from exc
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc
 
 
 def _object(body: Any) -> dict[str, Any]:
     if not isinstance(body, dict):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="The request body must be an object",
         )
     return body
@@ -134,7 +134,7 @@ async def post_confirmation(
     place_id = payload.get("place_id")
     if not isinstance(place_id, str) or not place_id:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="place_id must be text",
         )
     result: dict[str, Any] = await _guard(

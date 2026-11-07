@@ -354,6 +354,11 @@
 
 /* ── No-flows banner ────────────────────────────────────────────────────── */
 
+/* Shown by privacy.js once the flows are known. */
+#no-flows-banner {
+  display: none;
+}
+
 .modal-no-flows-banner {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -416,6 +421,11 @@
 }
 
 /* ── Modals ─────────────────────────────────────────────────────────────── */
+
+/* Opened by privacy.js; closed is the default state. */
+#data-flows-modal {
+  display: none;
+}
 
 .privacy-modal {
   position: fixed;

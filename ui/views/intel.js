@@ -1115,6 +1115,8 @@
           + 'was explored before recording began.',
           'intel-exploration-card',
         ));
+        const biologyStatus = this._buildBiologicalSignalsCard();
+        if (biologyStatus) section.appendChild(biologyStatus);
         return section;
       }
 
@@ -1328,68 +1330,240 @@
       return card;
     }
 
-    /* Biological signals. Observed facts lead; candidates are visually and
-       textually separated and always say what they are. Where the journal
-       named the genera, no candidate is shown at all. */
+    /* Biological signals. The journal leads and wins: signal counts, reported
+       genera and ScanOrganic confirmations are facts. Species suggestions come
+       from independent journal evidence, are visibly quieter, always say what
+       they are, and disappear for a genus once ScanOrganic confirms it. */
     _buildBiologicalSignalsCard() {
       const payload = this._lastBiologicalSignals || null;
       const rows = Array.isArray(payload?.bodies) ? payload.bodies : [];
-      if (!rows.length) return null;
+      const basis = payload?.candidate_basis;
+      const noEvidence = basis?.state === 'unavailable';
+      if (!rows.length && !noEvidence) return null;
 
       const card = safeEl('article', 'support-card intel-biology-card');
       card.id = 'intel-biology-card';
       card.appendChild(this._cardHeading('Biological Signals', payload?.truth_class));
       card.appendChild(safeEl('p', 'intel-workspace-lead',
-        `${rows.length} surface-mapped bod${rows.length === 1 ? 'y' : 'ies'} with `
-        + 'recorded biological signals.'));
+        rows.length
+          ? `${rows.length} bod${rows.length === 1 ? 'y' : 'ies'} with recorded biology.`
+          : 'No biological signals recorded yet.'));
+      if (noEvidence) {
+        /* Unknown stays unknown: without evidence there is nothing to suggest,
+           which is different from a body having no likely species. */
+        const note = safeEl('p', 'intel-history-caveat',
+          basis.reason === 'invalid'
+            ? 'Species suggestions are unavailable because the evidence file could '
+              + 'not be read. Your recorded signals and samples are unaffected.'
+            : 'Species suggestions are not included in this build. Your recorded '
+              + 'signals and samples are unaffected.');
+        note.id = 'intel-biology-unavailable';
+        card.appendChild(note);
+      }
 
       const list = safeEl('ul', 'intel-biology-list');
-      rows.forEach((row) => {
-        const item = safeEl('li', 'intel-biology-row');
-        item.appendChild(safeEl('span', 'intel-biology-body',
-          row.body_name || 'Unknown body'));
-
-        /* Observed count is a fact and leads. */
-        const count = Number(row.biological_signal_count ?? 0);
-        item.appendChild(safeEl('span', 'intel-biology-count',
-          `${count} biological signal${count === 1 ? '' : 's'} · reported by scan`));
-
-        if (row.genera_observed && row.observed_genera?.length) {
-          item.appendChild(safeEl('span', 'intel-biology-observed',
-            `Genera reported: ${row.observed_genera.join(', ')}`));
-        } else if (row.candidate_genera?.length) {
-          /* Clearly marked as an estimate, with its basis named. */
-          const genera = row.candidate_genera.map((c) => c.genus).join(', ');
-          item.appendChild(safeEl('span', 'intel-biology-candidates',
-            `Candidate genera (estimate, not confirmed): ${genera}`));
-        }
-
-        if (row.genera_never_logged_by_commander?.length) {
-          item.appendChild(safeEl('span', 'intel-biology-unlogged',
-            'Never logged by you: '
-            + `${row.genera_never_logged_by_commander.join(', ')}`));
-        }
-
-        const sampled = row.sampling_progress || [];
-        if (sampled.length) {
-          const done = sampled.filter((s) => s.analysed).length;
-          item.appendChild(safeEl('span', 'intel-biology-progress',
-            `${done} of ${sampled.length} sampled species analysed here`));
-        }
-        list.appendChild(item);
-      });
+      rows.forEach((row) => list.appendChild(this._buildBiologyRow(row)));
       card.appendChild(list);
 
-      const basis = payload?.candidate_basis;
-      if (basis?.needs_review) {
-        card.appendChild(safeEl('p', 'intel-history-caveat',
-          `Candidate matching uses reference bands from ${basis.kb_entry}, which `
-          + 'are community-derived and still awaiting review.'));
+      if (!noEvidence && basis?.source_attribution) {
+        const source = safeEl('p', 'intel-history-caveat intel-biology-source',
+          `${basis.method_note || ''} ${basis.source_attribution}`.trim());
+        source.id = 'intel-biology-source';
+        card.appendChild(source);
       }
       if (payload?.caveat) {
-        card.appendChild(safeEl('p', 'intel-history-caveat', payload.caveat));
+        const details = safeEl('details', 'intel-biology-about');
+        details.appendChild(safeEl('summary', 'intel-biology-about-summary',
+          'How suggestions work'));
+        details.appendChild(safeEl('p', 'intel-history-caveat', payload.caveat));
+        if (basis?.variant_note) {
+          details.appendChild(safeEl('p', 'intel-history-caveat', basis.variant_note));
+        }
+        card.appendChild(details);
       }
       return card;
+    }
+
+    _buildBiologyRow(row) {
+      const item = safeEl('li', 'intel-biology-row');
+      item.setAttribute('data-stage', String(row.prediction_stage || 'unknown'));
+      const head = safeEl('div', 'intel-biology-head');
+      head.appendChild(safeEl('span', 'intel-biology-body', row.body_name || 'Unknown body'));
+      if (row.star_system && !String(row.body_name || '').startsWith(row.star_system)) {
+        head.appendChild(safeEl('span', 'intel-biology-system', row.star_system));
+      }
+      item.appendChild(head);
+
+      /* Observed count is a fact and leads. */
+      const count = row.biological_signal_count;
+      const via = {
+        FSSBodySignals: 'detected by FSS',
+        SAASignalsFound: 'reported by surface scan',
+      }[row.signal_source];
+      item.appendChild(safeEl('span', 'intel-biology-count',
+        Number.isInteger(count)
+          ? `${count} biological signal${count === 1 ? '' : 's'} · ${via || 'reported by scan'}`
+          : 'Biology confirmed by your samples'));
+
+      const cond = row.ranking_conditions || {};
+      const condParts = [cond.planet_class, cond.atmosphere, cond.temperature_band]
+        .filter((part) => part !== null && part !== undefined && part !== '');
+      if (condParts.length) {
+        item.appendChild(safeEl('span', 'intel-biology-conditions', condParts.join(' · ')));
+      }
+
+      /* Row-level facts from the Commander's own record sit with the body, above
+         the per-genus blocks, so they never read as part of the last genus. */
+      if (row.genera_never_logged_by_commander?.length) {
+        item.appendChild(safeEl('span', 'intel-biology-unlogged',
+          `Never logged by you: ${row.genera_never_logged_by_commander.join(', ')}`));
+      }
+      const sampled = row.sampling_progress || [];
+      if (sampled.length) {
+        const done = sampled.filter((s) => s.analysed).length;
+        item.appendChild(safeEl('span', 'intel-biology-progress',
+          `${done} of ${sampled.length} sampled species analysed here`));
+      }
+
+      (row.genus_predictions || []).forEach((genus) => {
+        item.appendChild(this._buildBiologyGenus(genus));
+      });
+
+      const stage = row.prediction_stage;
+      if (stage === 'preliminary' && row.candidate_genera?.length) {
+        item.appendChild(this._buildBiologyPreliminary(row));
+      } else if (stage === 'insufficient_conditions') {
+        item.appendChild(safeEl('span', 'intel-biology-note',
+          'Genera not yet identified. This body\'s planet type and atmosphere were '
+          + 'not recorded, so there is nothing to base a suggestion on. A surface '
+          + 'map names the genera.'));
+      } else if (stage === 'unavailable') {
+        item.appendChild(safeEl('span', 'intel-biology-note',
+          'Genera not yet identified. Suggestions are unavailable in this build.'));
+      }
+
+      return item;
+    }
+
+    _buildBiologyGenus(genus) {
+      const block = safeEl('div', `intel-biology-genus intel-biology-genus--${genus.status}`);
+      block.appendChild(safeEl('span', 'intel-biology-genus-name', genus.genus || 'Unknown genus'));
+
+      if (genus.status === 'confirmed') {
+        (genus.confirmed_species || []).forEach((species) => {
+          const stages = species.stages_recorded || [];
+          const progress = species.analysed
+            ? 'analysed'
+            : `${stages.length} of 3 sampling steps`;
+          block.appendChild(safeEl('span', 'intel-biology-confirmed',
+            `Confirmed: ${species.variant || species.species} · ${progress}`));
+        });
+        return block;
+      }
+      block.appendChild(safeEl('span', 'intel-biology-genus-source',
+        genus.reported_by_scan ? 'Genus reported by scan' : 'Genus'));
+      if (genus.status !== 'ranked') {
+        if (genus.note) block.appendChild(safeEl('span', 'intel-biology-note', genus.note));
+        return block;
+      }
+
+      block.appendChild(safeEl('span', 'intel-biology-suggestion-label',
+        'Likely species (suggestion, not confirmed)'));
+      const lead = safeEl('ol', 'intel-biology-suggestions');
+      lead.setAttribute('aria-label', `Likely ${genus.genus} species, strongest first`);
+      (genus.suggestions || []).forEach((candidate) => {
+        lead.appendChild(this._buildBiologyCandidate(candidate, genus));
+      });
+      block.appendChild(lead);
+      if (genus.note) block.appendChild(safeEl('span', 'intel-biology-note', genus.note));
+
+      const others = genus.other_candidates || [];
+      if (others.length) {
+        const more = safeEl('details', 'intel-biology-more');
+        more.appendChild(safeEl('summary', 'intel-biology-more-summary',
+          `Other possible ${genus.genus} species (${others.length})`));
+        const list = safeEl('ul', 'intel-biology-other-list');
+        others.forEach((candidate) => {
+          list.appendChild(this._buildBiologyCandidate(candidate, genus));
+        });
+        more.appendChild(list);
+        block.appendChild(more);
+      }
+      return block;
+    }
+
+    _buildBiologyCandidate(candidate, genus) {
+      const STRENGTH = {
+        strong: 'Strong evidence',
+        moderate: 'Moderate evidence',
+        limited: 'Limited evidence',
+        genus_only: 'Not seen under these conditions',
+        none: 'No recorded sightings',
+      };
+      const item = safeEl('li', 'intel-biology-candidate');
+      item.setAttribute('data-strength', String(candidate.evidence_strength || 'none'));
+      item.appendChild(safeEl('span', 'intel-biology-candidate-name', candidate.species));
+      const similar = Number(candidate.similar_temperature_bodies || 0);
+      const sameType = Number(candidate.same_planet_atmosphere_bodies || 0);
+      const total = Number(candidate.total_observed_bodies || 0);
+      let detail;
+      if (similar > 0 && genus.ranking_basis === 'temperature_band'
+          && genus.similar_bodies_in_genus) {
+        detail = `on ${similar} of ${genus.similar_bodies_in_genus} similar ${genus.genus} bodies`;
+      } else if (sameType > 0) {
+        detail = `on ${sameType} bod${sameType === 1 ? 'y' : 'ies'} of this type`;
+      } else {
+        detail = `${total} sighting${total === 1 ? '' : 's'} elsewhere`;
+      }
+      const flags = [STRENGTH[candidate.evidence_strength] || 'Evidence unknown', detail];
+      if (candidate.logged_by_commander) flags.push('logged by you before');
+      item.appendChild(safeEl('span', 'intel-biology-candidate-evidence', flags.join(' · ')));
+      if (candidate.sparse) {
+        item.appendChild(safeEl('span', 'intel-biology-sparse',
+          'Sparse evidence: few confirmed sightings anywhere, so do not rule it in or out.'));
+      }
+      return item;
+    }
+
+    _buildBiologyPreliminary(row) {
+      const STRENGTH = {
+        strong: 'strong evidence',
+        moderate: 'moderate evidence',
+        limited: 'limited evidence',
+      };
+      const block = safeEl('div', 'intel-biology-preliminary');
+      block.appendChild(safeEl('span', 'intel-biology-suggestion-label',
+        'Preliminary: genera not yet identified'));
+      const candidates = row.candidate_genera || [];
+      const unexplained = Number.isInteger(row.biological_signal_count)
+        ? Math.max(1, row.biological_signal_count - (row.genus_predictions || []).length)
+        : 3;
+      const shown = candidates.slice(0, Math.min(Math.max(unexplained, 3), 6));
+      const describe = (entry) => {
+        const species = entry.top_species?.length ? ` (e.g. ${entry.top_species.join(', ')})` : '';
+        return `${entry.genus}${species} · ${STRENGTH[entry.evidence_strength] || 'evidence'}`;
+      };
+      const lead = safeEl('ol', 'intel-biology-suggestions intel-biology-candidates');
+      shown.forEach((entry) => {
+        lead.appendChild(safeEl('li', 'intel-biology-candidate', describe(entry)));
+      });
+      block.appendChild(lead);
+      const rest = candidates.slice(shown.length);
+      if (rest.length) {
+        const more = safeEl('details', 'intel-biology-more');
+        more.appendChild(safeEl('summary', 'intel-biology-more-summary',
+          `More possible genera (${rest.length})`));
+        const list = safeEl('ul', 'intel-biology-other-list');
+        rest.forEach((entry) => {
+          list.appendChild(safeEl('li', 'intel-biology-candidate', describe(entry)));
+        });
+        more.appendChild(list);
+        block.appendChild(more);
+      }
+      block.appendChild(safeEl('span', 'intel-biology-note',
+        'Based on genera confirmed on bodies with the same recorded conditions. '
+        + 'A surface map names the actual genera.'));
+      return block;
     }
 
     /* PB13-03 Campaign facts. Intel presents what the objective says and how

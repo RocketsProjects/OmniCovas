@@ -236,7 +236,7 @@ async def get_location_match(
     """Documented places an observed position matches, and how deeply and surely."""
     if system_address is None and not system:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="A system name or SystemAddress is required",
         )
     knowledge = _knowledge()
@@ -328,7 +328,7 @@ async def put_intelligence_preferences(
         service.preferences.set(service.profile_key(), body)
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc
     except OSError as exc:
         raise HTTPException(
@@ -417,5 +417,5 @@ async def get_unlock_plan(
         ) from exc
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
         ) from exc

@@ -1205,17 +1205,15 @@
     ));
     if (biology.candidate_genera > 0) {
       wrap.appendChild(explorationFactRow(
-        'Candidate genera',
-        `${biology.candidate_genera} predicted — not observed`,
+        'Preliminary genera',
+        `${biology.candidate_genera} suggested — not yet identified`,
         'candidate',
       ));
     }
-    /* A predicate the Sentinel has falsified must not be presented as an
-       authority. R5 consumes that verdict; it never changes the ruleset. */
-    if (biology.sentinel_predicate_state) {
+    if (biology.prediction_unavailable) {
       wrap.appendChild(explorationFactRow(
-        'Prediction rules',
-        `${biology.sentinel_predicate_state} — candidates shown with reduced confidence`,
+        'Species suggestions',
+        'Not available in this build — recorded biology is unaffected',
         'candidate',
       ));
     }

@@ -851,6 +851,10 @@ class CommanderSystemNote(Base):
 class ExobiologyRuleEvidence(Base):
     """One species observation weighed against the occurrence rules (Rule Sentinel).
 
+    Retired with the legacy occurrence ruleset (FU-021, 2026-11-07). Nothing writes
+    here any more. The table and its migration stay so existing local databases keep
+    the evidence they recorded and the schema history remains linear.
+
     A confirmed ScanOrganic proves the species was present under the conditions the
     journal recorded for that body. Where the rules said that was impossible, the rule
     is wrong or incomplete, and this table is where that proof is kept.

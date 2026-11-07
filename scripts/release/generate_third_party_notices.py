@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from omnicovas.features import galactic_knowledge  # noqa: E402
+from omnicovas.features import exobiology_evidence, galactic_knowledge  # noqa: E402
 
 EVIDENCE = ROOT / "artifacts" / "sbom" / "phase10-reconciliation"
 INVENTORY = EVIDENCE / "dependency-license-inventory.csv"
@@ -181,6 +181,8 @@ def main() -> int:
     add("")
     # Credit for the references behind the shipped galactic knowledge packs.
     lines.extend(galactic_knowledge.notice_markdown())
+    # Provenance of the independent exobiology journal-evidence asset (FU-021).
+    lines.extend(exobiology_evidence.notice_markdown())
     add("## Regeneration")
     add("")
     add("```")

@@ -987,6 +987,124 @@
   }
 }
 
+/* FU-021 biology suggestions. Reported genera and confirmed species are fact
+   and read at full strength; suggestions are grouped under each genus, ranked,
+   and marked as suggestions in copy and in a style that survives forced
+   colours. Long lists stay one disclosure away so a body with three genera
+   still fits a compact tablet column. */
+.intel-biology-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.intel-biology-system,
+.intel-biology-conditions {
+  font-size: 0.82em;
+  opacity: 0.7;
+}
+
+.intel-biology-genus,
+.intel-biology-preliminary {
+  border-top: 1px dashed var(--ocv-border, rgba(255, 255, 255, 0.2));
+  display: grid;
+  gap: 3px;
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.intel-biology-genus-name {
+  font-weight: 600;
+}
+
+.intel-biology-genus-source,
+.intel-biology-suggestion-label {
+  font-size: 0.8em;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+  text-transform: uppercase;
+}
+
+.intel-biology-confirmed {
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.intel-biology-confirmed::before {
+  content: "\2713  ";
+}
+
+.intel-biology-suggestions,
+.intel-biology-other-list {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.intel-biology-candidate {
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+.intel-biology-candidate-name {
+  margin-right: 6px;
+}
+
+.intel-biology-candidate-evidence,
+.intel-biology-note {
+  font-size: 0.82em;
+  font-style: normal;
+  opacity: 0.75;
+}
+
+.intel-biology-candidate[data-strength="strong"] .intel-biology-candidate-name {
+  font-weight: 600;
+}
+
+.intel-biology-sparse {
+  display: block;
+  font-size: 0.8em;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.intel-biology-more summary,
+.intel-biology-about summary {
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.intel-biology-source {
+  font-size: 0.8em;
+}
+
+@media (max-width: 900px) {
+  .intel-biology-candidate-name {
+    display: block;
+  }
+
+  .intel-biology-suggestions,
+  .intel-biology-other-list {
+    padding-left: 1.1em;
+  }
+}
+
+@media (forced-colors: active) {
+  .intel-biology-candidate,
+  .intel-biology-candidate-evidence,
+  .intel-biology-note,
+  .intel-biology-system,
+  .intel-biology-conditions {
+    opacity: 1;
+  }
+
+  .intel-biology-suggestions .intel-biology-candidate-name::before {
+    content: "~ ";
+  }
+}
+
 /* -- Reference domain (PB13-02) ------------------------------------------
    A reference card without a version is a claim without a date, so the
    citation line is part of the entry, not a footnote. Withheld entries keep

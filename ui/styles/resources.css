@@ -22,3 +22,8 @@
   gap: var(--space-4);
   flex-wrap: wrap;
 }
+
+/* Status banner: resources.js only fills it when there is something to say. */
+#res-status-msg:empty {
+  display: none;
+}

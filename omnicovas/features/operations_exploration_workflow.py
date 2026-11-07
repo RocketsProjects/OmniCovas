@@ -22,7 +22,7 @@ flight recorder. Nothing is fetched, nothing is predicted into fact, and the
 three exobiology truth levels stay separated end to end:
 
     observed genus  ->  fact       (SAASignalsFound named it)
-    candidate genus ->  prediction (the ruleset thinks it could be here)
+    candidate genus ->  prediction (independent evidence suggests it)
     unknown         ->  unknown    (the journal has not said)
 
 A candidate never counts toward completed biology, and an unrecorded body count
@@ -296,12 +296,33 @@ def _biology_progress(biology_payload: dict[str, Any]) -> dict[str, Any]:
             # Predicted, not seen. Counted in its own column so it can never be
             # added to the observed total by a later reader.
             bodies_candidate_only += 1
-        candidate_genera_total += len(candidates)
+        # Preliminary genera are ranked, and the list can be long. Only as many
+        # as the body has unexplained signals are counted as suggestions.
+        signal_count = body.get("biological_signal_count")
+        slots = (
+            max(0, int(signal_count) - len(observed))
+            if isinstance(signal_count, int)
+            else 0
+        )
+        candidate_genera_total += min(len(candidates), slots)
 
+        likely: dict[str, list[str]] = {}
+        for prediction in body.get("genus_predictions") or []:
+            if prediction.get("status") == "ranked":
+                likely[str(prediction.get("genus"))] = [
+                    str(row.get("species"))
+                    for row in prediction.get("suggestions") or []
+                ]
         for genus in observed:
             if not _genus_sampled(genus, sampled_here):
                 genera_unsampled.append(
-                    {"body_name": body.get("body_name"), "genus": genus}
+                    {
+                        "body_name": body.get("body_name"),
+                        "genus": genus,
+                        # Ranked suggestions for a game-confirmed genus. Never a
+                        # confirmation; empty when no evidence is available.
+                        "likely_species": likely.get(str(genus), []),
+                    }
                 )
 
         for entry in body.get("sampling_progress") or []:
@@ -333,11 +354,12 @@ def _biology_progress(biology_payload: dict[str, Any]) -> dict[str, Any]:
     genera_unsampled.sort(key=lambda e: (str(e["body_name"]), str(e["genus"])))
     species_incomplete.sort(key=lambda e: (str(e["body_name"]), str(e["species"])))
 
-    sentinel = (biology_payload.get("candidate_basis") or {}).get("sentinel") or {}
+    basis = biology_payload.get("candidate_basis") or {}
     return {
         "bodies_with_signals": bodies_with_signals,
         "bodies_with_observed_genera": bodies_observed,
         "bodies_candidate_only": bodies_candidate_only,
+        "prediction_unavailable": basis.get("state") == "unavailable",
         "bodies_signals_unresolved": signals_unresolved,
         "genera_observed": genera_observed,
         "genera_observed_unsampled": genera_unsampled,
@@ -345,11 +367,6 @@ def _biology_progress(biology_payload: dict[str, Any]) -> dict[str, Any]:
         "species_sampled": species_sampled,
         "species_analysed": species_analysed,
         "species_sampling_incomplete": species_incomplete,
-        # The Sentinel's own read-only verdict, carried so a surface can refuse
-        # to present a suspended predicate as authoritative. R5 consumes it and
-        # never modifies the canonical ruleset.
-        "sentinel_predicate_state": sentinel.get("predicate_state"),
-        "sentinel_open_contradictions": sentinel.get("open_contradictions"),
     }
 
 
@@ -881,6 +898,13 @@ def derive_work_remaining(
                 "detail": (
                     f"{unsampled[0]['genus']} on {unsampled[0]['body_name']}. "
                     "Observed in the journal, so this is a fact."
+                    + (
+                        " Likely species (suggestion, not confirmed): "
+                        + ", ".join(unsampled[0]["likely_species"])
+                        + "."
+                        if unsampled[0].get("likely_species")
+                        else ""
+                    )
                 ),
                 "kind": WORK_KIND_WORK,
             }
@@ -926,11 +950,12 @@ def derive_work_remaining(
                 "label": (
                     f"{biology['bodies_candidate_only']} bod"
                     f"{'y' if biology['bodies_candidate_only'] == 1 else 'ies'} "
-                    "may hold biology"
+                    "with preliminary genus suggestions"
                 ),
                 "detail": (
-                    "Candidate genera only — a prediction from the local "
-                    "ruleset. Nothing has been observed on these bodies."
+                    "Preliminary genus suggestions only, ranked from independent "
+                    "journal evidence. The game has not yet named the genera on "
+                    "these bodies."
                 ),
                 "kind": WORK_KIND_OPPORTUNITY,
             }

@@ -301,10 +301,9 @@ ENGINEERING_HANDOFF_TO_SETTINGS: Final[str] = "engineering.handoff_to_settings"
 ENGINEERING_HANDOFF_TO_ACTIVITY_LOG: Final[str] = "engineering.handoff_to_activity_log"
 ENGINEERING_AI_DRAFT_EMITTED: Final[str] = "engineering.ai.draft_emitted"
 
-# Exobiology Rule Sentinel (Phase 13). Raised when a confirmed ScanOrganic
-# contradicts the community-derived occurrence rules, which means an exclusion
-# predicate is false. Emitted once per newly detected contradiction; repeat scans
-# of the same colony increment a count and stay silent.
+# Exobiology Rule Sentinel (Phase 13). Retired with the legacy occurrence ruleset
+# (FU-021, 2026-11-07) and no longer emitted. Kept registered so Activity Log
+# entries recorded before retirement still classify.
 EXOBIOLOGY_RULE_CONTRADICTION_DETECTED: Final[str] = (
     "exobiology.rule.contradiction_detected"
 )

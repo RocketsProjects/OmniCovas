@@ -412,7 +412,7 @@
       <div id="log-entries" role="log" aria-live="polite" aria-atomic="false"
            aria-label="Live activity log entries"
            class="ocv-recorder-timeline">
-        <p class="field-value unknown" style="padding:var(--space-3)">No events yet.</p>
+        <p class="field-value unknown event-log-empty">No events yet.</p>
       </div>
     </section>
 
@@ -522,7 +522,7 @@
           <p>Visual density and palette. Changes apply immediately on this device.</p>
           <div class="setting-group">
             <h3>Density</h3>
-            <p style="margin:0 0 0.5rem 0;color:var(--color-fg-muted);font-size:0.9rem">
+            <p class="setting-note setting-note-gap-small">
               Density modes are display-only views of the same data: Pilot tightens the deck
               for cockpit glances, Proof opens up source and detail drawers for review.
               No mode ever hides blockers, the Confirmation Gate, or proof access.
@@ -582,7 +582,7 @@
           </div>
           <div id="overlay-event-toggles" class="setting-group" hidden>
             <h3>Critical ship alerts</h3>
-            <p style="margin:0 0 0.75rem 0;color:var(--color-fg-muted)">
+            <p class="setting-note setting-note-gap setting-note-body-size">
               Choose which ship conditions may interrupt you. A turned-off alert is still recorded in the Activity Log.
             </p>
             <div id="overlay-event-grid" class="overlay-event-grid"></div>
@@ -608,7 +608,7 @@
           </p>
           <div class="setting-group">
             <h3>AI Provider</h3>
-            <p style="color:var(--color-fg-muted);margin:0 0 0.75rem 0;font-size:0.9rem">
+            <p class="setting-note setting-note-gap">
               Advisory features operate in rule-based mode. The stored preference contract does
               not activate a provider, save an API key, or make outbound calls.
             </p>
@@ -630,7 +630,7 @@
           </div>
           <div class="setting-group">
             <h3>Confirmation Gate</h3>
-            <p style="color:var(--color-fg-muted);margin:0;font-size:0.9rem;line-height:1.5">
+            <p class="setting-note setting-note-relaxed">
               OmniCOVAS respects your sovereignty. No action is taken on your behalf
               without your direct confirmation. AI output is advisory only &mdash; you retain full
               control of every decision.
@@ -703,7 +703,7 @@
               <option value="deuteranopia">Deuteranopia</option>
               <option value="tritanopia">Tritanopia</option>
             </select>
-            <p style="margin:0.5rem 0 0 0;color:var(--color-fg-muted);font-size:0.9rem">
+            <p class="setting-note setting-note-after">
               Palette tokens live in <code>ui/styles/tokens-*.css</code>. Selection applies on next reload.
             </p>
           </div>
@@ -713,7 +713,7 @@
               <input type="checkbox" id="a11y-reduce-motion" />
               Reduce non-essential animation and transitions
             </label>
-            <p style="margin:0.5rem 0 0 0;color:var(--color-fg-muted);font-size:0.9rem">
+            <p class="setting-note setting-note-after">
               Honors the OS <code>prefers-reduced-motion</code> setting by default. This toggle is a per-app override.
             </p>
           </div>
@@ -811,6 +811,17 @@
         margin: 0 0 1rem 0;
         color: var(--color-fg-muted);
       }
+
+      #view-settings section p.setting-note {
+        margin: 0;
+        font-size: 0.9rem;
+      }
+
+      #view-settings section p.setting-note-gap-small { margin-bottom: 0.5rem; }
+      #view-settings section p.setting-note-gap { margin-bottom: 0.75rem; }
+      #view-settings section p.setting-note-after { margin-top: 0.5rem; }
+      #view-settings section p.setting-note-body-size { font-size: inherit; }
+      #view-settings section p.setting-note-relaxed { line-height: 1.5; }
 
       #view-settings section h3 {
         margin: 0 0 0.75rem 0;
@@ -1158,7 +1169,7 @@
       </section>
 
       <!-- Data Flows Modal (hidden by default) -->
-      <div id="data-flows-modal" class="privacy-modal" style="display: none;" role="dialog" aria-labelledby="flows-modal-title">
+      <div id="data-flows-modal" class="privacy-modal" role="dialog" aria-labelledby="flows-modal-title">
         <div class="privacy-modal-content">
           <h2 id="flows-modal-title">Configured Outbound Posture</h2>
 
@@ -1166,7 +1177,7 @@
             <!-- Flows populated by JavaScript -->
           </div>
 
-          <div class="modal-no-flows-banner" id="no-flows-banner" style="display: none;">
+          <div class="modal-no-flows-banner" id="no-flows-banner">
             &#8505;&#65039; <strong>No outbound connections are currently active.</strong> OmniCOVAS is operating in local-only mode.
           </div>
 
@@ -1211,7 +1222,7 @@
 
     <!-- Status banner: enabled / initializing / unavailable -->
     <p id="res-status-msg" class="field-value unknown"
-       aria-live="polite" aria-atomic="true" style="display:none"></p>
+       aria-live="polite" aria-atomic="true"></p>
 
     <div class="ocv-diagnostics-grid">
 
@@ -1233,7 +1244,7 @@
           <span class="field-value" id="res-mem-pct">&mdash;</span>
         </div>
         <div class="progress-bar-wrap" aria-hidden="true">
-          <div class="progress-bar-fill" id="res-mem-bar" style="width:0%"></div>
+          <div class="progress-bar-fill" id="res-mem-bar"></div>
         </div>
       </article>
 
@@ -1248,7 +1259,7 @@
           <span class="badge muted" id="res-cpu-badge">&mdash;</span>
         </div>
         <div class="progress-bar-wrap" aria-hidden="true">
-          <div class="progress-bar-fill" id="res-cpu-bar" style="width:0%"></div>
+          <div class="progress-bar-fill" id="res-cpu-bar"></div>
         </div>
       </article>
 
@@ -1270,7 +1281,7 @@
           <span class="field-value" id="res-disk-pct">&mdash;</span>
         </div>
         <div class="progress-bar-wrap" aria-hidden="true">
-          <div class="progress-bar-fill" id="res-disk-bar" style="width:0%"></div>
+          <div class="progress-bar-fill" id="res-disk-bar"></div>
         </div>
       </article>
 
@@ -1319,14 +1330,14 @@
         <h1 class="registry-title" id="credits-title">About OmniCOVAS</h1>
       </div>
 
-      <div class="card" style="margin-bottom:var(--space-4)">
+      <div class="card credits-card">
         <h2 class="card-title">What is OmniCOVAS?</h2>
         <p>
           OmniCOVAS is a local-first companion application for Elite Dangerous. It reads game data from your local machine to provide live command deck views, telemetry, and advisory features. It does not control your ship or automate gameplay. AI assistance is optional and is never treated as a source of game facts; core features keep working with no AI provider configured.
         </p>
       </div>
 
-      <div class="card" style="margin-bottom:var(--space-4)">
+      <div class="card credits-card">
         <h2 class="card-title">Public beta posture</h2>
         <p>
           OmniCOVAS is a public beta &mdash; not a v1.0 release. The following posture applies:
@@ -1341,7 +1352,7 @@
         </ul>
       </div>
 
-      <div class="card" style="margin-bottom:var(--space-4)">
+      <div class="card credits-card">
         <h2 class="card-title">Trademark Disclaimer</h2>
         <p class="trademark-disclaimer">
           OmniCOVAS is an independent, unofficial project and is not affiliated with,

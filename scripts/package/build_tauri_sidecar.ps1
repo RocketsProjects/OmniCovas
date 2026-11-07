@@ -34,6 +34,9 @@ $outputPath = Join-Path $binDir "$sidecarStem$extension"
 $knowledgeBaseDir = Join-Path $repoRoot "omnicovas/knowledge_base"
 # Shipped galactic knowledge packs only; the restricted folder is never collected.
 $galacticKnowledgeDir = Join-Path $repoRoot "omnicovas/data/galactic_knowledge"
+# Independent exobiology journal evidence (FU-021). Original OmniCOVAS aggregate; the
+# retired legacy occurrence ruleset is never collected.
+$exobiologyEvidencePath = Join-Path $repoRoot "omnicovas/data/exobiology_journal_evidence_v1.json"
 $resourceBudgetPath = Join-Path $repoRoot "resource_budget.yaml"
 
 if (-not (Test-Path -LiteralPath $entryPoint)) {
@@ -44,6 +47,9 @@ if (-not (Test-Path -LiteralPath $knowledgeBaseDir)) {
 }
 if (-not (Test-Path -LiteralPath $galacticKnowledgeDir)) {
     throw "Galactic knowledge directory missing: $galacticKnowledgeDir"
+}
+if (-not (Test-Path -LiteralPath $exobiologyEvidencePath)) {
+    throw "Exobiology evidence asset missing: $exobiologyEvidencePath"
 }
 if (-not (Test-Path -LiteralPath $resourceBudgetPath)) {
     throw "Resource budget missing: $resourceBudgetPath"
@@ -64,6 +70,8 @@ $pyinstallerArgs = @(
     "$knowledgeBaseDir$([IO.Path]::PathSeparator)omnicovas/knowledge_base",
     "--add-data",
     "$galacticKnowledgeDir$([IO.Path]::PathSeparator)omnicovas/data/galactic_knowledge",
+    "--add-data",
+    "$exobiologyEvidencePath$([IO.Path]::PathSeparator)omnicovas/data",
     "--add-data",
     "$resourceBudgetPath$([IO.Path]::PathSeparator).",
     "--hidden-import",

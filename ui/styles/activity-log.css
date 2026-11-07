@@ -537,3 +537,7 @@
   outline: 2px solid var(--color-critical);
   outline-offset: 2px;
 }
+
+.event-log-empty {
+  padding: var(--space-3);
+}

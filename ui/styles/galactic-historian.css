@@ -60,7 +60,7 @@
 .gh-next-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .gh-name { font-size: 13px; font-weight: 600; color: #e1ebf4; }
 .gh-meta { font-size: 11px; color: #8fa2b5; }
-.gh-link { background: transparent; border: 0; padding: 0; color: #ffcf8f; font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; }
+.gh-link { display: inline-flex; align-items: center; min-height: 24px; background: transparent; border: 0; padding: 0; color: #ffcf8f; font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; }
 .gh-link:hover { color: #ffe0b8; }
 .gh-connection { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
 .gh-connection-text { flex-basis: 100%; font-size: 12px; line-height: 1.5; color: #c3d4e3; }
@@ -68,10 +68,11 @@
 .gh-current { margin: 10px 0 0; padding: 8px 12px; border-left: 3px solid #ffb35a; background: #1c1912; font-size: 12px; line-height: 1.5; }
 .gh-flag { display: inline-block; margin: 4px 6px 0 0; font-size: 11px; border: 1px solid #44576a; border-radius: 3px; padding: 1px 6px; color: #c3d4e3; }
 .gh-plan { margin-top: 6px; }
+.gh-actions .gh-plan { margin-top: 0; }
 
 /* Filters, columns and timeline */
 .gh-filter { display: flex; flex-wrap: wrap; border-bottom: 1px solid #344354; }
-.gh-filter-tab { background: transparent; color: #a9bacb; border: 0; border-bottom: 3px solid transparent; padding: 8px 10px; min-height: 36px; font: inherit; font-size: 12px; cursor: pointer; }
+.gh-filter-tab { background: transparent; color: #a9bacb; border: 0; border-bottom: 3px solid transparent; padding: 8px 10px; min-height: 44px; font: inherit; font-size: 12px; cursor: pointer; }
 .gh-filter-tab[aria-selected=true] { color: #e1ebf4; border-bottom-color: #7acada; }
 .gh-columns { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr); gap: 16px; align-items: start; }
 .gh-main, .gh-side { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
@@ -86,7 +87,9 @@
 /* Atlas "Your record" card */
 .gh-record { border-color: #5a4a2c; background: linear-gradient(180deg, #17150f 0%, #0d1721 70%); }
 .gh-record h4 { color: #ffe0b8; }
-.gh-record .gh-actions button { min-height: 32px; }
+.gh-record .gh-actions button,
+.gh-chronicle .ocv-btn,
+.gh-chronicle .ocv-btn-ghost { min-height: 44px; }
 
 @media (max-width: 1100px) {
   .gh-here { grid-template-columns: minmax(0, 1fr); }

@@ -619,6 +619,14 @@ Galactic knowledge packs hold original OmniCOVAS records of Elite Dangerous game
 - Elite Dangerous Wiki: Security Firmware Patch: <https://elite-dangerous.fandom.com/wiki/Security_Firmware_Patch> (revision 153059; reviewed 2026-10-30; CC BY-SA (Fandom community content))
 - Elite Dangerous Wiki: Modified Embedded Firmware: <https://elite-dangerous.fandom.com/wiki/Modified_Embedded_Firmware> (revision 154604; reviewed 2026-10-30; CC BY-SA (Fandom community content))
 
+## Exobiology journal evidence
+
+`omnicovas/data/exobiology_journal_evidence_v1.json` is an original OmniCOVAS aggregate of confirmed exobiology sightings, compiled from Frontier Elite Dangerous journal events relayed by the Elite Dangerous Data Network (EDDN) and archived by EDGalaxyData. It contains counts of distinct bodies per species and game-recorded planet class, atmosphere and temperature band only: no commander names, uploader identifiers, system or body identifiers, or raw messages. No third-party prediction tables or occurrence rules were used.
+
+- Frontier Developments: Elite Dangerous Player Journal v37: <https://hosting.zaonce.net/community/journal/v37/Journal_Manual_v37.pdf> (field definitions for Scan, ScanOrganic, CodexEntry and SAASignalsFound)
+- Elite Dangerous Data Network (EDDN): <https://github.com/EDCD/EDDN> (relay of commander-uploaded game journal events)
+- EDGalaxyData historical EDDN archives: <https://edgalaxydata.space/EDDN/> (daily raw-event archives for 2026-10-01 to 2026-10-03)
+
 ## Regeneration
 
 ```
